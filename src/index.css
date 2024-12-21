@@ -1,0 +1,140 @@
+:root {
+  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+  color-scheme: light dark;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+h1 {
+  padding: 1.5rem;
+  max-width: 768px;
+  margin: 0 auto;
+}
+
+#root {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+}
+
+form {
+  width: 100%;
+  max-width: 768px;
+  margin: auto;
+  display: flex;
+  gap: 0.5rem;
+}
+
+button {
+  border-radius: 8px;
+  border: 1px solid currentColor;
+  padding: 0 1.5em;
+  height: 4rem;
+  font-size: 1rem;
+  font-family: inherit;
+  background-color: inherit;
+  color: currentColor;
+  cursor: pointer;
+  transition: border-color 0.25s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+button.loading {
+  font-size: 0;
+}
+
+button.loading::after {
+  content: "";
+  padding: 0;
+  position: absolute;
+  width: 0.5rem;
+  height: 0.5rem;
+  border: 8px solid currentColor;
+  border-bottom-color: transparent;
+  border-radius: 1rem;
+  animation: spinner 0.6s linear infinite;
+  transform-origin: center;
+}
+
+@keyframes spinner {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+button:hover {
+  border-color: #646cff;
+}
+
+button:focus,
+button:focus-visible {
+  outline: 4px auto -webkit-focus-ring-color;
+}
+
+button[type="submit"] {
+  min-width: 135px;
+}
+
+input {
+  border: 1px solid currentColor;
+  height: 4rem;
+  padding: 0 1rem;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-family: inherit;
+  background: inherit;
+  flex: 1;
+}
+
+a {
+  font-weight: 500;
+  color: #646cff;
+  text-decoration: inherit;
+}
+
+a:hover {
+  color: #535bf2;
+}
+
+.message {
+  width: 100%;
+  max-width: 768px;
+  margin: 1rem auto;
+}
+
+.message.user {
+  background: rgba(0, 0, 0, 0.3);
+  padding: 1rem 1.5rem;
+  border-radius: 1rem;
+}
+
+.role {
+  opacity: 0.5;
+  text-transform: uppercase;
+  font-weight: bold;
+  font-size: small;
+  margin: 0 0 0.5rem;
+}
+
+.content {
+  font: inherit;
+
+  & > div {
+    white-space: pre-line;
+  }
+}
