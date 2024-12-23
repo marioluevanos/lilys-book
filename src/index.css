@@ -56,6 +56,7 @@ button {
 
 button.loading {
   font-size: 0;
+  pointer-events: none;
 }
 
 button.loading::after {
@@ -90,10 +91,9 @@ button[type="submit"] {
   min-width: 135px;
 }
 
-input {
+textarea {
   border: 1px solid currentColor;
-  height: 4rem;
-  padding: 0 1rem;
+  padding: 1rem 1rem 0;
   border-radius: 8px;
   font-size: 1rem;
   font-family: inherit;
@@ -118,9 +118,14 @@ a:hover {
 }
 
 .message.user {
-  background: rgba(0, 0, 0, 0.3);
+  background: rgba(0, 0, 0, 0.08);
   padding: 1rem 1.5rem;
   border-radius: 1rem;
+
+  & .content {
+    font: inherit;
+    white-space: normal;
+  }
 }
 
 .role {
@@ -132,9 +137,14 @@ a:hover {
 }
 
 .content {
-  font: inherit;
+  white-space: normal;
+  overflow: auto;
+  margin: 0;
 
-  & > div {
-    white-space: pre-line;
+  & img {
+    width: 100%;
+    height: auto;
+    display: block;
+    object-fit: contain;
   }
 }
