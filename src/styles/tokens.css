@@ -1,0 +1,170 @@
+/**
+ * DO NOT DIRECTLY EDIT THIS FILE
+ * THIS FILE IS AUTO GENERATED
+ */
+
+/**
+ * THEME "light" mode
+ */
+:root,
+[data-theme="light"] {
+  --theme-bg: hsl(203deg 0% 100%);
+  --theme-bg1: hsl(203deg 27% 96%);
+  --theme-bg2: hsl(203deg 16% 88%);
+  --theme-bg3: hsl(203deg 8% 80%);
+  --theme-bg4: hsl(203deg 8% 60%);
+  --theme-text: hsl(203deg 6.52% 16%);
+  --theme-text1: hsl(203deg 6.52% 48%);
+  --theme-text2: hsl(203deg 6.52% 64%);
+  --theme-border: hsl(203 24% 90% / 1);
+  --theme-border1: hsl(203 7% 75%);
+  --theme-border2: hsl(203 2% 50%);
+  --theme-icon: hsl(30 1% 37%);
+  --theme-input-bg: var(--theme-bg1);
+  --theme-input-bg-active: var(--theme-bg1);
+  --theme-input-bg-value: var(--theme-bg1);
+  --theme-input-text-muted: var(--theme-text2);
+  --theme-input-border-color: var(--theme-border);
+  --theme-input-border-active: var(--theme-text2);
+  --theme-brand-primary: #000000;
+  --theme-brand-secondary: #ccd4a8;
+  --theme-brand-accent: #3983a6;
+  --theme-success-bg: #0da000;
+  --theme-success-text: #0b8000;
+  --theme-error-bg: hsl(0deg 100% 42%);
+  --theme-error-text: hsl(0deg 100% 48%);
+}
+
+/**
+ * THEME "dark" mode
+ */
+[data-theme="dark"] {
+  --theme-bg: hsl(203deg 4% 4%);
+  --theme-bg1: hsl(203deg 16% 10%);
+  --theme-bg2: hsl(203deg 8% 14%);
+  --theme-bg3: hsl(203deg 8% 28%);
+  --theme-bg4: hsl(203deg 8% 41.96%);
+  --theme-text: hsl(203deg 6.25% 90%);
+  --theme-text1: hsl(203deg 7.23% 67.45%);
+  --theme-text2: hsl(203deg 7.25% 55%);
+  --theme-border: hsl(203deg 0% 16%);
+  --theme-border1: hsl(203deg 6.29% 32%);
+  --theme-border2: hsl(203deg 5.88% 50%);
+  --theme-icon: hsl(203deg 7.25% 59.41%);
+  --theme-input-bg: var(--theme-bg1);
+  --theme-input-bg-active: var(--theme-bg1);
+  --theme-input-bg-value: var(--theme-bg1);
+  --theme-input-text-muted: var(--theme-text2);
+  --theme-input-border-color: var(--theme-border);
+  --theme-input-border-active: var(--theme-text2);
+  --theme-brand-primary: #ffffff;
+  --theme-brand-secondary: #ccd4a8;
+  --theme-brand-accent: hsl(203 49% 64% / 1);
+  --theme-success-bg: #0da000;
+  --theme-success-text: #0b8000;
+  --theme-error-bg: hsl(0deg 100% 42%);
+  --theme-error-text: hsl(0deg 100% 48%);
+}
+
+/**
+ * FONT-FAMILY "default" mode
+ */
+:root {
+  --font-family-heading: "Inter", "Poppins", sans-serif;
+  --font-family-body: "Inter", "Roboto", sans-serif;
+}
+
+/**
+ * BREAKPOINT "default" mode
+ */
+:root {
+  --breakpoint-media-1: 375px;
+  --breakpoint-media-2: 540px;
+  --breakpoint-media-3: 768px;
+  --breakpoint-media-4: 1024px;
+  --breakpoint-media-5: 1280px;
+  --breakpoint-media-6: 1440px;
+  --breakpoint-media-7: 1920px;
+}
+
+/**
+ * RADIUS "default" mode
+ */
+:root {
+  --radius-xxsmall: 2px;
+  --radius-xsmall: 4px;
+  --radius-small: 8px;
+  --radius-medium: 12px;
+  --radius-large: 16px;
+}
+
+/**
+ * EASE "default" mode
+ */
+:root {
+  --ease-in-sine: cubic-bezier(0.47, 0, 0.745, 0.715);
+  --ease-out-sine: cubic-bezier(0.39, 0.575, 0.565, 1);
+  --ease-in-out-sine: cubic-bezier(0.445, 0.05, 0.55, 0.95);
+  --ease-in-expo: cubic-bezier(0.95, 0.05, 0.795, 0.035);
+  --ease-out-expo: cubic-bezier(0.19, 1, 0.22, 1);
+  --ease-in-out-expo: cubic-bezier(1, 0, 0, 1);
+  --ease-in-cube: cubic-bezier(0.55, 0.055, 0.675, 0.19);
+  --ease-out-cube: cubic-bezier(0.215, 0.61, 0.355, 1);
+}
+
+/**
+ * SIZE "small" mode
+ */
+:root,
+[data-size="small"] {
+  --size-maxw-xxxlarge: 1650px;
+  --size-maxw-xxlarge: 1440px;
+  --size-maxw-xlarge: 1280px;
+  --size-maxw-large: 1024px;
+  --size-maxw-medium: 768px;
+  --size-maxw-small: 540px;
+  --size-maxw-xsmall: 320px;
+  --size-header-h: 80px;
+  --size-section-spacer: 32px;
+  --size-gutter: 16px;
+  --size-heading-xlarge: 56px;
+  --size-heading-large: 48px;
+  --size-heading-medium: 40px;
+  --size-heading-small: 28px;
+  --size-heading-xsmall: 24px;
+  --size-body-xlarge: 24px;
+  --size-body-large: 18px;
+  --size-body-medium: 16px;
+  --size-body-small: 14px;
+  --size-body-xsmall: 12px;
+  --size-body-xxsmall: 10px;
+  --size-input-h: 40px;
+}
+
+/**
+ * SIZE "large" mode
+ */
+[data-size="large"] {
+  --size-maxw-xxxlarge: 1650px;
+  --size-maxw-xxlarge: 1440px;
+  --size-maxw-xlarge: 1280px;
+  --size-maxw-large: 1024px;
+  --size-maxw-medium: 768px;
+  --size-maxw-small: 540px;
+  --size-maxw-xsmall: 320px;
+  --size-header-h: 120px;
+  --size-section-spacer: 80px;
+  --size-gutter: 64px;
+  --size-heading-xlarge: 96px;
+  --size-heading-large: 56px;
+  --size-heading-medium: 48px;
+  --size-heading-small: 32px;
+  --size-heading-xsmall: 24px;
+  --size-body-xlarge: 24px;
+  --size-body-large: 22px;
+  --size-body-medium: 18px;
+  --size-body-small: 14px;
+  --size-body-xsmall: 12px;
+  --size-body-xxsmall: 10px;
+  --size-input-h: 52px;
+}
