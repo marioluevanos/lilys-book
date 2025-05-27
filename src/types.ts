@@ -11,5 +11,5 @@ export type Chapter = {
   title: string;
   characters: string;
   content: ReactNode;
-  image: Asset;
+  images: Asset[];
 };

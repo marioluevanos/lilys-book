@@ -75,11 +75,18 @@ function App() {
         title: chapter.title,
         content: chapter.content,
         characters: chapter.characters,
-        image: await generateImage(`${chapter.characters} ${chapter.scene}`),
+        images: await Promise.all(
+          chapter.images.map((image) =>
+            generateImage(
+              `Title: ${chapter.title} What's happening: ${chapter.content} Scene: ${chapter.scene} and generate an image of ${image.title}`
+            )
+          )
+        ),
       };
 
       setLoadingProgress((prev) => prev + 0.1);
 
+      console.log({ story });
       return story;
     },
     [generateImage]
@@ -225,12 +232,15 @@ function App() {
               __html: String(story.characters).replace(/\\n/g, "<br/>"),
             }}
           />
-          <img
-            alt={story.image.title}
-            src={story.image.url}
-            width={story.image.width}
-            height={story.image.height}
-          />
+          {story.images.map((image) => (
+            <img
+              key={image.url}
+              alt={image.title}
+              src={image.url}
+              width={image.width}
+              height={image.height}
+            />
+          ))}
         </div>
       )}
 
