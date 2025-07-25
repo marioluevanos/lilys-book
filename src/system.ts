@@ -8,7 +8,7 @@ export const system: { initial: History } = {
   },
 };
 
-export function userPrompt(args: { summary: string; numberOfPages: number }) {
+export function userPrompt(args: { summary: string }) {
   return `You are going to write a book in the children's genre. 
 
  The book should be about the text content in the <book-summary> markup.
@@ -18,7 +18,7 @@ export function userPrompt(args: { summary: string; numberOfPages: number }) {
   2. Lily, a 5-year-old girl, has a round face, fair skin, and curly hair. 
 
  Requirements:
-  - Each book should contain ${args.numberOfPages} pages.
+  - Each book should contain 12 pages.
   - Each page should get about 60 words.
   - It should rhyme a little.
   - The book should have a random fact related to the book's subject matter shown at the end.

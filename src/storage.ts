@@ -1,25 +1,31 @@
 import { ChatCompletionMessageParam as History } from "openai/resources/index.mjs";
 import { BookWImages } from "./types";
-import { BOOK_W_IMAGES } from "./data";
+import { BOOK_W_IMAGES } from "./data/hello-kitty";
 
-export const USER_PROMPT = "last-user-prompt";
-export const HISTORY_KEY = "history";
-export const PAGES_KEY = "pages";
+const USER_PROMPT = "last-user-prompt";
+const HISTORY_KEY = "history";
+const PAGES_KEY = "pages";
+
+export const KEYS = {
+  USER_PROMPT,
+  HISTORY_KEY,
+  PAGES_KEY,
+};
 
 /**
  * Load from local storage
  */
 export function preloadStorage(setters: {
-  setBook: React.Dispatch<React.SetStateAction<BookWImages | undefined>>;
-  setPrompt: React.Dispatch<React.SetStateAction<string>>;
-  setHistory: React.Dispatch<React.SetStateAction<History[]>>;
+  getBook: (payload: BookWImages | undefined) => void;
+  getPrompt: (payload: string) => void;
+  getHistory: (payload: History[]) => void;
 }) {
-  const { setBook, setHistory, setPrompt } = setters;
+  const { getBook, getHistory, getPrompt } = setters;
 
   try {
     const prompt = localStorage.getItem(USER_PROMPT);
     if (typeof prompt === "string" && prompt !== "undefined") {
-      setPrompt(prompt);
+      getPrompt(prompt);
     }
   } catch (error) {
     console.warn(error);
@@ -30,7 +36,7 @@ export function preloadStorage(setters: {
     try {
       const history = JSON.parse(savedHistory);
       if (Array.isArray(history)) {
-        setHistory(history);
+        getHistory(history);
       }
     } catch (error) {
       console.warn(error);
@@ -44,12 +50,12 @@ export function preloadStorage(setters: {
 
       console.log({ BOOK_W_IMAGES, story });
       if (story && typeof story === "object") {
-        setBook(story);
+        getBook(story);
       }
     } catch (error) {
       console.warn(error);
     }
   } else {
-    setBook(BOOK_W_IMAGES);
+    getBook(BOOK_W_IMAGES);
   }
 }

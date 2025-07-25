@@ -1,69 +1,31 @@
-/**
- * DO NOT DIRECTLY EDIT THIS FILE
- * THIS FILE IS AUTO GENERATED
- */
-
-/**
- * THEME "light" mode
- */
-:root,
-[data-theme="light"] {
-  --theme-bg: hsl(203deg 0% 100%);
-  --theme-bg1: hsl(203deg 27% 96%);
-  --theme-bg2: hsl(203deg 16% 88%);
-  --theme-bg3: hsl(203deg 8% 80%);
-  --theme-bg4: hsl(203deg 8% 60%);
-  --theme-text: hsl(203deg 6.52% 16%);
-  --theme-text1: hsl(203deg 6.52% 48%);
-  --theme-text2: hsl(203deg 6.52% 64%);
-  --theme-border: hsl(203 24% 90% / 1);
-  --theme-border1: hsl(203 7% 75%);
-  --theme-border2: hsl(203 2% 50%);
-  --theme-icon: hsl(30 1% 37%);
-  --theme-input-bg: var(--theme-bg1);
-  --theme-input-bg-active: var(--theme-bg1);
-  --theme-input-bg-value: var(--theme-bg1);
-  --theme-input-text-muted: var(--theme-text2);
-  --theme-input-border-color: var(--theme-border);
-  --theme-input-border-active: var(--theme-text2);
-  --theme-brand-primary: #000000;
-  --theme-brand-secondary: #ccd4a8;
-  --theme-brand-accent: #3983a6;
-  --theme-success-bg: #0da000;
-  --theme-success-text: #0b8000;
-  --theme-error-bg: hsl(0deg 100% 42%);
-  --theme-error-text: hsl(0deg 100% 48%);
+:root {
+  --accent: hsl(274deg 71% 50%);
+  --accent2: hsl(274deg 71% 30%);
+  --accent-text: hsl(274deg 71% 100%);
+  --secondary: hsl(161deg 40% 87%);
+  --bg: hsl(210deg 0% 100%);
+  --bg1: hsl(210deg 16% 94%);
+  --bg2: hsl(210deg 8% 90%);
+  --bg3: hsl(210deg 8% 76%);
+  --text: hsl(210deg 0% 0%);
+  --text1: hsl(210deg 0% 40%);
+  --text2: hsl(210deg 0% 70%);
 }
 
-/**
- * THEME "dark" mode
- */
-[data-theme="dark"] {
-  --theme-bg: hsl(203deg 4% 4%);
-  --theme-bg1: hsl(203deg 16% 10%);
-  --theme-bg2: hsl(203deg 8% 14%);
-  --theme-bg3: hsl(203deg 8% 28%);
-  --theme-bg4: hsl(203deg 8% 41.96%);
-  --theme-text: hsl(203deg 6.25% 90%);
-  --theme-text1: hsl(203deg 7.23% 67.45%);
-  --theme-text2: hsl(203deg 7.25% 55%);
-  --theme-border: hsl(203deg 0% 16%);
-  --theme-border1: hsl(203deg 6.29% 32%);
-  --theme-border2: hsl(203deg 5.88% 50%);
-  --theme-icon: hsl(203deg 7.25% 59.41%);
-  --theme-input-bg: var(--theme-bg1);
-  --theme-input-bg-active: var(--theme-bg1);
-  --theme-input-bg-value: var(--theme-bg1);
-  --theme-input-text-muted: var(--theme-text2);
-  --theme-input-border-color: var(--theme-border);
-  --theme-input-border-active: var(--theme-text2);
-  --theme-brand-primary: #ffffff;
-  --theme-brand-secondary: #ccd4a8;
-  --theme-brand-accent: hsl(203 49% 64% / 1);
-  --theme-success-bg: #0da000;
-  --theme-success-text: #0b8000;
-  --theme-error-bg: hsl(0deg 100% 42%);
-  --theme-error-text: hsl(0deg 100% 48%);
+@media (prefers-color-scheme: dark) {
+  :root {
+    --accent: hsl(274deg 71% 30%);
+    --accent2: hsl(274deg 71% 16%);
+    --accent-text: hsla(274deg 71% 100%/60%);
+    --secondary: hsl(161deg 40% 66%);
+    --bg: hsl(210deg 22% 8%);
+    --bg1: hsl(210deg 22% 12%);
+    --bg2: hsl(210deg 22% 20%);
+    --bg3: hsl(210deg 22% 28%);
+    --text: hsl(210deg 0% 100%);
+    --text1: hsl(210deg 0% 76%);
+    --text2: hsl(210deg 0% 50%);
+  }
 }
 
 /**

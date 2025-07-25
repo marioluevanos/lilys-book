@@ -10,7 +10,7 @@
 
 .message-history .message.user {
   border-radius: 1rem;
-  background: var(--theme-bg1);
+  background: var(--bg1);
 
   & .content {
     margin: 0;
@@ -28,7 +28,7 @@
 }
 
 .message-history .message.assistant .content {
-  border: 1px dotted var(--theme-border);
+  border: 1px dotted var(--bg2);
   border-radius: 1rem;
   padding: 1rem;
   overflow: auto;

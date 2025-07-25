@@ -1,4 +1,5 @@
 import "./Form.css";
+import { Button } from "../Button/Button";
 import { BaseSyntheticEvent, FC } from "react";
 
 export const Form: FC<{
@@ -9,22 +10,23 @@ export const Form: FC<{
   const { onSubmit, disabled, defaultValue } = props;
   return (
     <form onSubmit={onSubmit} aria-disabled={disabled}>
-      <label>What kind of book would you like?</label>
+      <label htmlFor="prompt">What kind of book would you like?</label>
       <textarea
+        id="prompt"
         name="prompt"
         disabled={disabled}
-        rows={8}
+        rows={6}
         defaultValue={defaultValue}
         placeholder="Generate a book about..."
       />
-      <button
+      <Button
         type="submit"
         name="cta"
         disabled={disabled}
         className={`${disabled ? "loading " : ""}`}
       >
         Make me a book
-      </button>
+      </Button>
     </form>
   );
 };

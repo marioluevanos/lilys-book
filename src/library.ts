@@ -1,7 +1,9 @@
 import OpenAI from "openai";
 import { zodResponseFormat } from "openai/helpers/zod.mjs";
 import { ChatCompletionMessageParam as History } from "openai/resources/index.mjs";
-import { Book, BookSchema, Page, PageWImage } from "./types";
+import { Book, BookSchema, BookWImages, Page, PageWImage } from "./types";
+import { userPrompt } from "./system";
+import { KEYS } from "./storage";
 
 export const openai = new OpenAI({
   apiKey: import.meta.env.VITE_OPENAI_API_KEY,
@@ -9,9 +11,9 @@ export const openai = new OpenAI({
 });
 
 /**
- * Generate BookSchema
+ * Generate a page with an Image
  */
-export async function generatePage(
+export async function generatePageWithImage(
   page: Page,
   previousResponseId: string | undefined
 ): Promise<PageWImage> {
@@ -44,6 +46,7 @@ export async function generateImage(args: {
 
   if (imageData.length > 0) {
     const imageBase64 = imageData[0];
+
     if (imageBase64) {
       const fs = await import("fs");
       fs.writeFileSync("ass.png", Buffer.from(imageBase64, "base64"));
@@ -54,19 +57,18 @@ export async function generateImage(args: {
   return { url: "" };
 }
 
+type BookResponse = {
+  content: Book | null;
+  response: OpenAI.Chat.Completions.ChatCompletionMessage;
+};
+
 /**
  * Create a Chapter
  */
 export async function requestBook(
   history: History[],
   message: History
-): Promise<
-  | {
-      content: Book | null;
-      response: OpenAI.Chat.Completions.ChatCompletionMessage;
-    }
-  | undefined
-> {
+): Promise<BookResponse | undefined> {
   const chatCompletion = await openai.chat.completions.create({
     messages: [...history, message],
     model: "gpt-4.1",
@@ -88,7 +90,7 @@ export async function requestBook(
 /**
  * Create a prompt message
  */
-export function createMessage(formInput: string): History {
+function createMessage(formInput: string): History {
   console.log({ formInput });
   return {
     role: "user",
@@ -99,7 +101,7 @@ export function createMessage(formInput: string): History {
 /**
  * Chat sends back json, parse the string as JSON
  */
-export function parseResponse(content: string): Book | null {
+function parseResponse(content: string): Book | null {
   try {
     return JSON.parse(content);
   } catch (error) {
@@ -107,4 +109,66 @@ export function parseResponse(content: string): Book | null {
   }
 
   return null;
+}
+
+/**
+ * Get book, internall handle the prompt engineering and boo creation
+ * @param prompt The engineered prompt
+ * @param history Message history
+ * @returns
+ */
+export async function getBook(prompt: string, history: History[]) {
+  localStorage.setItem(KEYS.USER_PROMPT, prompt);
+
+  const engineeredPrompt = userPrompt({ summary: prompt });
+
+  console.log({ engineeredPrompt });
+
+  const userHistory = createMessage(engineeredPrompt);
+
+  const bookResponse = await requestBook(history, userHistory);
+
+  return { bookResponse, userHistory };
+}
+
+export async function createBookProps(
+  bookResponse: BookResponse | undefined,
+  book: BookWImages | undefined
+): Promise<BookWImages | undefined> {
+  const { content, response } = bookResponse || {};
+
+  if (content && response) {
+    const bookCreated: BookWImages = {
+      title: content.title,
+      pages: await Promise.all(content.pages.map(mapPage)),
+      randomFact: content.randomFact,
+    };
+
+    return bookCreated;
+  }
+
+  function mapPage(ch: Page, idx: number) {
+    const p = book?.pages[idx - 1];
+    const previousResponseId = p?.image?.id;
+    return generatePageWithImage(ch, previousResponseId);
+  }
+}
+
+export function updateHistory(
+  userInput: History,
+  bookResponse: BookResponse | undefined,
+  prev: History[]
+) {
+  const payload: typeof prev = [
+    ...prev,
+    userInput,
+    {
+      role: "assistant",
+      content: bookResponse?.response?.content,
+    },
+  ];
+
+  localStorage.setItem(KEYS.HISTORY_KEY, JSON.stringify(payload));
+
+  return payload;
 }

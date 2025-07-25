@@ -1,14 +1,14 @@
 import { BaseSyntheticEvent, useCallback, useEffect, useState } from "react";
-import { createMessage, generatePage, requestBook } from "../openai";
+import { createBookProps, getBook, updateHistory } from "../library";
 import { useModes } from "../hooks/useModes";
 import { BookWImages, History } from "../types";
-import { system, userPrompt } from "../system";
-import { HISTORY_KEY, preloadStorage, USER_PROMPT } from "../storage";
+import { system } from "../system";
+import { preloadStorage } from "../storage";
 import { Form } from "./Form/Form";
 import { MessageHistory } from "./MessageHistory/MessageHistory";
 import { Book } from "./Book/Book";
-
-const NUMBER_OF_PAGES = 12;
+import { Drawer } from "./Drawer/Drawer";
+import { ActionButton } from "./Button/ActionButton";
 
 function App() {
   const { size, theme } = useModes();
@@ -17,6 +17,13 @@ function App() {
   const [prompt, setPrompt] = useState("");
   const [book, setBook] = useState<BookWImages>();
   const [history, setHistory] = useState<History[]>([system.initial]);
+  const [isFormActive, setIsFormActive] = useState<boolean>(false);
+
+  const getFormInput = useCallback((event: BaseSyntheticEvent) => {
+    const form = event.target;
+    const textArea = form.firstElementChild;
+    return textArea.value;
+  }, []);
 
   /**
    * Handle form submit
@@ -27,54 +34,16 @@ function App() {
 
       setLoadingProgress((prev) => prev + 1);
 
-      const form = event.target as HTMLFormElement;
-      const formInput = form.firstElementChild as HTMLTextAreaElement;
+      const input = getFormInput(event);
+      const { bookResponse, userHistory } = await getBook(input, history);
+      console.log({ bookResponse, userHistory });
+      const bookCreated = await createBookProps(bookResponse, book);
 
-      localStorage.setItem(USER_PROMPT, formInput.value);
-
-      const engineeredPrompt = userPrompt({
-        summary: formInput.value,
-        numberOfPages: NUMBER_OF_PAGES,
-      });
-
-      console.log({ engineeredPrompt });
-
-      const userInput = createMessage(engineeredPrompt);
-
-      const bookResponse = await requestBook(history, userInput);
-
-      if (bookResponse?.content && bookResponse.response) {
-        const bookCreated: BookWImages = {
-          title: bookResponse.content.title,
-          pages: await Promise.all(
-            bookResponse.content.pages.map((ch, idx) => {
-              const p = book?.pages[idx - 1];
-              const previousResponseId = p?.image?.id;
-              return generatePage(ch, previousResponseId);
-            })
-          ),
-          randomFact: bookResponse.content.randomFact,
-        };
-
-        setBook(bookCreated);
-      }
-
-      setHistory((prev) => {
-        const payload: typeof prev = [
-          ...prev,
-          userInput,
-          {
-            role: "assistant",
-            content: bookResponse?.response?.content,
-          },
-        ];
-        localStorage.setItem(HISTORY_KEY, JSON.stringify(payload));
-        return payload;
-      });
-
-      formInput.value = "";
-
+      setBook(bookCreated);
+      setHistory((prev) => updateHistory(userHistory, bookResponse, prev));
       setLoadingProgress(1);
+
+      event.target.value = "";
     },
     [history, book]
   );
@@ -84,24 +53,21 @@ function App() {
    */
   useEffect(() => {
     preloadStorage({
-      setPrompt,
-      setBook,
-      setHistory,
+      getPrompt: (p) => setPrompt(p),
+      getBook: (b) => setBook(b),
+      getHistory: (h) => setHistory(h),
     });
   }, []);
 
   return (
     <div className="app" data-size={size} data-theme={theme}>
       {loadingProgress === 1 ? "" : `Progress: ${100 * loadingProgress}%`}
-
       <MessageHistory history={history} />
-
-      {book && (
-        <main>
-          <Book book={book} />
-        </main>
-      )}
-      <Form onSubmit={onSubmit} disabled={loading} defaultValue={prompt} />
+      {book && <Book book={book} />}
+      <Drawer open={isFormActive}>
+        <Form onSubmit={onSubmit} disabled={loading} defaultValue={prompt} />
+      </Drawer>
+      <ActionButton onClick={() => setIsFormActive(true)}>+</ActionButton>
     </div>
   );
 }
