@@ -1,119 +1,19 @@
 import { FormEvent, useCallback, useEffect, useState } from "react";
-import { openai } from "../openai";
-import { ChatCompletionMessageParam } from "openai/resources/index.mjs";
-import { zodResponseFormat } from "openai/src/helpers/zod.js";
-import { z } from "zod";
+import { createMessage, generatePage, requestBook } from "../openai";
 import { useModes } from "../hooks/useModes";
-import { ChapterGenerated, system } from "../prompt/system";
-import { Asset, Chapter } from "../types";
+import { Book, BookWImages, History } from "../types";
+import { system, userPrompt } from "../system";
+import { HISTORY_KEY, preloadStorage, USER_PROMPT } from "../storage";
 
-const HISTORY_KEY = "history";
-const CHAPTERS_KEY = "chapters";
+const NUMBER_OF_PAGES = 12;
 
 function App() {
   const { size, theme } = useModes();
   const [loadingProgress, setLoadingProgress] = useState<number>(1);
   const loading = loadingProgress !== 1;
-  const [story, setStory] = useState<Chapter>();
-  const [history, setHistory] = useState<ChatCompletionMessageParam[]>([
-    {
-      role: "system",
-      content: system.childrensBookAuthor,
-    },
-  ]);
-
-  /**
-   * Create a Chapter
-   */
-  const requestChapters = useCallback(
-    async (
-      history: ChatCompletionMessageParam[],
-      message: ChatCompletionMessageParam
-    ) => {
-      const chatCompletion = await openai.chat.completions.create({
-        messages: [...history, message],
-        model: "gpt-4o",
-        response_format: zodResponseFormat(ChapterGenerated, "chapters"),
-      });
-
-      return chatCompletion.choices[0].message;
-    },
-    []
-  );
-
-  /**
-   * Generate an image with a prompt
-   */
-  const generateImage = useCallback(async (prompt: string): Promise<Asset> => {
-    const WIDTH = 1024;
-    const HEIGHT = 1024;
-    const img = await openai.images.generate({
-      model: "dall-e-3",
-      prompt,
-      style: "natural",
-      size: `${WIDTH}x${HEIGHT}`,
-      quality: "hd",
-      user: "user",
-      response_format: "url",
-      n: 1,
-    });
-
-    return {
-      width: WIDTH,
-      height: HEIGHT,
-      title: prompt,
-      url: img.data[0].url || "",
-    };
-  }, []);
-
-  /**
-   * Generate ChaptersGenerated
-   */
-  const generateChapter = useCallback(
-    async (chapter: z.infer<typeof ChapterGenerated>) => {
-      const story = {
-        title: chapter.title,
-        content: chapter.content,
-        characters: chapter.characters,
-        images: await Promise.all(
-          chapter.images.map((image) =>
-            generateImage(
-              `Title: ${chapter.title} What's happening: ${chapter.content} Scene: ${chapter.scene} and generate an image of ${image.title}`
-            )
-          )
-        ),
-      };
-
-      setLoadingProgress((prev) => prev + 0.1);
-
-      console.log({ story });
-      return story;
-    },
-    [generateImage]
-  );
-
-  /**
-   * Create a prompt message
-   */
-  const createMessage = (formInput: string): ChatCompletionMessageParam => ({
-    role: "user",
-    content: formInput,
-  });
-
-  /**
-   * Chat sends back json, parse the string as JSON
-   */
-  const parseChapters = (
-    content: string
-  ): z.infer<typeof ChapterGenerated> | null => {
-    try {
-      return JSON.parse(content);
-    } catch (error) {
-      console.warn(error);
-    }
-
-    return null;
-  };
+  const [prompt, setPrompt] = useState("");
+  const [book, setBook] = useState<BookWImages>();
+  const [history, setHistory] = useState<History[]>([system.initial]);
 
   /**
    * Handle form submit
@@ -122,33 +22,47 @@ function App() {
     async (event: FormEvent<HTMLFormElement>) => {
       event.preventDefault();
 
-      setLoadingProgress(0);
+      setLoadingProgress((prev) => prev + 1);
 
       const form = event.target as HTMLFormElement;
       const formInput = form.firstElementChild as HTMLTextAreaElement;
-      const message = createMessage(formInput.value);
-      const chapters = await requestChapters(history, message);
 
-      setLoadingProgress(0.6);
+      localStorage.setItem(USER_PROMPT, formInput.value);
 
-      if (chapters.content) {
-        const data = parseChapters(chapters.content);
-        if (data) {
-          const chapters = await generateChapter(data);
-          setStory(() => {
-            localStorage.setItem(CHAPTERS_KEY, JSON.stringify(chapters));
-            return chapters;
-          });
-        }
+      const engineeredPrompt = userPrompt({
+        summary: formInput.value,
+        numberOfPages: NUMBER_OF_PAGES,
+      });
+
+      console.log({ engineeredPrompt });
+
+      const userInput = createMessage(engineeredPrompt);
+
+      const bookResponse = await requestBook(history, userInput);
+
+      if (bookResponse?.content && bookResponse.response) {
+        const bookCreated: Book = {
+          title: bookResponse.content.title,
+          pages: await Promise.all(
+            bookResponse.content.pages.map((ch, idx) => {
+              const p = book?.pages[idx - 1];
+              const previousResponseId = p?.image?.id;
+              return generatePage(ch, previousResponseId);
+            })
+          ),
+          randomFact: bookResponse.content.randomFact,
+        };
+
+        setBook(bookCreated);
       }
 
       setHistory((prev) => {
         const payload: typeof prev = [
           ...prev,
-          message,
+          userInput,
           {
             role: "assistant",
-            content: chapters.content,
+            content: bookResponse?.response?.content,
           },
         ];
         localStorage.setItem(HISTORY_KEY, JSON.stringify(payload));
@@ -159,44 +73,19 @@ function App() {
 
       setLoadingProgress(1);
     },
-    [requestChapters, generateChapter, history]
+    [history, book]
   );
-
-  /**
-   * Load from local storage
-   */
-  const preloadStorage = useCallback(() => {
-    const savedHistory = localStorage.getItem(HISTORY_KEY);
-    if (savedHistory) {
-      try {
-        const history = JSON.parse(savedHistory);
-        if (Array.isArray(history)) {
-          setHistory(history);
-        }
-      } catch (error) {
-        console.warn(error);
-      }
-    }
-
-    const savedChapters = localStorage.getItem(CHAPTERS_KEY);
-    if (savedChapters) {
-      try {
-        const story = JSON.parse(savedChapters);
-        if (story && typeof story === "object") {
-          setStory(story);
-        }
-      } catch (error) {
-        console.warn(error);
-      }
-    }
-  }, []);
 
   /**
    * Run preload
    */
   useEffect(() => {
-    preloadStorage();
-  }, [preloadStorage]);
+    preloadStorage({
+      setPrompt,
+      setBook,
+      setHistory,
+    });
+  }, []);
 
   return (
     <div className="app" data-size={size} data-theme={theme}>
@@ -219,43 +108,44 @@ function App() {
         )
       )}
 
-      {story && (
-        <div className="message chapter">
-          <h2>{story.title}</h2>
-          <p
-            dangerouslySetInnerHTML={{
-              __html: String(story.content).replace(/\\n/g, "<br/>"),
-            }}
-          />
-          <p
-            dangerouslySetInnerHTML={{
-              __html: String(story.characters).replace(/\\n/g, "<br/>"),
-            }}
-          />
-          {story.images.map((image) => (
-            <img
-              key={image.url}
-              alt={image.title}
-              src={image.url}
-              width={image.width}
-              height={image.height}
-            />
-          ))}
-        </div>
+      {book && (
+        <main className="message chapter">
+          <h1>{book.title}</h1>
+
+          <ol>
+            {book.pages.map((ch) => (
+              <li key={ch.synopsis}>
+                <p>{ch.content}</p>
+                {ch.image?.url && (
+                  <img
+                    key={ch.synopsis}
+                    alt={ch.synopsis}
+                    src={ch.image.url}
+                    width={512}
+                    height={512}
+                  />
+                )}
+              </li>
+            ))}
+          </ol>
+        </main>
       )}
 
       <form onSubmit={onSubmit} aria-disabled={loading}>
         <textarea
+          name="prompt"
           disabled={loading}
           rows={4}
-          placeholder="I need a bedtime story about..."
+          defaultValue={prompt}
+          placeholder="Generate a book about..."
         />
         <button
           type="submit"
+          name="cta"
           disabled={loading}
           className={`${loading ? "loading " : ""}`}
         >
-          Enter
+          Make me a book
         </button>
       </form>
     </div>
