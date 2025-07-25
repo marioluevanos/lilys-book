@@ -14,8 +14,8 @@ export function userPrompt(args: { summary: string }) {
  The book should be about the text content in the <book-summary> markup.
     
  The protagonists are the following characters: 
-  1. Kiko, a Miniature Schnauzer
-  2. Lily, a 5-year-old girl, has a round face, fair skin, and curly hair. 
+  1. Popcorn, a Miniature Schnauzer puppy, white fur and female. She barks a lot.
+  2. Lily, a 5-year-old girl, has a round face, long eyelashes, fair skin, and curly hair, and wears clothing inspired by Hello Kitty. 
 
  Requirements:
   - Each book should contain 12 pages.

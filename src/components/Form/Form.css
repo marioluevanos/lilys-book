@@ -7,11 +7,6 @@ form {
   padding: 1.5rem var(--size-gutter) 1rem;
   width: 100%;
   box-sizing: border-box;
-
-  @media (min-width: 768px) {
-    flex-direction: row;
-    max-width: var(--size-maxw-medium);
-  }
 }
 
 form label {
@@ -21,14 +16,12 @@ form label {
 }
 
 form textarea {
-  font: 400 1rem/1.5 var(--font-family-body);
+  font: 400 1.5rem/1.5 var(--font-family-body);
   color: var(--text1);
   background: var(--bg);
   border: 1px solid transparent;
   padding: 1rem 1rem 0;
   border-radius: 8px;
-  font-size: 1rem;
-  font-family: inherit;
   min-height: 64px;
   flex: 1;
 }

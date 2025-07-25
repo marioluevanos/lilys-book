@@ -1,6 +1,11 @@
+.message-histor {
+  width: 100%;
+  overflow: hidden;
+}
+
 .message-history .message {
   width: 100%;
-  max-width: 768px;
+  overflow: hidden;
   margin: 0 auto;
 
   & h2 {
@@ -40,4 +45,8 @@
     display: block;
     object-fit: contain;
   }
+}
+
+.message-history .code {
+  overflow: hidden;
 }

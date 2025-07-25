@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
+    <title>Lily's Book</title>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -9,9 +10,31 @@
       href="https://fonts.googleapis.com/css2?family=Playpen+Sans:wght@100..800&display=swap"
       rel="stylesheet"
     />
-
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Create a Children's Book</title>
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
+    <meta
+      name="theme-color"
+      media="(prefers-color-scheme: light)"
+      content="white"
+    />
+    <meta
+      name="theme-color"
+      media="(prefers-color-scheme: dark)"
+      content="#101419"
+    />
+    <link id="manifest" rel="manifest" href="/manifest-dark.json" />
+    <script>
+      (function getThemeColor() {
+        const s = document.getElementById("manifest");
+        const dark = window.matchMedia("(prefers-color-scheme: dark)");
+        const listener = (e) =>
+          (s.href = e.matches ? "/manifest-dark.json" : "/manifest.json");
+        listener(dark);
+        dark.addEventListener("change", listener);
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>

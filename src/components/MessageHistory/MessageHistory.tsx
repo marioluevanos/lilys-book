@@ -1,3 +1,4 @@
+import "./MessageHistory.css";
 import { FC } from "react";
 import { History } from "../../types";
 
@@ -10,20 +11,23 @@ export const MessageHistory: FC<MessageHistoryProps> = (props) => {
   return (
     <div className="message-history">
       {history.map((h, i) =>
-        h.role === "system" ? null : (
+        h.role === "assistant" ? (
           <div
             key={String(h.content) + i}
             className={`message ${String(h.role)}`}
           >
             <p className="role">{String(h.role)}</p>
-            <pre
-              className="content"
-              dangerouslySetInnerHTML={{
-                __html: String(h.content),
-              }}
-            />
+
+            <details className="content code">
+              <summary>Code</summary>
+              <div
+                dangerouslySetInnerHTML={{
+                  __html: String(h.content),
+                }}
+              ></div>
+            </details>
           </div>
-        )
+        ) : null
       )}
     </div>
   );

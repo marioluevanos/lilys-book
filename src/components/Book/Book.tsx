@@ -1,18 +1,28 @@
 import "./Book.css";
 import { BookWImages } from "../../types";
-import { FC } from "react";
+import { BaseSyntheticEvent, FC, useEffect, useRef } from "react";
 
 export const Book: FC<{
   book: BookWImages;
+  pageIndex: number;
+  onPageChange: (event: BaseSyntheticEvent) => void;
 }> = (props) => {
-  const { book } = props;
+  const { book, pageIndex = 0, onPageChange } = props;
+  const bookRef = useRef<HTMLOListElement>(null);
+
+  useEffect(() => {
+    if (bookRef.current) {
+      bookRef.current.scrollTo({
+        left: pageIndex * window.innerWidth,
+        behavior: "smooth",
+      });
+    }
+  }, [pageIndex]);
 
   return (
     <main id="book">
-      <ol className="h-scroll book">
-        <li className="h-scroll-section page cover">
-          <h1>{book.title}</h1>
-        </li>
+      <p className="page-number">{pageIndex + 1}</p>
+      <ol className="h-scroll book" ref={bookRef}>
         {book.pages.map((ch, i) => (
           <li
             key={ch.synopsis}
@@ -33,11 +43,25 @@ export const Book: FC<{
             )}
           </li>
         ))}
-        <li className="h-scroll-section page fact">
-          <h2>It's a Fact</h2>
-          <p className="content">{book.randomFact}</p>
-        </li>
       </ol>
+      <nav className="book-nav">
+        <button
+          onClick={onPageChange}
+          data-active={pageIndex}
+          data-dir="prev"
+          className="prev"
+        >
+          Prev
+        </button>
+        <button
+          onClick={onPageChange}
+          data-active={pageIndex}
+          data-dir="next"
+          className="next"
+        >
+          Next
+        </button>
+      </nav>
     </main>
   );
 };

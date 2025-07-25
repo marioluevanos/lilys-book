@@ -3,25 +3,30 @@ import "./Drawer.css";
 import { Drawer as Vaul } from "vaul";
 import { useCallback, useEffect, useState } from "react";
 import type { FC, ReactNode } from "react";
+import { EventPayload, events } from "../../events";
 
 type DrawerProps = {
   title?: string;
   description?: string;
-  children?: ReactNode;
-  open?: boolean;
 };
 
-export const Drawer: FC<DrawerProps> = (props) => {
-  const { children } = props;
-  const [open, setOpen] = useState(props.open);
+export const Drawer: FC<DrawerProps> = () => {
+  const [open, setOpen] = useState(false);
+  const [children, setChildren] = useState<ReactNode>();
 
   const onOpenChange = useCallback(() => {
-    setOpen(undefined);
+    setOpen(false);
   }, []);
 
   useEffect(() => {
-    setOpen(props.open);
-  }, [props.open]);
+    const onDrawer = ({ children }: EventPayload) => {
+      setOpen(true);
+      setChildren(children);
+    };
+    events.on("drawer", onDrawer);
+
+    return () => events.off("drawer", onDrawer);
+  }, []);
 
   return (
     <Vaul.Root open={open} onOpenChange={onOpenChange}>

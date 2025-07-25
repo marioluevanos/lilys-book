@@ -10,14 +10,13 @@ export const Form: FC<{
   const { onSubmit, disabled, defaultValue } = props;
   return (
     <form onSubmit={onSubmit} aria-disabled={disabled}>
-      <label htmlFor="prompt">What kind of book would you like?</label>
       <textarea
         id="prompt"
         name="prompt"
         disabled={disabled}
         rows={6}
         defaultValue={defaultValue}
-        placeholder="Generate a book about..."
+        placeholder="What kind of book would you like?"
       />
       <Button
         type="submit"

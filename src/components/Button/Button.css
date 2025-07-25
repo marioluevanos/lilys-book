@@ -13,6 +13,10 @@
   align-items: center;
   justify-content: center;
   width: 100%;
+
+  & * {
+    pointer-events: none;
+  }
 }
 
 .button.loading {
@@ -54,10 +58,12 @@
 }
 
 .button.action {
+  box-shadow: 0 4px 0px var(--accent2);
+  border-radius: 16px;
   padding: 0;
   line-height: 3rem;
   position: fixed;
-  bottom: 3rem;
+  bottom: 1rem;
   right: 1rem;
   width: 3rem;
   height: 3rem;

@@ -1,23 +1,30 @@
 import { BaseSyntheticEvent, useCallback, useEffect, useState } from "react";
-import { createBookProps, getBook, updateHistory } from "../library";
+import {
+  createBookProps,
+  generatePageWithImage,
+  getBook,
+  updateHistory,
+} from "../library";
 import { useModes } from "../hooks/useModes";
-import { BookWImages, History } from "../types";
+import { BookWImages, History, PageWImage } from "../types";
 import { system } from "../system";
-import { preloadStorage } from "../storage";
+import { KEYS, preloadStorage } from "../storage";
 import { Form } from "./Form/Form";
-import { MessageHistory } from "./MessageHistory/MessageHistory";
 import { Book } from "./Book/Book";
 import { Drawer } from "./Drawer/Drawer";
 import { ActionButton } from "./Button/ActionButton";
+import { events } from "../events";
+import { PlusIcon } from "./Icon";
+import { LoadingProgress } from "./LoadingProgress/LoadingProgress";
 
 function App() {
   const { size, theme } = useModes();
-  const [loadingProgress, setLoadingProgress] = useState<number>(1);
-  const loading = loadingProgress !== 1;
+  const [loading, setLoading] = useState<boolean>(false);
   const [prompt, setPrompt] = useState("");
   const [book, setBook] = useState<BookWImages>();
   const [history, setHistory] = useState<History[]>([system.initial]);
-  const [isFormActive, setIsFormActive] = useState<boolean>(false);
+  const [pageIndex, setPageIndex] = useState(0);
+  const currentPage = book?.pages[pageIndex] as PageWImage | undefined;
 
   const getFormInput = useCallback((event: BaseSyntheticEvent) => {
     const form = event.target;
@@ -32,20 +39,74 @@ function App() {
     async (event: BaseSyntheticEvent) => {
       event.preventDefault();
 
-      setLoadingProgress((prev) => prev + 1);
+      setLoading(true);
 
       const input = getFormInput(event);
       const { bookResponse, userHistory } = await getBook(input, history);
-      console.log({ bookResponse, userHistory });
-      const bookCreated = await createBookProps(bookResponse, book);
+      const bookCreated = await createBookProps(bookResponse);
 
       setBook(bookCreated);
       setHistory((prev) => updateHistory(userHistory, bookResponse, prev));
-      setLoadingProgress(1);
+      setLoading(false);
 
       event.target.value = "";
     },
-    [history, book]
+    [history, getFormInput]
+  );
+
+  const onActionClick = useCallback(() => {
+    events.emit("drawer", {
+      children: (
+        <Form onSubmit={onSubmit} disabled={loading} defaultValue={prompt} />
+      ),
+    });
+  }, [loading, onSubmit, prompt]);
+
+  const onPageChange = useCallback(
+    (event: BaseSyntheticEvent) => {
+      event.preventDefault();
+      const btn = event.target as HTMLButtonElement;
+      const { dir, active } = btn.dataset;
+
+      setPageIndex((prev) => {
+        if (dir === "prev" && book) {
+          return prev === 0 ? 0 : prev - 1;
+        }
+        if (dir === "next" && book) {
+          return prev === book.pages.length - 1
+            ? book.pages.length - 1
+            : prev + 1;
+        }
+        return prev;
+      });
+
+      if (book) {
+        if (Number(active) === 0 && btn.classList.contains("prev")) {
+          events.emit("drawer", {
+            children: (
+              <div className="cover">
+                <h1>{book.title}</h1>
+              </div>
+            ),
+          });
+        }
+
+        if (
+          Number(active) === book?.pages.length - 1 &&
+          btn.classList.contains("next")
+        ) {
+          events.emit("drawer", {
+            children: (
+              <div className="fact">
+                <h2>It's a Fact</h2>
+                <p className="content">{book.randomFact}</p>
+              </div>
+            ),
+          });
+        }
+      }
+    },
+    [book]
   );
 
   /**
@@ -59,15 +120,58 @@ function App() {
     });
   }, []);
 
+  /**
+   * Run preload
+   */
+  useEffect(() => {
+    if (currentPage) {
+      updatePageImage(currentPage);
+    }
+
+    async function updatePageImage(page: PageWImage) {
+      setLoading(true);
+
+      try {
+        const hasImage = typeof page.image?.url === "string";
+
+        if (!hasImage) {
+          const p = await generatePageWithImage(page);
+          setBook((prev) => {
+            const updated = {
+              title: prev?.title || "",
+              randomFact: prev?.randomFact || "",
+              pages: [
+                p,
+                ...(prev?.pages.slice(1, prev.pages.length - 1) || []),
+              ],
+            };
+
+            localStorage.setItem(KEYS.BOOK_KEY, JSON.stringify(updated));
+            return updated;
+          });
+        }
+      } catch (e) {
+        console.error(e);
+      } finally {
+        setLoading(false);
+      }
+    }
+  }, [book, currentPage]);
+
   return (
     <div className="app" data-size={size} data-theme={theme}>
-      {loadingProgress === 1 ? "" : `Progress: ${100 * loadingProgress}%`}
-      <MessageHistory history={history} />
-      {book && <Book book={book} />}
-      <Drawer open={isFormActive}>
+      <LoadingProgress progress={loading} />
+      {book ? (
+        <>
+          <Book pageIndex={pageIndex} book={book} onPageChange={onPageChange} />
+          <Drawer />
+          <ActionButton onClick={onActionClick}>
+            <PlusIcon />
+          </ActionButton>
+        </>
+      ) : (
         <Form onSubmit={onSubmit} disabled={loading} defaultValue={prompt} />
-      </Drawer>
-      <ActionButton onClick={() => setIsFormActive(true)}>+</ActionButton>
+      )}
     </div>
   );
 }

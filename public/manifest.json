@@ -1,0 +1,19 @@
+{
+  "name": "MLB",
+  "id": "mlb-games",
+  "short_name": "MLB",
+  "description": "Lily's Book",
+  "theme_color": "#FFFFFF",
+  "background_color": "#FFFFFF",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/icon.png",
+      "sizes": "128x128",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}

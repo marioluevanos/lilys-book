@@ -1,15 +1,15 @@
 import { ChatCompletionMessageParam as History } from "openai/resources/index.mjs";
 import { BookWImages } from "./types";
-import { BOOK_W_IMAGES } from "./data/hello-kitty";
+import { BOOK_W_IMAGES } from "./data/3-nights";
 
 const USER_PROMPT = "last-user-prompt";
 const HISTORY_KEY = "history";
-const PAGES_KEY = "pages";
+const BOOK_KEY = "book";
 
 export const KEYS = {
   USER_PROMPT,
   HISTORY_KEY,
-  PAGES_KEY,
+  BOOK_KEY,
 };
 
 /**
@@ -43,12 +43,11 @@ export function preloadStorage(setters: {
     }
   }
 
-  const savedChapters = localStorage.getItem(PAGES_KEY);
-  if (savedChapters) {
+  const savedBook = localStorage.getItem(BOOK_KEY);
+  if (savedBook) {
     try {
-      const story = JSON.parse(savedChapters);
+      const story = JSON.parse(savedBook);
 
-      console.log({ BOOK_W_IMAGES, story });
       if (story && typeof story === "object") {
         getBook(story);
       }
@@ -57,5 +56,6 @@ export function preloadStorage(setters: {
     }
   } else {
     getBook(BOOK_W_IMAGES);
+    localStorage.setItem(KEYS.BOOK_KEY, JSON.stringify(BOOK_W_IMAGES));
   }
 }

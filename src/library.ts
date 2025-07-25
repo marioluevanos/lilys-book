@@ -13,13 +13,9 @@ export const openai = new OpenAI({
 /**
  * Generate a page with an Image
  */
-export async function generatePageWithImage(
-  page: Page,
-  previousResponseId: string | undefined
-): Promise<PageWImage> {
+export async function generatePageWithImage(page: Page): Promise<PageWImage> {
   const image = await generateImage({
     prompt: page.synopsis,
-    previousResponseId,
   });
 
   return {
@@ -28,30 +24,23 @@ export async function generatePageWithImage(
   };
 }
 
-export async function generateImage(args: {
+async function generateImage(args: {
   prompt: string;
-  previousResponseId?: string;
-}): Promise<{ url: string; imageId?: string }> {
-  const imageResponse = await openai.responses.create({
-    model: "gpt-4.1",
-    input: args.prompt,
-    previous_response_id: args.previousResponseId,
-    tools: [{ type: "image_generation" }],
+}): Promise<{ url: string }> {
+  const imageResponse = await openai.images.generate({
+    model: "gpt-image-1",
+    prompt: args.prompt,
+    n: 1,
   });
 
-  console.log({ imageResponse });
-  const imageData = imageResponse.output
-    .filter((output) => output.type === "image_generation_call")
-    .map((output) => output.result);
+  const data = imageResponse?.data;
+  const imgFile = (data || [])[0];
+  const imageBase64 = imgFile?.b64_json || "";
 
-  if (imageData.length > 0) {
-    const imageBase64 = imageData[0];
-
-    if (imageBase64) {
-      const fs = await import("fs");
-      fs.writeFileSync("ass.png", Buffer.from(imageBase64, "base64"));
-      return { url: imageBase64, imageId: imageResponse.id };
-    }
+  if (imageBase64) {
+    return {
+      url: `data:image/png;base64, ${imageBase64}`,
+    };
   }
 
   return { url: "" };
@@ -75,8 +64,6 @@ export async function requestBook(
     temperature: 0.2,
     response_format: zodResponseFormat(BookSchema, "data"),
   });
-
-  console.log({ chatCompletion });
   const response = chatCompletion.choices[0].message;
 
   if (response.content) {
@@ -91,7 +78,6 @@ export async function requestBook(
  * Create a prompt message
  */
 function createMessage(formInput: string): History {
-  console.log({ formInput });
   return {
     role: "user",
     content: formInput,
@@ -121,36 +107,27 @@ export async function getBook(prompt: string, history: History[]) {
   localStorage.setItem(KEYS.USER_PROMPT, prompt);
 
   const engineeredPrompt = userPrompt({ summary: prompt });
-
-  console.log({ engineeredPrompt });
-
   const userHistory = createMessage(engineeredPrompt);
-
   const bookResponse = await requestBook(history, userHistory);
 
   return { bookResponse, userHistory };
 }
 
 export async function createBookProps(
-  bookResponse: BookResponse | undefined,
-  book: BookWImages | undefined
-): Promise<BookWImages | undefined> {
+  bookResponse: BookResponse | undefined
+): Promise<Book | undefined> {
   const { content, response } = bookResponse || {};
 
   if (content && response) {
     const bookCreated: BookWImages = {
       title: content.title,
-      pages: await Promise.all(content.pages.map(mapPage)),
+      pages: content.pages,
       randomFact: content.randomFact,
     };
 
-    return bookCreated;
-  }
+    localStorage.setItem(KEYS.BOOK_KEY, JSON.stringify(bookCreated));
 
-  function mapPage(ch: Page, idx: number) {
-    const p = book?.pages[idx - 1];
-    const previousResponseId = p?.image?.id;
-    return generatePageWithImage(ch, previousResponseId);
+    return bookCreated;
   }
 }
 

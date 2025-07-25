@@ -17,7 +17,7 @@
   align-items: flex-end;
 }
 
-.book .page.fact {
+.fact {
   padding: 2rem;
   align-items: flex-start;
   justify-content: flex-start;
@@ -31,14 +31,15 @@
 }
 
 .page .content {
-  font: 400 1.5rem/1.75 var(--font-family-body);
+  font: 400 1.25rem/1.75 var(--font-family-body);
   margin: 0;
-  padding: 2.5rem 1.5rem 1.5rem;
+  padding: 2.5rem 1.5rem 4.5rem;
   position: relative;
   z-index: 1;
 }
 
-.book .page.cover {
+.cover {
+  padding: 2rem;
   text-wrap: balance;
   text-align: center;
   align-items: center;
@@ -69,4 +70,41 @@
   display: block;
   object-position: 50% 0%;
   object-fit: cover;
+}
+
+.book-nav {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  justify-content: space-between;
+  z-index: 100;
+  pointer-events: none;
+
+  & button {
+    pointer-events: all;
+    font-size: 0;
+    border: none;
+    padding: 0;
+    background: transparent;
+    width: 16vw;
+    height: 100%;
+  }
+}
+
+.page-number {
+  margin: 0;
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  background: var(--accent);
+  color: var(--accent-text);
+  border-radius: 1rem;
+  width: 2rem;
+  height: 2rem;
+  font: 700 16px/1 var(--font-family-body);
+  z-index: 400;
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }

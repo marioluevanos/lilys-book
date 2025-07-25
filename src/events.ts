@@ -1,27 +1,21 @@
+import { ReactNode } from "react";
+
+/* eslint-disable @typescript-eslint/no-explicit-any */
 export type EventPayload = {
-  event: string;
-  payload: Record<string, any>;
+  children: ReactNode;
 };
-
-export type EventMap = {
-  [E in EventPayload as E["event"]]: E["payload"];
-};
-
-type EventName = keyof EventMap;
-
-type Listener<K extends EventName> = (payload: EventMap[K]) => void;
 
 interface EventEmitter {
-  on: <K extends EventName>(event: K, listener: Listener<K>) => void;
-  off: <K extends EventName>(event: K, listener: Listener<K>) => void;
-  emit: <K extends EventName>(event: K, payload: EventMap[K]) => void;
+  on: (event: string, listener: (payload: EventPayload) => void) => void;
+  off: (event: string, listener: (payload: EventPayload) => void) => void;
+  emit: (event: string, payload: EventPayload) => void;
 }
 
 /**
  * Typed event emitter
  */
 export function createEventEmitter(): EventEmitter {
-  const listeners: Partial<Record<EventName, Array<(args: any) => void>>> = {};
+  const listeners: Partial<Record<string, Array<(args: any) => void>>> = {};
 
   return {
     on(event, fn) {
