@@ -1,6 +1,6 @@
 import { ChatCompletionMessageParam as History } from "openai/resources/index.mjs";
 import { BookWImages } from "./types";
-import SAMPLE_BOOK from "./book.json";
+import { BOOK_W_IMAGES } from "./data";
 
 export const USER_PROMPT = "last-user-prompt";
 export const HISTORY_KEY = "history";
@@ -18,7 +18,7 @@ export function preloadStorage(setters: {
 
   try {
     const prompt = localStorage.getItem(USER_PROMPT);
-    if (typeof prompt === "string") {
+    if (typeof prompt === "string" && prompt !== "undefined") {
       setPrompt(prompt);
     }
   } catch (error) {
@@ -42,16 +42,14 @@ export function preloadStorage(setters: {
     try {
       const story = JSON.parse(savedChapters);
 
-      console.log({ SAMPLE_BOOK, story });
+      console.log({ BOOK_W_IMAGES, story });
       if (story && typeof story === "object") {
         setBook(story);
-      } else {
-        setBook(SAMPLE_BOOK);
       }
     } catch (error) {
       console.warn(error);
     }
   } else {
-    setBook(SAMPLE_BOOK);
+    setBook(BOOK_W_IMAGES);
   }
 }

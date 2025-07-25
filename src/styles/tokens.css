@@ -70,8 +70,8 @@
  * FONT-FAMILY "default" mode
  */
 :root {
-  --font-family-heading: "Inter", "Poppins", sans-serif;
-  --font-family-body: "Inter", "Roboto", sans-serif;
+  --font-family-heading: "Playpen Sans", sans-serif;
+  --font-family-body: "Playpen Sans", "Roboto", sans-serif;
 }
 
 /**

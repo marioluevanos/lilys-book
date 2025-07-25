@@ -1,9 +1,7 @@
 import OpenAI from "openai";
 import { zodResponseFormat } from "openai/helpers/zod.mjs";
 import { ChatCompletionMessageParam as History } from "openai/resources/index.mjs";
-import { Book, PageWImage } from "./types";
-import { z } from "zod";
-import { BookSchema, PageSchema } from "./system";
+import { Book, BookSchema, Page, PageWImage } from "./types";
 
 export const openai = new OpenAI({
   apiKey: import.meta.env.VITE_OPENAI_API_KEY,
@@ -14,7 +12,7 @@ export const openai = new OpenAI({
  * Generate BookSchema
  */
 export async function generatePage(
-  page: z.infer<typeof PageSchema>,
+  page: Page,
   previousResponseId: string | undefined
 ): Promise<PageWImage> {
   const image = await generateImage({

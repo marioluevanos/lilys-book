@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { History } from "./types";
+import { BookSchema, History } from "./types";
 
 export const system: { initial: History } = {
   initial: {
@@ -32,22 +32,6 @@ export function userPrompt(args: { summary: string; numberOfPages: number }) {
   <book-summary>${args.summary}</book-summary>
   `;
 }
-
-export const ImageSchema = z.object({
-  url: z.string(),
-  id: z.string().optional(),
-});
-
-export const PageSchema = z.object({
-  content: z.string(),
-  synopsis: z.string(),
-});
-
-export const BookSchema = z.object({
-  title: z.string(),
-  pages: z.array(PageSchema),
-  randomFact: z.string(),
-});
 
 const schema: z.infer<typeof BookSchema> = {
   title: "A tagline for the book",

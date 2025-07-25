@@ -1,9 +1,12 @@
-import { FormEvent, useCallback, useEffect, useState } from "react";
+import { BaseSyntheticEvent, useCallback, useEffect, useState } from "react";
 import { createMessage, generatePage, requestBook } from "../openai";
 import { useModes } from "../hooks/useModes";
-import { Book, BookWImages, History } from "../types";
+import { BookWImages, History } from "../types";
 import { system, userPrompt } from "../system";
 import { HISTORY_KEY, preloadStorage, USER_PROMPT } from "../storage";
+import { Form } from "./Form/Form";
+import { MessageHistory } from "./MessageHistory/MessageHistory";
+import { Book } from "./Book/Book";
 
 const NUMBER_OF_PAGES = 12;
 
@@ -19,7 +22,7 @@ function App() {
    * Handle form submit
    */
   const onSubmit = useCallback(
-    async (event: FormEvent<HTMLFormElement>) => {
+    async (event: BaseSyntheticEvent) => {
       event.preventDefault();
 
       setLoadingProgress((prev) => prev + 1);
@@ -41,7 +44,7 @@ function App() {
       const bookResponse = await requestBook(history, userInput);
 
       if (bookResponse?.content && bookResponse.response) {
-        const bookCreated: Book = {
+        const bookCreated: BookWImages = {
           title: bookResponse.content.title,
           pages: await Promise.all(
             bookResponse.content.pages.map((ch, idx) => {
@@ -91,63 +94,14 @@ function App() {
     <div className="app" data-size={size} data-theme={theme}>
       {loadingProgress === 1 ? "" : `Progress: ${100 * loadingProgress}%`}
 
-      {history.map((h, i) =>
-        h.role === "system" ? null : (
-          <div
-            key={String(h.content) + i}
-            className={`message ${String(h.role)}`}
-          >
-            <p className="role">{String(h.role)}</p>
-            <pre
-              className="content"
-              dangerouslySetInnerHTML={{
-                __html: String(h.content),
-              }}
-            />
-          </div>
-        )
-      )}
+      <MessageHistory history={history} />
 
       {book && (
-        <main className="message chapter">
-          <h1>{book.title}</h1>
-
-          <ol>
-            {book.pages.map((ch) => (
-              <li key={ch.synopsis}>
-                <p>{ch.content}</p>
-                {ch.image?.url && (
-                  <img
-                    key={ch.synopsis}
-                    alt={ch.synopsis}
-                    src={ch.image.url}
-                    width={512}
-                    height={512}
-                  />
-                )}
-              </li>
-            ))}
-          </ol>
+        <main>
+          <Book book={book} />
         </main>
       )}
-
-      <form onSubmit={onSubmit} aria-disabled={loading}>
-        <textarea
-          name="prompt"
-          disabled={loading}
-          rows={4}
-          defaultValue={prompt}
-          placeholder="Generate a book about..."
-        />
-        <button
-          type="submit"
-          name="cta"
-          disabled={loading}
-          className={`${loading ? "loading " : ""}`}
-        >
-          Make me a book
-        </button>
-      </form>
+      <Form onSubmit={onSubmit} disabled={loading} defaultValue={prompt} />
     </div>
   );
 }

@@ -1,5 +1,4 @@
 import { z } from "zod";
-import { BookSchema, ImageSchema, PageSchema } from "./system";
 import { ChatCompletionMessageParam as History } from "openai/resources/index.mjs";
 
 export type { History };
@@ -13,3 +12,19 @@ export type BookWImages = Omit<Book, "pages"> & {
 };
 
 export type PageWImage = Page & { image: Image };
+
+export const ImageSchema = z.object({
+  url: z.string(),
+  id: z.string().optional(),
+});
+
+export const PageSchema = z.object({
+  content: z.string(),
+  synopsis: z.string(),
+});
+
+export const BookSchema = z.object({
+  title: z.string(),
+  pages: z.array(PageSchema),
+  randomFact: z.string(),
+});

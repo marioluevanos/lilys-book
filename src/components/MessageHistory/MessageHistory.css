@@ -1,0 +1,43 @@
+.message-history .message {
+  width: 100%;
+  max-width: 768px;
+  margin: 0 auto;
+
+  & h2 {
+    margin-top: 0;
+  }
+}
+
+.message-history .message.user {
+  border-radius: 1rem;
+  background: var(--theme-bg1);
+
+  & .content {
+    margin: 0;
+    font: inherit;
+    white-space: normal;
+  }
+}
+
+.message-history .role {
+  opacity: 0.5;
+  text-transform: uppercase;
+  font-weight: bold;
+  font-size: small;
+  margin: 0 0 0.5rem;
+}
+
+.message-history .message.assistant .content {
+  border: 1px dotted var(--theme-border);
+  border-radius: 1rem;
+  padding: 1rem;
+  overflow: auto;
+  margin: 0;
+
+  & img {
+    width: 100%;
+    height: auto;
+    display: block;
+    object-fit: contain;
+  }
+}
