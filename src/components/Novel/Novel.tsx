@@ -13,6 +13,7 @@ import { useNovelObserver } from "./useNovelObserver";
 import { cn } from "../../utils/cn";
 import { events } from "../../events";
 import { NovelProgress } from "./NovelProgress";
+import { mainCharacters } from "../../system";
 import { generateImage } from "../../library";
 
 type NovelProps = {
@@ -36,28 +37,24 @@ export const Novel: FC<NovelProps> = (props) => {
     async (page: Page, pageIndex: number, previousResponseId?: string) => {
       try {
         const hasImage = (images[pageIndex]?.url || "").length > 0;
-        console.log({ hasImage });
 
         if (!hasImage) {
           setIsGeneratingImage(true);
 
-          const image = await generateImage({
-            prompt: page.synopsis,
+          const response = await generateImage({
+            input: page.synopsis,
             previousResponseId,
+            instructions: `${mainCharacters}\nThe image should be 820/1030 aspect ratio, and illustrated in a style for children.`,
           });
+          const image = response.data;
 
           if (image.url.length <= 0) {
-            console.error("FAILED TO GEN IMAGE", {
-              image,
-              page,
-              previousResponseId,
-            });
+            console.error("FAILED TO GEN IMAGE");
             setIsGeneratingImage(false);
             return;
           }
 
           const data = { image, pageIndex };
-          console.log("EMIT", { data });
           events.emit("genratedimage", { data });
         }
       } catch (e) {
@@ -80,7 +77,6 @@ export const Novel: FC<NovelProps> = (props) => {
       const prevImage = images[pageIndex - 1];
       const previousResponseId = prevImage?.responseId;
 
-      console.log({ page, pageIndex, previousResponseId });
       if (page) updatePageWithImage(page, pageIndex, previousResponseId);
     },
     [updatePageWithImage, book]

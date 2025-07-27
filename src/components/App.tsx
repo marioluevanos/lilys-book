@@ -1,12 +1,11 @@
 import { BaseSyntheticEvent, useCallback, useEffect, useState } from "react";
-import { createBookProps, generateBook, uploadBase64Image } from "../library";
+import { generateBook, uploadBase64Image } from "../library";
 import { useModes } from "../hooks/useModes";
-import { Book, BookResponse, History, Image } from "../types";
-import { initialImages, system } from "../system";
+import { Book, History, Image } from "../types";
+import { initialImages, system, userPrompt } from "../system";
 import {
   preloadStorage,
   updateBook,
-  updateHistory,
   updateImages,
   updatePrompt,
 } from "../storage";
@@ -56,27 +55,6 @@ function App() {
     }
   }, []);
 
-  /**
-   * Merge new chat history with old chat history
-   */
-  const mergeHistory = useCallback(
-    (
-      prevHistory: History[],
-      history: History,
-      bookResponse: BookResponse | undefined
-    ): History[] => {
-      return [
-        ...prevHistory,
-        history,
-        {
-          role: "assistant",
-          content: bookResponse?.response?.content,
-        },
-      ];
-    },
-    []
-  );
-
   const getUserInput = useCallback((event: BaseSyntheticEvent): string => {
     const form = event.target;
     const textArea = form.firstElementChild;
@@ -91,27 +69,24 @@ function App() {
       event.preventDefault();
       setLoading(true);
 
-      const input = getUserInput(event);
-      const { bookResponse, userHistory } = await generateBook(
-        { summary: input, numberOfPages: initialImages.length },
-        history
-      );
-      const bookCreated = await createBookProps(bookResponse);
-      const historyWithBook = mergeHistory(history, userHistory, bookResponse);
+      const userInput = getUserInput(event);
+      const options = userPrompt(userInput);
+      const bookResponse = await generateBook(options);
 
-      setBook(bookCreated);
-      setHistory(historyWithBook);
-
-      updateBook(bookCreated);
-      updateHistory(historyWithBook);
-      updatePrompt(input);
+      console.log({ bookResponse });
+      if (bookResponse?.data) {
+        const bookCreated = bookResponse?.data;
+        setBook(bookCreated);
+        updateBook(bookCreated);
+        updatePrompt(userInput);
+      }
 
       event.target.value = "";
 
       setLoading(false);
       events.emit("drawerclose", {});
     },
-    [history, getUserInput, mergeHistory]
+    [history, getUserInput]
   );
 
   /**

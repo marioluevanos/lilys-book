@@ -1,6 +1,5 @@
 import { z } from "zod";
 import { ChatCompletionMessageParam as History } from "openai/resources/index.mjs";
-import OpenAI from "openai";
 
 export type { History };
 
@@ -24,7 +23,21 @@ export const BookSchema = z.object({
   randomFact: z.string(),
 });
 
-export type BookResponse = {
-  content: Book | null;
-  response: OpenAI.Chat.Completions.ChatCompletionMessage;
+export type GenerateResponseOptions = {
+  input: string;
+  previousResponseId: string | undefined;
+  asImage?: boolean;
+  instructions: string;
 };
+
+export type BookResponsePayload = {
+  data: Book;
+  responseId: string;
+};
+
+export type ImageResponsePayload = {
+  data: Image;
+  responseId: string;
+};
+
+export type ReponsePayload = BookResponsePayload | ImageResponsePayload;

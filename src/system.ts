@@ -1,5 +1,12 @@
 import { z } from "zod";
-import { BookSchema, History } from "./types";
+import { BookSchema, GenerateResponseOptions, History } from "./types";
+
+const numberOfPages = 6;
+
+export const initialImages = Array.from({ length: numberOfPages }).map(() => ({
+  responseId: "",
+  url: "",
+}));
 
 export const system: { initial: History } = {
   initial: {
@@ -8,16 +15,20 @@ export const system: { initial: History } = {
   },
 };
 
-export function userPrompt(args: { summary: string; numberOfPages: number }) {
-  return `You are going to write a book in the children's genre. 
+export const mainCharacters = `
+  1. Popcorn, a Miniature Schnauzer puppy, white fur, and female. She barks a lot.
+  2. Lily, a 5-year-old girl, has a round face, round nose, long eyelashes, fair skin, and light-brown hair, and wears clothing inspired by Hello Kitty.`;
+
+export function userPrompt(input: string): GenerateResponseOptions {
+  return {
+    instructions: `You are going to write a book in the children's genre. 
 The book should focus on the text content in the <book-summary> markup, and the protagonists should always be the main characters of the story, even if not mentioned in the <book-summary>.
     
-The protagonists are the following characters: 
-  1. Popcorn, a Miniature Schnauzer puppy, white fur, and female. She barks a lot.
-  2. Lily, a 5-year-old girl, has a round face, round nose, long eyelashes, fair skin, and light-brown hair, and wears clothing inspired by Hello Kitty. 
+The protagonists are the following characters:
+${mainCharacters}
 
 Requirements:
-  - Each book should contain ${args.numberOfPages} pages.
+  - Each book should contain ${numberOfPages} pages.
   - Each page should get about 60 words.
   - It should rhyme a little.
   - The book should have a random fact related to the book's subject matter shown at the end.
@@ -27,9 +38,10 @@ The response should be in JSON format, should be formatted and not minified, and
 \`\`\`
   ${JSON.stringify(schema, null, 2)}
 \`\`\`
-
-<book-summary>${args.summary}</book-summary>
-`;
+`,
+    input: `<book-summary>${input}</book-summary>`,
+    previousResponseId: undefined,
+  };
 }
 
 const schema: z.infer<typeof BookSchema> = {
@@ -43,10 +55,3 @@ const schema: z.infer<typeof BookSchema> = {
   ],
   randomFact: "A random fact about the story.",
 };
-
-const numberOfPages = 6;
-
-export const initialImages = Array.from({ length: numberOfPages }).map(() => ({
-  responseId: "",
-  url: "",
-}));
