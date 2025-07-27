@@ -19,25 +19,28 @@ export async function generateImage(args: {
   const options: OpenAI.Responses.ResponseCreateParams = {
     model: "gpt-4.1-mini",
     input: args.prompt,
+    tool_choice: "required",
     tools: [{ type: "image_generation" }],
+    instructions: "The image should be 820/1030 aspect ratio",
   };
 
   if (args.previousResponseId) {
     options.previous_response_id = args.previousResponseId;
   }
 
-  const imageResponse = await openai.responses.create(options);
-
-  const imageData = (imageResponse.output || [])
+  const response = await openai.responses.create(options);
+  console.log({ response });
+  const imageResults = (response.output || [])
     .filter((output) => output.type === "image_generation_call")
     .map((output) => output.result);
 
-  if (imageData.length > 0) {
-    const imageBase64 = imageData[0];
+  console.log({ imageResults });
+  if (imageResults.length > 0) {
+    const imageBase64 = imageResults[0];
 
     if (imageBase64) {
       const url = `data:image/png;base64, ${imageBase64}`;
-      const responseId = imageResponse.id;
+      const responseId = response.id;
 
       return { url, responseId };
     }
@@ -59,6 +62,7 @@ export async function createBook(
     temperature: 0.2,
     response_format: zodResponseFormat(BookSchema, "data"),
   });
+
   const response = chatCompletion.choices[0].message;
 
   if (response.content) {
@@ -93,13 +97,15 @@ function parseResponse(content: string): Book | null {
 }
 
 /**
- * Get book, internall handle the prompt engineering and boo creation
+ * Generate a book with AI. Handles the prompt engineering and book creation.
  * @param prompt The engineered prompt
  * @param history Message history
- * @returns
  */
-export async function generateBook(prompt: string, history: History[]) {
-  const engineeredPrompt = userPrompt({ summary: prompt });
+export async function generateBook(
+  prompt: { summary: string; numberOfPages: number },
+  history: History[]
+) {
+  const engineeredPrompt = userPrompt(prompt);
   const userHistory = createMessage(engineeredPrompt);
   const bookResponse = await createBook(history, userHistory);
 
@@ -120,4 +126,27 @@ export async function createBookProps(
 
     return bookCreated;
   }
+}
+
+export async function uploadBase64Image(base64: string) {
+  const res = await fetch(base64); // Convert base64 to binary
+  const blob = await res.blob(); // or use Buffer in Node.js
+
+  // Create a File (browser) or Blob
+  const file = new File([blob], "image.png", { type: "image/png" });
+
+  const formData = new FormData();
+  formData.append("file", file);
+
+  const response = await fetch("http://localhost:5171/api/upload", {
+    method: "POST",
+    body: formData,
+  });
+
+  const data: { url: string } = await response.json();
+  console.log("Upload result:", data);
+
+  return {
+    url: `http://localhost:5171${data.url}`,
+  };
 }

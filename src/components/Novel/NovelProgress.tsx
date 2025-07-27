@@ -7,7 +7,7 @@ export const NovelProgress: FC<{ progress: number }> = (props) => {
       className="book-progress"
       style={{
         background: "var(--accent)",
-        height: "4px",
+        height: "8px",
         width: "100%",
         position: "fixed",
         top: "0",
@@ -17,8 +17,6 @@ export const NovelProgress: FC<{ progress: number }> = (props) => {
         transition: "0.3s var(--ease-in-out-sine)",
         transformOrigin: "0% 0%",
       }}
-    >
-      {progress}
-    </div>
+    ></div>
   );
 };

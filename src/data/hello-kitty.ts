@@ -1,6 +1,6 @@
-import { Book, BookWImages } from "../types";
+import { Book } from "../types";
 
-export const BOOK: Book = {
+const BOOK: Book = {
   title: "Rescue Hello Kit!",
   pages: [
     {
@@ -80,11 +80,12 @@ export const BOOK: Book = {
     "Lava can reach temperatures of up to 2,200°F (1,200°C)—hot enough to melt rock and metal!",
 };
 
-export const BOOK_W_IMAGES: BookWImages = {
+export const HELLO_KITTY: Book = {
   title: BOOK.title,
   pages: BOOK.pages.map((p, i) => ({
     ...p,
     image: {
+      // responseId: '',
       url: `/images/hello-kitty/${i + 1}.png`,
     },
   })),

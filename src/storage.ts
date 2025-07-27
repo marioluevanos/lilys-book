@@ -90,7 +90,7 @@ export function updatePrompt(prompt: string | undefined) {
   }
 }
 
-export function updateImages(images: Image[] | undefined) {
+export function updateImages(images: Record<number, Image> | undefined) {
   if (images) {
     localStorage.setItem(KEYS.IMAGES_KEY, JSON.stringify(images));
   }

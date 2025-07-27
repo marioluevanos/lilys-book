@@ -6,6 +6,6 @@ export const LoadingProgress: FC<{ progress: boolean }> = ({ progress }) => {
     ""
   ) : (
     // `Progress: ${100 * progress}%`
-    <div className="loading-progress">Generating</div>
+    <div className="loading-progress">Generating {progress}</div>
   );
 };

@@ -1,8 +1,8 @@
 import { BaseSyntheticEvent, useCallback, useEffect, useState } from "react";
-import { createBookProps, generateBook } from "../library";
+import { createBookProps, generateBook, uploadBase64Image } from "../library";
 import { useModes } from "../hooks/useModes";
 import { Book, BookResponse, History, Image } from "../types";
-import { system } from "../system";
+import { initialImages, system } from "../system";
 import {
   preloadStorage,
   updateBook,
@@ -13,50 +13,48 @@ import {
 import { Form } from "./Form/Form";
 import { Novel } from "./Novel/Novel";
 import { Drawer } from "./Drawer/Drawer";
-import { ActionButton } from "./Button/ActionButton";
 import { EventPayload, events } from "../events";
 import { PlusIcon } from "./Icon";
 import { LoadingProgress } from "./LoadingProgress/LoadingProgress";
+import { ActionButton } from "./ActionButton";
 
 function App() {
   const { size, theme } = useModes();
   const [loading, setLoading] = useState<boolean>(false);
   const [prompt, setPrompt] = useState("");
   const [book, setBook] = useState<Book>();
-  const [images, setImages] = useState<Image[]>(
-    Array.from({ length: book?.pages.length || 0 }, () => ({
-      responseId: "",
-      url: "",
-    }))
-  );
+  const [images, setImages] = useState<Image[]>(initialImages);
   const [history, setHistory] = useState<History[]>([system.initial]);
 
   /**
    * Handle the generated image
    */
-  const onGeneratedImage = useCallback(
-    (payload: EventPayload) => {
-      const { data } = payload;
+  const onGeneratedImage = useCallback(async (payload: EventPayload) => {
+    const { data } = payload;
 
-      console.log("onGeneratedImage", { data });
-      const pIndex = data?.pageIndex || 0;
+    console.log("onGeneratedImage", data);
+    const pageIndex = data?.pageIndex || 0;
+    const generatedImage = data?.image;
 
-      if (data?.image) {
-        const newImages = images.map((p, i) => {
-          if (i === pIndex) {
-            return data.image;
+    if (generatedImage?.url && (generatedImage?.url || "").length > 0) {
+      console.log(generatedImage);
+      const uploadImage = await uploadBase64Image(generatedImage.url);
+
+      setImages((prev) => {
+        const images = prev.map((img, i) => {
+          if (i === pageIndex) {
+            return {
+              ...generatedImage,
+              url: uploadImage.url,
+            };
           }
-          return p;
+          return img;
         });
-
-        console.log({ newImages });
-
-        updateImages(newImages);
-        setImages(newImages);
-      }
-    },
-    [images]
-  );
+        updateImages(images);
+        return images;
+      });
+    }
+  }, []);
 
   /**
    * Merge new chat history with old chat history
@@ -79,7 +77,7 @@ function App() {
     []
   );
 
-  const getUserInput = useCallback((event: BaseSyntheticEvent) => {
+  const getUserInput = useCallback((event: BaseSyntheticEvent): string => {
     const form = event.target;
     const textArea = form.firstElementChild;
     return textArea.value;
@@ -94,7 +92,10 @@ function App() {
       setLoading(true);
 
       const input = getUserInput(event);
-      const { bookResponse, userHistory } = await generateBook(input, history);
+      const { bookResponse, userHistory } = await generateBook(
+        { summary: input, numberOfPages: initialImages.length },
+        history
+      );
       const bookCreated = await createBookProps(bookResponse);
       const historyWithBook = mergeHistory(history, userHistory, bookResponse);
 
@@ -145,7 +146,7 @@ function App() {
         <>
           <Novel book={book} images={images} key="Novel" />
           <Drawer />
-          <ActionButton onClick={onActionClick}>
+          <ActionButton onClick={onActionClick} style={{ display: "none" }}>
             <PlusIcon />
           </ActionButton>
         </>

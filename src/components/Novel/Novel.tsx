@@ -15,10 +15,12 @@ import { events } from "../../events";
 import { NovelProgress } from "./NovelProgress";
 import { generateImage } from "../../library";
 
-export const Novel: FC<{
+type NovelProps = {
   book: Book;
-  images: Image[];
-}> = (props) => {
+  images: Record<number, Image>;
+};
+
+export const Novel: FC<NovelProps> = (props) => {
   const { book, images = [] } = props;
   const bookRef = useRef<HTMLOListElement>(null);
   const [isGeneratingImage, setIsGeneratingImage] = useState(false);
@@ -34,6 +36,8 @@ export const Novel: FC<{
     async (page: Page, pageIndex: number, previousResponseId?: string) => {
       try {
         const hasImage = (images[pageIndex]?.url || "").length > 0;
+        console.log({ hasImage });
+
         if (!hasImage) {
           setIsGeneratingImage(true);
 
@@ -42,7 +46,19 @@ export const Novel: FC<{
             previousResponseId,
           });
 
-          events.emit("genratedimage", { data: { image, pageIndex } });
+          if (image.url.length <= 0) {
+            console.error("FAILED TO GEN IMAGE", {
+              image,
+              page,
+              previousResponseId,
+            });
+            setIsGeneratingImage(false);
+            return;
+          }
+
+          const data = { image, pageIndex };
+          console.log("EMIT", { data });
+          events.emit("genratedimage", { data });
         }
       } catch (e) {
         console.error(e);
@@ -60,12 +76,12 @@ export const Novel: FC<{
     (event: BaseSyntheticEvent) => {
       event.preventDefault();
       const pageIndex = +event.target.dataset.pageIndex;
-      const currentPage = book.pages[pageIndex];
+      const page = book.pages[pageIndex];
       const prevImage = images[pageIndex - 1];
       const previousResponseId = prevImage?.responseId;
 
-      if (currentPage)
-        updatePageWithImage(currentPage, pageIndex, previousResponseId);
+      console.log({ page, pageIndex, previousResponseId });
+      if (page) updatePageWithImage(page, pageIndex, previousResponseId);
     },
     [updatePageWithImage, book]
   );
@@ -80,7 +96,7 @@ export const Novel: FC<{
   }, [pageIndex]);
 
   return (
-    <main id="book">
+    <main id="novel">
       <NovelProgress progress={bookProgress} />
       <p className="page-number">{pageIndex + 1}</p>
       <ol className="h-scroll book">
@@ -93,6 +109,13 @@ export const Novel: FC<{
           >
             {images[i]?.url ? (
               <figure className="art">
+                <a
+                  download={images[i].url}
+                  href={images[i].url}
+                  className="download"
+                >
+                  Download
+                </a>
                 <img
                   key={images[i].responseId}
                   alt={page.synopsis}

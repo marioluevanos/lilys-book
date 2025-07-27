@@ -5,7 +5,10 @@ import { Image } from "./types";
 
 export type EventPayload = {
   children?: ReactNode;
-  data?: { image: Image; pageIndex: number };
+  data?: {
+    image: Image;
+    pageIndex: number;
+  };
 };
 
 interface EventEmitter {
