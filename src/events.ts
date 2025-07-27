@@ -1,8 +1,10 @@
 import { ReactNode } from "react";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
+
 export type EventPayload = {
-  children: ReactNode;
+  children?: ReactNode;
+  data?: any;
 };
 
 interface EventEmitter {

@@ -1,9 +1,15 @@
 import OpenAI from "openai";
 import { zodResponseFormat } from "openai/helpers/zod.mjs";
 import { ChatCompletionMessageParam as History } from "openai/resources/index.mjs";
-import { Book, BookSchema, BookWImages, Page, PageWImage } from "./types";
+import {
+  Book,
+  BookResponse,
+  BookSchema,
+  BookWImages,
+  Page,
+  PageWImage,
+} from "./types";
 import { userPrompt } from "./system";
-import { KEYS } from "./storage";
 
 export const openai = new OpenAI({
   apiKey: import.meta.env.VITE_OPENAI_API_KEY,
@@ -45,11 +51,6 @@ async function generateImage(args: {
 
   return { url: "" };
 }
-
-type BookResponse = {
-  content: Book | null;
-  response: OpenAI.Chat.Completions.ChatCompletionMessage;
-};
 
 /**
  * Create a Chapter
@@ -104,8 +105,6 @@ function parseResponse(content: string): Book | null {
  * @returns
  */
 export async function getBook(prompt: string, history: History[]) {
-  localStorage.setItem(KEYS.USER_PROMPT, prompt);
-
   const engineeredPrompt = userPrompt({ summary: prompt });
   const userHistory = createMessage(engineeredPrompt);
   const bookResponse = await requestBook(history, userHistory);
@@ -115,37 +114,16 @@ export async function getBook(prompt: string, history: History[]) {
 
 export async function createBookProps(
   bookResponse: BookResponse | undefined
-): Promise<Book | undefined> {
+): Promise<BookWImages | undefined> {
   const { content, response } = bookResponse || {};
 
   if (content && response) {
     const bookCreated: BookWImages = {
       title: content.title,
-      pages: content.pages,
+      pages: content.pages.map((p, pageIndex) => ({ ...p, pageIndex })),
       randomFact: content.randomFact,
     };
 
-    localStorage.setItem(KEYS.BOOK_KEY, JSON.stringify(bookCreated));
-
     return bookCreated;
   }
-}
-
-export function updateHistory(
-  userInput: History,
-  bookResponse: BookResponse | undefined,
-  prev: History[]
-) {
-  const payload: typeof prev = [
-    ...prev,
-    userInput,
-    {
-      role: "assistant",
-      content: bookResponse?.response?.content,
-    },
-  ];
-
-  localStorage.setItem(KEYS.HISTORY_KEY, JSON.stringify(payload));
-
-  return payload;
 }

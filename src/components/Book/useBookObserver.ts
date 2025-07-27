@@ -1,0 +1,104 @@
+import {
+  useRef,
+  useEffect,
+  useCallback,
+  useState,
+  BaseSyntheticEvent,
+} from "react";
+
+/**
+ * Intersection Observer for the Book
+ */
+export function useBookObserver() {
+  const pagesRef = useRef<HTMLLIElement[]>([]);
+  const [pageIndex, setPageIndex] = useState(0);
+
+  /**
+   * For each Intersection Observer, add onScrollPosition callback
+   */
+  const onIntersection = useCallback(
+    ({ intersectionRatio, target }: IntersectionObserverEntry) => {
+      const elementInViewport = intersectionRatio >= 0.5;
+
+      if (elementInViewport) {
+        const li = target as HTMLLIElement;
+        const { pageIndex } = li.dataset;
+        if (pageIndex && !isNaN(+pageIndex)) {
+          setPageIndex(+pageIndex);
+        }
+      }
+    },
+    []
+  );
+
+  const onTouchEnd = useCallback(() => {
+    // console.log(event);
+  }, []);
+
+  /**
+   * Handle on page change clicks
+   */
+  const onPageChange = useCallback((event: BaseSyntheticEvent) => {
+    event.preventDefault();
+    const btn = event.target;
+    const { dir } = btn.dataset;
+    const pages = pagesRef.current;
+
+    setPageIndex((prev) => {
+      if (dir === "prev") {
+        return prev === 0 ? 0 : prev - 1;
+      }
+      if (dir === "next") {
+        return prev === pages.length - 1 ? pages.length - 1 : prev + 1;
+      }
+      return prev;
+    });
+  }, []);
+
+  /**
+   * Observe the scroll for each accordion item
+   */
+  useEffect(() => {
+    const observers = pagesRef.current.map((element) => {
+      element.addEventListener("touchend", onTouchEnd);
+      return initObserver(element, onIntersection);
+    });
+
+    return () => {
+      observers.forEach((io) => io.disconnect());
+    };
+  }, [onIntersection, onTouchEnd]);
+
+  return {
+    pagesRef,
+    pageIndex,
+    onPageChange,
+    get bookProgress() {
+      return pageIndex / (pagesRef.current.length - 1);
+    },
+  };
+}
+
+/**
+ * Intersection Observer API initialization
+ */
+function initObserver(
+  target: HTMLElement | null,
+  entriesCallback: (entry: IntersectionObserverEntry) => void
+) {
+  const options = {
+    rootMargin: "0px",
+    threshold: [0, 0.25, 0.5, 0.75, 1],
+  };
+
+  const callback = (entries: IntersectionObserverEntry[]) =>
+    entries.forEach(entriesCallback);
+
+  const observer = new IntersectionObserver(callback, options);
+
+  if (!target) return observer;
+
+  observer.observe(target);
+
+  return observer;
+}

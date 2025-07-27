@@ -1,13 +1,12 @@
 import { ChatCompletionMessageParam as History } from "openai/resources/index.mjs";
-import { BookWImages } from "./types";
-import { BOOK_W_IMAGES } from "./data/3-nights";
+import { Book, BookWImages } from "./types";
 
-const USER_PROMPT = "last-user-prompt";
+const PROMPT_KEY = "prompt";
 const HISTORY_KEY = "history";
 const BOOK_KEY = "book";
 
 export const KEYS = {
-  USER_PROMPT,
+  PROMPT_KEY,
   HISTORY_KEY,
   BOOK_KEY,
 };
@@ -23,7 +22,7 @@ export function preloadStorage(setters: {
   const { getBook, getHistory, getPrompt } = setters;
 
   try {
-    const prompt = localStorage.getItem(USER_PROMPT);
+    const prompt = localStorage.getItem(PROMPT_KEY);
     if (typeof prompt === "string" && prompt !== "undefined") {
       getPrompt(prompt);
     }
@@ -54,8 +53,24 @@ export function preloadStorage(setters: {
     } catch (error) {
       console.warn(error);
     }
-  } else {
-    getBook(BOOK_W_IMAGES);
-    localStorage.setItem(KEYS.BOOK_KEY, JSON.stringify(BOOK_W_IMAGES));
+  }
+}
+
+export function updateHistory(history: History[] | undefined) {
+  if (Array.isArray(history)) {
+    localStorage.setItem(KEYS.HISTORY_KEY, JSON.stringify(history));
+  }
+}
+
+export function updateBook(bookCreated: Book | undefined) {
+  if (bookCreated) {
+    localStorage.setItem(KEYS.BOOK_KEY, JSON.stringify(bookCreated));
+    return bookCreated;
+  }
+}
+
+export function updatePrompt(prompt: string | undefined) {
+  if (prompt) {
+    localStorage.setItem(KEYS.PROMPT_KEY, prompt);
   }
 }

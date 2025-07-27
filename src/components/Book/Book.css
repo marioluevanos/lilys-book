@@ -8,6 +8,9 @@
   color: var(--book-text);
 }
 
+/**
+ * Page
+ */
 .book .page {
   position: relative;
   min-width: 100vw;
@@ -15,38 +18,23 @@
   overflow: hidden;
   display: flex;
   align-items: flex-end;
-}
-
-.fact {
-  padding: 2rem;
-  align-items: flex-start;
-  justify-content: flex-start;
   flex-direction: column;
-
-  & .content {
-    margin: 0;
-    padding: 0;
-    font-size: 1.5rem;
-  }
 }
 
+/**
+ * Content
+ */
 .page .content {
   font: 400 1.25rem/1.75 var(--font-family-body);
-  margin: 0;
+  margin: auto 0 0;
   padding: 2.5rem 1.5rem 4.5rem;
   position: relative;
   z-index: 1;
 }
 
-.cover {
-  padding: 2rem;
-  text-wrap: balance;
-  text-align: center;
-  align-items: center;
-  justify-content: center;
-  flex-direction: column;
-}
-
+/**
+ * Art section
+ */
 .book .page .art {
   position: absolute;
   inset: 0;
@@ -62,16 +50,33 @@
     position: absolute;
     inset: 0 0 -0.5rem 0;
   }
+
+  & img {
+    width: 100%;
+    height: 100%;
+    display: block;
+    object-position: 50% 0%;
+    object-fit: cover;
+  }
 }
 
-.book .page .art img {
+/**
+ * CTA - Generate Image
+ */
+.book .page .cta {
+  z-index: 100;
+  flex; 1;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding: 4rem 1rem 2rem;
   width: 100%;
   height: 100%;
-  display: block;
-  object-position: 50% 0%;
-  object-fit: cover;
 }
 
+/**
+ * Nav
+ */
 .book-nav {
   position: absolute;
   inset: 0;
@@ -91,6 +96,9 @@
   }
 }
 
+/**
+ * Page Number
+ */
 .page-number {
   margin: 0;
   position: fixed;

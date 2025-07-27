@@ -1,14 +1,14 @@
 import { BaseSyntheticEvent, useCallback, useEffect, useState } from "react";
-import {
-  createBookProps,
-  generatePageWithImage,
-  getBook,
-  updateHistory,
-} from "../library";
+import { createBookProps, getBook } from "../library";
 import { useModes } from "../hooks/useModes";
-import { BookWImages, History, PageWImage } from "../types";
+import { BookResponse, BookWImages, History } from "../types";
 import { system } from "../system";
-import { KEYS, preloadStorage } from "../storage";
+import {
+  preloadStorage,
+  updateBook,
+  updateHistory,
+  updatePrompt,
+} from "../storage";
 import { Form } from "./Form/Form";
 import { Book } from "./Book/Book";
 import { Drawer } from "./Drawer/Drawer";
@@ -23,10 +23,33 @@ function App() {
   const [prompt, setPrompt] = useState("");
   const [book, setBook] = useState<BookWImages>();
   const [history, setHistory] = useState<History[]>([system.initial]);
-  const [pageIndex, setPageIndex] = useState(0);
-  const currentPage = book?.pages[pageIndex] as PageWImage | undefined;
 
-  const getFormInput = useCallback((event: BaseSyntheticEvent) => {
+  const onGeneratedImage = useCallback((payload: unknown) => {
+    console.log(payload);
+  }, []);
+
+  /**
+   * Merge new chat history with old chat history
+   */
+  const mergeHistory = useCallback(
+    (
+      prevHistory: History[],
+      history: History,
+      bookResponse: BookResponse | undefined
+    ): History[] => {
+      return [
+        ...prevHistory,
+        history,
+        {
+          role: "assistant",
+          content: bookResponse?.response?.content,
+        },
+      ];
+    },
+    []
+  );
+
+  const getUserInput = useCallback((event: BaseSyntheticEvent) => {
     const form = event.target;
     const textArea = form.firstElementChild;
     return textArea.value;
@@ -38,22 +61,30 @@ function App() {
   const onSubmit = useCallback(
     async (event: BaseSyntheticEvent) => {
       event.preventDefault();
-
       setLoading(true);
 
-      const input = getFormInput(event);
+      const input = getUserInput(event);
       const { bookResponse, userHistory } = await getBook(input, history);
       const bookCreated = await createBookProps(bookResponse);
+      const historyWithBook = mergeHistory(history, userHistory, bookResponse);
 
       setBook(bookCreated);
-      setHistory((prev) => updateHistory(userHistory, bookResponse, prev));
-      setLoading(false);
+      setHistory(historyWithBook);
+
+      updateBook(bookCreated);
+      updateHistory(historyWithBook);
+      updatePrompt(input);
 
       event.target.value = "";
+
+      setLoading(false);
     },
-    [history, getFormInput]
+    [history, getUserInput, mergeHistory]
   );
 
+  /**
+   * Handle the main action button click
+   */
   const onActionClick = useCallback(() => {
     events.emit("drawer", {
       children: (
@@ -62,55 +93,8 @@ function App() {
     });
   }, [loading, onSubmit, prompt]);
 
-  const onPageChange = useCallback(
-    (event: BaseSyntheticEvent) => {
-      event.preventDefault();
-      const btn = event.target as HTMLButtonElement;
-      const { dir, active } = btn.dataset;
-
-      setPageIndex((prev) => {
-        if (dir === "prev" && book) {
-          return prev === 0 ? 0 : prev - 1;
-        }
-        if (dir === "next" && book) {
-          return prev === book.pages.length - 1
-            ? book.pages.length - 1
-            : prev + 1;
-        }
-        return prev;
-      });
-
-      if (book) {
-        if (Number(active) === 0 && btn.classList.contains("prev")) {
-          events.emit("drawer", {
-            children: (
-              <div className="cover">
-                <h1>{book.title}</h1>
-              </div>
-            ),
-          });
-        }
-
-        if (
-          Number(active) === book?.pages.length - 1 &&
-          btn.classList.contains("next")
-        ) {
-          events.emit("drawer", {
-            children: (
-              <div className="fact">
-                <h2>It's a Fact</h2>
-                <p className="content">{book.randomFact}</p>
-              </div>
-            ),
-          });
-        }
-      }
-    },
-    [book]
-  );
-
   /**
-   * Run preload
+   * Set state from browser storage
    */
   useEffect(() => {
     preloadStorage({
@@ -118,52 +102,16 @@ function App() {
       getBook: (b) => setBook(b),
       getHistory: (h) => setHistory(h),
     });
+
+    events.on("genratedimage", onGeneratedImage);
   }, []);
-
-  /**
-   * Run preload
-   */
-  useEffect(() => {
-    if (currentPage) {
-      updatePageImage(currentPage);
-    }
-
-    async function updatePageImage(page: PageWImage) {
-      setLoading(true);
-
-      try {
-        const hasImage = typeof page.image?.url === "string";
-
-        if (!hasImage) {
-          const p = await generatePageWithImage(page);
-          setBook((prev) => {
-            const updated = {
-              title: prev?.title || "",
-              randomFact: prev?.randomFact || "",
-              pages: [
-                p,
-                ...(prev?.pages.slice(1, prev.pages.length - 1) || []),
-              ],
-            };
-
-            localStorage.setItem(KEYS.BOOK_KEY, JSON.stringify(updated));
-            return updated;
-          });
-        }
-      } catch (e) {
-        console.error(e);
-      } finally {
-        setLoading(false);
-      }
-    }
-  }, [book, currentPage]);
 
   return (
     <div className="app" data-size={size} data-theme={theme}>
       <LoadingProgress progress={loading} />
       {book ? (
         <>
-          <Book pageIndex={pageIndex} book={book} onPageChange={onPageChange} />
+          <Book book={book} />
           <Drawer />
           <ActionButton onClick={onActionClick}>
             <PlusIcon />

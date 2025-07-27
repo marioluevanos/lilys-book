@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { ChatCompletionMessageParam as History } from "openai/resources/index.mjs";
+import OpenAI from "openai";
 
 export type { History };
 
@@ -8,10 +9,10 @@ export type Page = z.infer<typeof PageSchema>;
 export type Image = z.infer<typeof ImageSchema>;
 
 export type BookWImages = Omit<Book, "pages"> & {
-  pages: Array<Page & { image?: Image }>;
+  pages: Array<PageWImage>;
 };
 
-export type PageWImage = Page & { image: Image };
+export type PageWImage = Page & { image?: Image; pageIndex?: number };
 
 export const ImageSchema = z.object({
   url: z.string(),
@@ -28,3 +29,8 @@ export const BookSchema = z.object({
   pages: z.array(PageSchema),
   randomFact: z.string(),
 });
+
+export type BookResponse = {
+  content: Book | null;
+  response: OpenAI.Chat.Completions.ChatCompletionMessage;
+};
