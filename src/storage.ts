@@ -1,25 +1,28 @@
 import { ChatCompletionMessageParam as History } from "openai/resources/index.mjs";
-import { Book, BookWImages } from "./types";
+import { Book, Image } from "./types";
 
 const PROMPT_KEY = "prompt";
 const HISTORY_KEY = "history";
+const IMAGES_KEY = "images";
 const BOOK_KEY = "book";
 
 export const KEYS = {
   PROMPT_KEY,
   HISTORY_KEY,
   BOOK_KEY,
+  IMAGES_KEY,
 };
 
 /**
  * Load from local storage
  */
 export function preloadStorage(setters: {
-  getBook: (payload: BookWImages | undefined) => void;
+  getBook: (payload: Book | undefined) => void;
   getPrompt: (payload: string) => void;
   getHistory: (payload: History[]) => void;
+  getImages: (payload: Image[]) => void;
 }) {
-  const { getBook, getHistory, getPrompt } = setters;
+  const { getBook, getHistory, getPrompt, getImages } = setters;
 
   try {
     const prompt = localStorage.getItem(PROMPT_KEY);
@@ -54,6 +57,18 @@ export function preloadStorage(setters: {
       console.warn(error);
     }
   }
+
+  const savedImages = localStorage.getItem(IMAGES_KEY);
+  if (savedImages) {
+    try {
+      const images = JSON.parse(savedImages);
+      if (Array.isArray(images)) {
+        getImages(images);
+      }
+    } catch (error) {
+      console.warn(error);
+    }
+  }
 }
 
 export function updateHistory(history: History[] | undefined) {
@@ -72,5 +87,11 @@ export function updateBook(bookCreated: Book | undefined) {
 export function updatePrompt(prompt: string | undefined) {
   if (prompt) {
     localStorage.setItem(KEYS.PROMPT_KEY, prompt);
+  }
+}
+
+export function updateImages(images: Image[] | undefined) {
+  if (images) {
+    localStorage.setItem(KEYS.IMAGES_KEY, JSON.stringify(images));
   }
 }

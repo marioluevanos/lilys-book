@@ -1,10 +1,11 @@
 import { ReactNode } from "react";
+import { Image } from "./types";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 export type EventPayload = {
   children?: ReactNode;
-  data?: any;
+  data?: { image: Image; pageIndex: number };
 };
 
 interface EventEmitter {

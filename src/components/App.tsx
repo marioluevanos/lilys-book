@@ -1,19 +1,20 @@
 import { BaseSyntheticEvent, useCallback, useEffect, useState } from "react";
-import { createBookProps, getBook } from "../library";
+import { createBookProps, generateBook } from "../library";
 import { useModes } from "../hooks/useModes";
-import { BookResponse, BookWImages, History } from "../types";
+import { Book, BookResponse, History, Image } from "../types";
 import { system } from "../system";
 import {
   preloadStorage,
   updateBook,
   updateHistory,
+  updateImages,
   updatePrompt,
 } from "../storage";
 import { Form } from "./Form/Form";
-import { Book } from "./Book/Book";
+import { Novel } from "./Novel/Novel";
 import { Drawer } from "./Drawer/Drawer";
 import { ActionButton } from "./Button/ActionButton";
-import { events } from "../events";
+import { EventPayload, events } from "../events";
 import { PlusIcon } from "./Icon";
 import { LoadingProgress } from "./LoadingProgress/LoadingProgress";
 
@@ -21,12 +22,41 @@ function App() {
   const { size, theme } = useModes();
   const [loading, setLoading] = useState<boolean>(false);
   const [prompt, setPrompt] = useState("");
-  const [book, setBook] = useState<BookWImages>();
+  const [book, setBook] = useState<Book>();
+  const [images, setImages] = useState<Image[]>(
+    Array.from({ length: book?.pages.length || 0 }, () => ({
+      responseId: "",
+      url: "",
+    }))
+  );
   const [history, setHistory] = useState<History[]>([system.initial]);
 
-  const onGeneratedImage = useCallback((payload: unknown) => {
-    console.log(payload);
-  }, []);
+  /**
+   * Handle the generated image
+   */
+  const onGeneratedImage = useCallback(
+    (payload: EventPayload) => {
+      const { data } = payload;
+
+      console.log("onGeneratedImage", { data });
+      const pIndex = data?.pageIndex || 0;
+
+      if (data?.image) {
+        const newImages = images.map((p, i) => {
+          if (i === pIndex) {
+            return data.image;
+          }
+          return p;
+        });
+
+        console.log({ newImages });
+
+        updateImages(newImages);
+        setImages(newImages);
+      }
+    },
+    [images]
+  );
 
   /**
    * Merge new chat history with old chat history
@@ -64,7 +94,7 @@ function App() {
       setLoading(true);
 
       const input = getUserInput(event);
-      const { bookResponse, userHistory } = await getBook(input, history);
+      const { bookResponse, userHistory } = await generateBook(input, history);
       const bookCreated = await createBookProps(bookResponse);
       const historyWithBook = mergeHistory(history, userHistory, bookResponse);
 
@@ -78,6 +108,7 @@ function App() {
       event.target.value = "";
 
       setLoading(false);
+      events.emit("drawerclose", {});
     },
     [history, getUserInput, mergeHistory]
   );
@@ -101,6 +132,7 @@ function App() {
       getPrompt: (p) => setPrompt(p),
       getBook: (b) => setBook(b),
       getHistory: (h) => setHistory(h),
+      getImages: (h) => setImages(h),
     });
 
     events.on("genratedimage", onGeneratedImage);
@@ -111,7 +143,7 @@ function App() {
       <LoadingProgress progress={loading} />
       {book ? (
         <>
-          <Book book={book} />
+          <Novel book={book} images={images} key="Novel" />
           <Drawer />
           <ActionButton onClick={onActionClick}>
             <PlusIcon />

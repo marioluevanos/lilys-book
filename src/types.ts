@@ -8,15 +8,9 @@ export type Book = z.infer<typeof BookSchema>;
 export type Page = z.infer<typeof PageSchema>;
 export type Image = z.infer<typeof ImageSchema>;
 
-export type BookWImages = Omit<Book, "pages"> & {
-  pages: Array<PageWImage>;
-};
-
-export type PageWImage = Page & { image?: Image; pageIndex?: number };
-
 export const ImageSchema = z.object({
   url: z.string(),
-  id: z.string().optional(),
+  responseId: z.string().optional(),
 });
 
 export const PageSchema = z.object({

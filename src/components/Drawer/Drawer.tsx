@@ -23,9 +23,16 @@ export const Drawer: FC<DrawerProps> = () => {
       setOpen(true);
       setChildren(children);
     };
+    const onDrawerClose = () => {
+      setOpen(false);
+    };
     events.on("drawer", onDrawer);
+    events.on("drawerclose", onDrawerClose);
 
-    return () => events.off("drawer", onDrawer);
+    return () => {
+      events.off("drawer", onDrawer);
+      events.off("drawerclose", onDrawer);
+    };
   }, []);
 
   return (

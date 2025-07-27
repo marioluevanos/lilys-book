@@ -9,7 +9,7 @@ import {
 /**
  * Intersection Observer for the Book
  */
-export function useBookObserver() {
+export function useNovelObserver() {
   const pagesRef = useRef<HTMLLIElement[]>([]);
   const [pageIndex, setPageIndex] = useState(0);
 

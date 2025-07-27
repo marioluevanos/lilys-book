@@ -1,5 +1,5 @@
-import "./Book.css";
-import { BookWImages, PageWImage } from "../../types";
+import "./Novel.css";
+import { Book, Image, Page } from "../../types";
 import {
   BaseSyntheticEvent,
   FC,
@@ -9,43 +9,49 @@ import {
   useState,
 } from "react";
 import { Button } from "../Button/Button";
-import { useBookObserver } from "./useBookObserver";
-import { generatePageWithImage } from "../../library";
+import { useNovelObserver } from "./useNovelObserver";
 import { cn } from "../../utils/cn";
 import { events } from "../../events";
+import { NovelProgress } from "./NovelProgress";
+import { generateImage } from "../../library";
 
-export const Book: FC<{
-  book: BookWImages;
+export const Novel: FC<{
+  book: Book;
+  images: Image[];
 }> = (props) => {
-  const { book } = props;
+  const { book, images = [] } = props;
   const bookRef = useRef<HTMLOListElement>(null);
   const [isGeneratingImage, setIsGeneratingImage] = useState(false);
-  const { pagesRef, pageIndex, bookProgress, onPageChange } = useBookObserver();
+  const { pagesRef, pageIndex, bookProgress, onPageChange } =
+    useNovelObserver();
 
   /**
    * Generate an image for the page, and
    *   1. Update state and
    *   2. Update browser storage
    */
-  const updatePageWithImage = useCallback(async (page: PageWImage) => {
-    try {
-      const hasImage = typeof page.image?.url === "string";
-      console.log({ page });
-      if (!hasImage) {
-        setIsGeneratingImage(true);
-        const pageWImage = await generatePageWithImage(page);
-        events.emit("genratedimage", { data: { pageWImage, book } });
-      }
-    } catch (e) {
-      console.error(e);
-    } finally {
-      setIsGeneratingImage(false);
-    }
-  }, []);
+  const updatePageWithImage = useCallback(
+    async (page: Page, pageIndex: number, previousResponseId?: string) => {
+      try {
+        const hasImage = (images[pageIndex]?.url || "").length > 0;
+        if (!hasImage) {
+          setIsGeneratingImage(true);
 
-  if (typeof updatePageWithImage === "function") {
-    //
-  }
+          const image = await generateImage({
+            prompt: page.synopsis,
+            previousResponseId,
+          });
+
+          events.emit("genratedimage", { data: { image, pageIndex } });
+        }
+      } catch (e) {
+        console.error(e);
+      } finally {
+        setIsGeneratingImage(false);
+      }
+    },
+    []
+  );
 
   /**
    * Handle generate image click
@@ -53,10 +59,15 @@ export const Book: FC<{
   const onGenerateImage = useCallback(
     (event: BaseSyntheticEvent) => {
       event.preventDefault();
+      const pageIndex = +event.target.dataset.pageIndex;
       const currentPage = book.pages[pageIndex];
-      if (currentPage) updatePageWithImage(currentPage);
+      const prevImage = images[pageIndex - 1];
+      const previousResponseId = prevImage?.responseId;
+
+      if (currentPage)
+        updatePageWithImage(currentPage, pageIndex, previousResponseId);
     },
-    [updatePageWithImage, book, pageIndex]
+    [updatePageWithImage, book]
   );
 
   useEffect(() => {
@@ -70,23 +81,7 @@ export const Book: FC<{
 
   return (
     <main id="book">
-      <div
-        className="book-progress"
-        style={{
-          background: "var(--accent)",
-          height: "4px",
-          width: "100%",
-          position: "fixed",
-          top: "0",
-          left: "0",
-          right: "0",
-          transform: `scaleX(${bookProgress})`,
-          transition: "0.3s var(--ease-in-out-sine)",
-          transformOrigin: "0% 0%",
-        }}
-      >
-        {bookProgress}
-      </div>
+      <NovelProgress progress={bookProgress} />
       <p className="page-number">{pageIndex + 1}</p>
       <ol className="h-scroll book">
         {book.pages.map((page, i) => (
@@ -96,12 +91,12 @@ export const Book: FC<{
             data-page-index={String(i)}
             ref={(el) => el && (pagesRef.current[i] = el)}
           >
-            {page.image?.url ? (
+            {images[i]?.url ? (
               <figure className="art">
                 <img
-                  key={page.synopsis}
+                  key={images[i].responseId}
                   alt={page.synopsis}
-                  src={page.image.url}
+                  src={images[i].url}
                   width={512}
                   height={512}
                 />
@@ -109,6 +104,7 @@ export const Book: FC<{
             ) : (
               <div className="cta">
                 <Button
+                  data-page-index={String(i)}
                   onClick={onGenerateImage}
                   disabled={isGeneratingImage}
                   className={cn(isGeneratingImage && "loading")}
