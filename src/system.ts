@@ -17,9 +17,9 @@ export const system: { initial: History } = {
 
 export const mainCharacters = `
   1. Popcorn, a Miniature Schnauzer puppy, white fur, and female. She barks a lot.
-  2. Lily, a 5-year-old girl, has a round face, round nose, long eyelashes, fair skin, and light-brown hair, and wears clothing inspired by Hello Kitty.`;
+  2. Lily, a 5-year-old girl, has a round face, a round nose, long eyelashes, fair skin, and light-brown hair that is very messy, as if she had just woken up. She wears clothing inspired by Hello Kitty.`;
 
-export function userPrompt(input: string): GenerateResponseOptions {
+export function bookPrompt(input: string): GenerateResponseOptions {
   return {
     instructions: `You are going to write a book in the children's genre. 
 The book should focus on the text content in the <book-summary> markup, and the protagonists should always be the main characters of the story, even if not mentioned in the <book-summary>.
@@ -32,8 +32,7 @@ Requirements:
   - Each page should get about 60 words.
   - It should rhyme a little.
   - The book should have a random fact related to the book's subject matter shown at the end.
-  
-The response should be in JSON format, should be formatted and not minified, and have the following schema:
+  - The response should be in JSON format, should be minified, and have the following schema:
 
 \`\`\`
   ${JSON.stringify(schema, null, 2)}
@@ -41,6 +40,16 @@ The response should be in JSON format, should be formatted and not minified, and
 `,
     input: `<book-summary>${input}</book-summary>`,
     previousResponseId: undefined,
+  };
+}
+
+export function imagePrompt(
+  args: Omit<GenerateResponseOptions, "instructions">
+): GenerateResponseOptions {
+  return {
+    instructions: `The image should be 820/1030 aspect ratio and in a Disney art style.`,
+    input: args.input,
+    previousResponseId: args.previousResponseId,
   };
 }
 

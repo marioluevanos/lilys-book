@@ -13,11 +13,11 @@ import { useNovelObserver } from "./useNovelObserver";
 import { cn } from "../../utils/cn";
 import { events } from "../../events";
 import { NovelProgress } from "./NovelProgress";
-import { mainCharacters } from "../../system";
 import { generateImage } from "../../library";
+import { imagePrompt } from "../../system";
 
 type NovelProps = {
-  book: Book;
+  book: Book & { responseId: string };
   images: Record<number, Image>;
 };
 
@@ -41,21 +41,22 @@ export const Novel: FC<NovelProps> = (props) => {
         if (!hasImage) {
           setIsGeneratingImage(true);
 
-          const response = await generateImage({
-            input: page.synopsis,
-            previousResponseId,
-            instructions: `${mainCharacters}\nThe image should be 820/1030 aspect ratio, and illustrated in a style for children.`,
-          });
-          const image = response.data;
+          const response = await generateImage(
+            imagePrompt({
+              input: page.synopsis,
+              previousResponseId,
+            })
+          );
 
-          if (image.url.length <= 0) {
-            console.error("FAILED TO GEN IMAGE");
+          if (response.data.url.length <= 0) {
+            console.error("Failed", response);
             setIsGeneratingImage(false);
             return;
           }
 
-          const data = { image, pageIndex };
-          events.emit("genratedimage", { data });
+          events.emit("genratedimage", {
+            data: { image: response.data, pageIndex },
+          });
         }
       } catch (e) {
         console.error(e);
@@ -75,7 +76,7 @@ export const Novel: FC<NovelProps> = (props) => {
       const pageIndex = +event.target.dataset.pageIndex;
       const page = book.pages[pageIndex];
       const prevImage = images[pageIndex - 1];
-      const previousResponseId = prevImage?.responseId;
+      const previousResponseId = prevImage?.responseId || book.responseId;
 
       if (page) updatePageWithImage(page, pageIndex, previousResponseId);
     },
@@ -105,13 +106,6 @@ export const Novel: FC<NovelProps> = (props) => {
           >
             {images[i]?.url ? (
               <figure className="art">
-                <a
-                  download={images[i].url}
-                  href={images[i].url}
-                  className="download"
-                >
-                  Download
-                </a>
                 <img
                   key={images[i].responseId}
                   alt={page.synopsis}
@@ -132,7 +126,11 @@ export const Novel: FC<NovelProps> = (props) => {
                 </Button>
               </div>
             )}
-            <p className="content">{page.content}</p>
+            <div className="content">
+              {page.content
+                .split(".")
+                .map((p, i) => p && <p key={i}>{`${p}.`}</p>)}
+            </div>
           </li>
         ))}
       </ol>

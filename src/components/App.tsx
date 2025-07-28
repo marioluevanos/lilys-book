@@ -2,7 +2,7 @@ import { BaseSyntheticEvent, useCallback, useEffect, useState } from "react";
 import { generateBook, uploadBase64Image } from "../library";
 import { useModes } from "../hooks/useModes";
 import { Book, History, Image } from "../types";
-import { initialImages, system, userPrompt } from "../system";
+import { initialImages, system, bookPrompt } from "../system";
 import {
   preloadStorage,
   updateBook,
@@ -21,7 +21,7 @@ function App() {
   const { size, theme } = useModes();
   const [loading, setLoading] = useState<boolean>(false);
   const [prompt, setPrompt] = useState("");
-  const [book, setBook] = useState<Book>();
+  const [book, setBook] = useState<Book & { responseId?: string }>();
   const [images, setImages] = useState<Image[]>(initialImages);
   const [history, setHistory] = useState<History[]>([system.initial]);
 
@@ -36,7 +36,7 @@ function App() {
     const generatedImage = data?.image;
 
     if (generatedImage?.url && (generatedImage?.url || "").length > 0) {
-      console.log(generatedImage);
+      console.log({ generatedImage });
       const uploadImage = await uploadBase64Image(generatedImage.url);
 
       setImages((prev) => {
@@ -49,6 +49,8 @@ function App() {
           }
           return img;
         });
+
+        console.log({ images });
         updateImages(images);
         return images;
       });
@@ -70,12 +72,13 @@ function App() {
       setLoading(true);
 
       const userInput = getUserInput(event);
-      const options = userPrompt(userInput);
-      const bookResponse = await generateBook(options);
+      const bookResponse = await generateBook(bookPrompt(userInput));
 
-      console.log({ bookResponse });
       if (bookResponse?.data) {
-        const bookCreated = bookResponse?.data;
+        const bookCreated: typeof book = {
+          ...bookResponse?.data,
+          responseId: bookResponse.responseId,
+        };
         setBook(bookCreated);
         updateBook(bookCreated);
         updatePrompt(userInput);
@@ -119,7 +122,14 @@ function App() {
       <LoadingProgress progress={loading} />
       {book ? (
         <>
-          <Novel book={book} images={images} key="Novel" />
+          <Novel
+            book={{
+              ...book,
+              responseId: book.responseId || "",
+            }}
+            images={images}
+            key="Novel"
+          />
           <Drawer />
           <ActionButton onClick={onActionClick} style={{ display: "none" }}>
             <PlusIcon />

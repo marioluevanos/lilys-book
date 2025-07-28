@@ -13,7 +13,7 @@ export function useNovelObserver() {
   const pagesRef = useRef<HTMLLIElement[]>([]);
   const [pageIndex, setPageIndex] = useState(0);
 
-  /**
+  /**w
    * For each Intersection Observer, add onScrollPosition callback
    */
   const onIntersection = useCallback(

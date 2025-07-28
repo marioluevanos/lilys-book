@@ -18,6 +18,7 @@ async function generateResponse(
     headers: {
       Authorization: `Bearer ${import.meta.env.VITE_OPENAI_API_KEY}`,
       "Content-Type": "application/json",
+      "Access-Control-Allow-Origin": "*",
     },
     body: JSON.stringify(getResponseOptions(args)),
   });
@@ -47,8 +48,12 @@ function getResponseOptions(
 export async function generateImage(
   args: GenerateResponseOptions
 ): Promise<ImageResponsePayload> {
-  const imageResponse = await generateResponse(args);
+  const imageResponse = await generateResponse({
+    ...args,
+    asImage: true,
+  });
 
+  console.log({ imageResponse });
   const imageResults = (imageResponse.output || [])
     .filter((output) => output.type === "image_generation_call")
     .map((output) => output.result);
@@ -61,7 +66,7 @@ export async function generateImage(
       const responseId = imageResponse.id;
 
       return {
-        data: { url },
+        data: { url, responseId: imageResponse.id },
         responseId,
       };
     }
@@ -87,7 +92,12 @@ export async function generateBook(
     .reduce<Book | undefined>((acc, output) => {
       const text = output.content.find((o) => o.type === "output_text");
       if (text && !acc) {
-        acc = JSON.parse(text.text);
+        try {
+          const data = JSON.parse(text.text);
+          acc = data;
+        } catch (error) {
+          console.error(error);
+        }
       }
       return acc;
     }, undefined);
@@ -103,11 +113,9 @@ export async function generateBook(
 export async function uploadBase64Image(base64: string): Promise<Image> {
   const res = await fetch(base64); // Convert base64 to binary
   const blob = await res.blob(); // or use Buffer in Node.js
-
-  // Create a File (browser) or Blob
-  const file = new File([blob], "image.png", { type: "image/png" });
-
+  const file = new File([blob], "image.png", { type: "image/png" }); // Create a File (browser) or Blob
   const formData = new FormData();
+
   formData.append("file", file);
 
   const response = await fetch("http://localhost:5171/api/upload", {
