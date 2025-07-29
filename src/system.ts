@@ -14,7 +14,7 @@ export const mainCharacters = `
 
 export const optionalCharacters = `
   1. Mommy, the mother of Lily, is 5'6", medium size, has beautiful eyes, dark wavy brow hair, light brow skin, and a round nose. She is half American, half Salvadoran descent. She is a hair stylist for a high-end boutique.
-  2. Daddy, the father of Lily, is 6'0", medium size, has dark short hair, fair skin, and a sharp nose. He wears jeans, boots, and collared shirts. He is half American, Half Mexican descent. He is a Software Engineer and Designer.
+  2. Daddy, the father of Lily, is 6'0", medium size, has dark short hair, fair skin, a short beard and a sharp nose. He wears jeans, boots, and collared shirts. He is half American, Half Mexican descent. He is a Software Engineer and Designer.
   3. Kiko, the older and bigger brother of Popcorn, an athletic Miniature Schnauzer with gray fur, is male. He barks a lot.`;
 
 export function bookPrompt(input: string): GenerateResponseOptions {
@@ -50,7 +50,7 @@ export function imagePrompt(
   args: Omit<GenerateResponseOptions, "instructions">
 ): GenerateResponseOptions {
   return {
-    instructions: `The image should have an aspect ratio of 820/1030 and a Disney art style.
+    instructions: `The image should have an aspect ratio of 820/1030 and a Dr. Seuss art style.
  Include the main characters, if applicable, with these characteristics:
     ${mainCharacters}
   And the optional characters, if applicable:

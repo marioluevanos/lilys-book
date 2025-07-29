@@ -55,7 +55,6 @@ export async function generateImage(
     asImage: true,
   });
 
-  console.log({ imageResponse });
   const imageResults = (imageResponse.output || [])
     .filter((output) => output.type === "image_generation_call")
     .map((output) => output.result);

@@ -9,13 +9,15 @@ import {
   useState,
 } from "react";
 import { Button } from "../Button/Button";
-import { useNovelObserver } from "./useBookObserver";
+import { useBookObserver } from "./useBookObserver";
 import { cn } from "../../utils/cn";
 import { events } from "../../events";
 import { BookProgress } from "./BookProgress";
 import { generateImage } from "../../library";
 import { imagePrompt } from "../../system";
 import { ImageAddIcon } from "../Icon";
+
+const { log } = console;
 
 type NovelProps = {
   book: BookProps & { responseId: string };
@@ -26,8 +28,8 @@ export const Book: FC<NovelProps> = (props) => {
   const { book, images = [] } = props;
   const bookRef = useRef<HTMLOListElement>(null);
   const [isGeneratingImage, setIsGeneratingImage] = useState(false);
-  const { pagesRef, pageIndex, bookProgress, onPageChange } =
-    useNovelObserver();
+  const { pagesRef, pageIndex, bookProgress, onPageChange, onNextClick } =
+    useBookObserver();
 
   /**
    * Generate an image for the page, and
@@ -46,13 +48,13 @@ export const Book: FC<NovelProps> = (props) => {
 
         if (!hasImage) {
           setIsGeneratingImage(true);
-
-          const response = await generateImage(
-            imagePrompt({
-              input: page.synopsis,
-              previousResponseId,
-            })
-          );
+          const prompt = imagePrompt({
+            input: page.synopsis,
+            previousResponseId,
+          });
+          log("imagePrompt", { prompt });
+          const response = await generateImage(prompt);
+          log("generateImage", { response });
 
           if (response.data.url.length <= 0) {
             console.error("Failed", response);
@@ -101,7 +103,7 @@ export const Book: FC<NovelProps> = (props) => {
   }, [pageIndex]);
 
   return (
-    <main id="novel">
+    <main id="book">
       <BookProgress progress={bookProgress} />
       <p className="page-number">{pageIndex + 1}</p>
       <ol className="h-scroll book">
@@ -142,6 +144,9 @@ export const Book: FC<NovelProps> = (props) => {
               {page.content
                 .split(".")
                 .map((p, i) => p && <p key={i}>{`${p}.`}</p>)}
+              <a href="#" onClick={onNextClick} className="next-page">
+                Next &rarr;
+              </a>
             </div>
           </li>
         ))}

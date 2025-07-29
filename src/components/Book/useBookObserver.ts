@@ -9,7 +9,7 @@ import {
 /**
  * Intersection Observer for the BookProps
  */
-export function useNovelObserver() {
+export function useBookObserver() {
   const pagesRef = useRef<HTMLLIElement[]>([]);
   const [pageIndex, setPageIndex] = useState(0);
 
@@ -56,6 +56,23 @@ export function useNovelObserver() {
   }, []);
 
   /**
+   * Handle on page change clicks
+   */
+  const onNextClick = useCallback(
+    (event: BaseSyntheticEvent) => {
+      event.preventDefault();
+      const parent = pagesRef.current[0].parentElement;
+      if (parent) {
+        parent.scrollTo({
+          left: (pageIndex + 1) * window.innerWidth,
+          behavior: "smooth",
+        });
+      }
+    },
+    [pageIndex]
+  );
+
+  /**
    * Observe the scroll for each accordion item
    */
   useEffect(() => {
@@ -72,6 +89,7 @@ export function useNovelObserver() {
   return {
     pagesRef,
     pageIndex,
+    onNextClick,
     onPageChange,
     get bookProgress() {
       return pageIndex / (pagesRef.current.length - 1);

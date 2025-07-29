@@ -18,6 +18,8 @@ import { ActionButton } from "./ActionButton";
 import { Book } from "./Book/Book";
 import { toKebabCase } from "../utils/toKebabCase";
 
+const { log } = console;
+
 function App() {
   const { size, theme } = useModes();
   const [loading, setLoading] = useState<boolean>(false);
@@ -31,30 +33,39 @@ function App() {
    */
   const onGeneratedImage = useCallback(async (payload: EventPayload) => {
     const { data } = payload;
-
-    console.log("onGeneratedImage", data);
     const pageIndex = data?.pageIndex || 0;
     const generatedImage = data?.image;
     const filename = `${toKebabCase(
       data?.bookTitle || "image"
     )}-${pageIndex}.png`;
 
+    log(payload, { generatedImage, filename, pageIndex, data });
+
     if (generatedImage?.url && (generatedImage?.url || "").length > 0) {
-      console.log({ generatedImage });
+      log("calling uploadBase64Image...", { filename });
       const uploadImage = await uploadBase64Image(generatedImage.url, filename);
+      log("uploadBase64Image results:", { uploadImage });
 
       setImages((prev) => {
         const images = prev.map((img, i) => {
+          log("setImages map", {
+            i,
+            pageIndex,
+            img,
+            uploadImage,
+            url: uploadImage.url,
+          });
           if (i === pageIndex) {
+            log("setImages", { uploadImage, url: uploadImage.url });
             return {
               ...generatedImage,
               url: uploadImage.url,
             };
           }
+
           return img;
         });
 
-        console.log({ images });
         updateImages(images);
         return images;
       });
@@ -78,7 +89,6 @@ function App() {
 
       const userInput = getUserInput(event);
       const prompt = bookPrompt(userInput);
-      console.log({ prompt, userInput });
       const bookResponse = await generateBook(prompt);
 
       if (bookResponse?.data) {
@@ -126,7 +136,7 @@ function App() {
 
   return (
     <div className="app" data-size={size} data-theme={theme}>
-      <LoadingProgress progress={loading} />
+      {loading && <LoadingProgress />}
       {book ? (
         <>
           <Book
@@ -138,9 +148,9 @@ function App() {
             key="Novel"
           />
           <Drawer />
-          <ActionButton onClick={onActionClick} style={{ display: "none" }}>
+          {/* <ActionButton onClick={onActionClick}>
             <PlusIcon />
-          </ActionButton>
+          </ActionButton> */}
         </>
       ) : (
         <Form onSubmit={onSubmit} disabled={loading} defaultValue={prompt} />
