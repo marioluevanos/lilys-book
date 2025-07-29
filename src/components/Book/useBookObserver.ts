@@ -7,7 +7,7 @@ import {
 } from "react";
 
 /**
- * Intersection Observer for the Book
+ * Intersection Observer for the BookProps
  */
 export function useNovelObserver() {
   const pagesRef = useRef<HTMLLIElement[]>([]);

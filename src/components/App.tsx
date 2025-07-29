@@ -1,7 +1,7 @@
 import { BaseSyntheticEvent, useCallback, useEffect, useState } from "react";
 import { generateBook, uploadBase64Image } from "../library";
 import { useModes } from "../hooks/useModes";
-import { Book, History, Image } from "../types";
+import { BookProps, History, ImageProps } from "../types";
 import { initialImages, system, bookPrompt } from "../system";
 import {
   preloadStorage,
@@ -10,19 +10,19 @@ import {
   updatePrompt,
 } from "../storage";
 import { Form } from "./Form/Form";
-import { Novel } from "./Novel/Novel";
 import { Drawer } from "./Drawer/Drawer";
 import { EventPayload, events } from "../events";
 import { PlusIcon } from "./Icon";
 import { LoadingProgress } from "./LoadingProgress/LoadingProgress";
 import { ActionButton } from "./ActionButton";
+import { Book } from "./Book/Book";
 
 function App() {
   const { size, theme } = useModes();
   const [loading, setLoading] = useState<boolean>(false);
   const [prompt, setPrompt] = useState("");
-  const [book, setBook] = useState<Book & { responseId?: string }>();
-  const [images, setImages] = useState<Image[]>(initialImages);
+  const [book, setBook] = useState<BookProps & { responseId?: string }>();
+  const [images, setImages] = useState<ImageProps[]>(initialImages);
   const [history, setHistory] = useState<History[]>([system.initial]);
 
   /**
@@ -80,6 +80,7 @@ function App() {
           responseId: bookResponse.responseId,
         };
         setBook(bookCreated);
+        // setHistory()
         updateBook(bookCreated);
         updatePrompt(userInput);
       }
@@ -115,14 +116,14 @@ function App() {
     });
 
     events.on("genratedimage", onGeneratedImage);
-  }, []);
+  }, [onGeneratedImage]);
 
   return (
     <div className="app" data-size={size} data-theme={theme}>
       <LoadingProgress progress={loading} />
       {book ? (
         <>
-          <Novel
+          <Book
             book={{
               ...book,
               responseId: book.responseId || "",

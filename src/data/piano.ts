@@ -1,6 +1,6 @@
-import { Book } from "../types";
+import { BookProps } from "../types";
 
-export const BOOK: Book = {
+export const BOOK: BookProps = {
   title: "Lily's Melodies Reach the Sky",
   pages: [
     {
@@ -44,7 +44,7 @@ export const BOOK: Book = {
     "Puppies like Popcorn can sense their owner’s emotions and often offer comfort when they practice or perform.",
 };
 
-export const PIANO: Book = {
+export const PIANO: BookProps = {
   title: BOOK.title,
   pages: BOOK.pages,
   randomFact: BOOK.randomFact,

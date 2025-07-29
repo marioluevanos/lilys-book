@@ -1,12 +1,12 @@
 import { ReactNode } from "react";
-import { Image } from "./types";
+import { ImageProps } from "./types";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 export type EventPayload = {
   children?: ReactNode;
   data?: {
-    image: Image;
+    image: ImageProps;
     pageIndex: number;
   };
 };

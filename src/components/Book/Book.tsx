@@ -1,5 +1,5 @@
-import "./Novel.css";
-import { Book, Image, Page } from "../../types";
+import "./Book.css";
+import { BookProps, ImageProps, PageProps } from "../../types";
 import {
   BaseSyntheticEvent,
   FC,
@@ -9,19 +9,20 @@ import {
   useState,
 } from "react";
 import { Button } from "../Button/Button";
-import { useNovelObserver } from "./useNovelObserver";
+import { useNovelObserver } from "./useBookObserver";
 import { cn } from "../../utils/cn";
 import { events } from "../../events";
-import { NovelProgress } from "./NovelProgress";
+import { BookProgress } from "./BookProgress";
 import { generateImage } from "../../library";
 import { imagePrompt } from "../../system";
+import { ImageAddIcon } from "../Icon";
 
 type NovelProps = {
-  book: Book & { responseId: string };
-  images: Record<number, Image>;
+  book: BookProps & { responseId: string };
+  images: Record<number, ImageProps>;
 };
 
-export const Novel: FC<NovelProps> = (props) => {
+export const Book: FC<NovelProps> = (props) => {
   const { book, images = [] } = props;
   const bookRef = useRef<HTMLOListElement>(null);
   const [isGeneratingImage, setIsGeneratingImage] = useState(false);
@@ -34,7 +35,7 @@ export const Novel: FC<NovelProps> = (props) => {
    *   2. Update browser storage
    */
   const updatePageWithImage = useCallback(
-    async (page: Page, pageIndex: number, previousResponseId?: string) => {
+    async (page: PageProps, pageIndex: number, previousResponseId?: string) => {
       try {
         const hasImage = (images[pageIndex]?.url || "").length > 0;
 
@@ -64,7 +65,7 @@ export const Novel: FC<NovelProps> = (props) => {
         setIsGeneratingImage(false);
       }
     },
-    []
+    [images]
   );
 
   /**
@@ -80,7 +81,7 @@ export const Novel: FC<NovelProps> = (props) => {
 
       if (page) updatePageWithImage(page, pageIndex, previousResponseId);
     },
-    [updatePageWithImage, book]
+    [updatePageWithImage, images, book]
   );
 
   useEffect(() => {
@@ -94,7 +95,7 @@ export const Novel: FC<NovelProps> = (props) => {
 
   return (
     <main id="novel">
-      <NovelProgress progress={bookProgress} />
+      <BookProgress progress={bookProgress} />
       <p className="page-number">{pageIndex + 1}</p>
       <ol className="h-scroll book">
         {book.pages.map((page, i) => (
@@ -120,8 +121,12 @@ export const Novel: FC<NovelProps> = (props) => {
                   data-page-index={String(i)}
                   onClick={onGenerateImage}
                   disabled={isGeneratingImage}
-                  className={cn(isGeneratingImage && "loading")}
+                  className={cn(
+                    isGeneratingImage && "loading loading-gradient",
+                    "generate-image"
+                  )}
                 >
+                  <ImageAddIcon />
                   Generate Image
                 </Button>
               </div>

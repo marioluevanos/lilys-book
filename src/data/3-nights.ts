@@ -1,6 +1,6 @@
-import { Book } from "../types";
+import { BookProps } from "../types";
 
-export const BOOK: Book = {
+export const BOOK: BookProps = {
   title: "Kiko and Lily’s Night Watch",
   pages: [
     {
@@ -80,7 +80,7 @@ export const BOOK: Book = {
     "Some animatronics use facial recognition and motion sensors to interact with guests—but only during operating hours!",
 };
 
-export const THREE_NIGHTS: Book = {
+export const THREE_NIGHTS: BookProps = {
   title: BOOK.title,
   pages: BOOK.pages.map((p, i) => ({
     ...p,

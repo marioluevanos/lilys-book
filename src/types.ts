@@ -3,9 +3,9 @@ import { ChatCompletionMessageParam as History } from "openai/resources/index.mj
 
 export type { History };
 
-export type Book = z.infer<typeof BookSchema>;
-export type Page = z.infer<typeof PageSchema>;
-export type Image = z.infer<typeof ImageSchema>;
+export type BookProps = z.infer<typeof BookSchema>;
+export type PageProps = z.infer<typeof PageSchema>;
+export type ImageProps = z.infer<typeof ImageSchema>;
 
 export const ImageSchema = z.object({
   url: z.string(),
@@ -31,12 +31,12 @@ export type GenerateResponseOptions = {
 };
 
 export type BookResponsePayload = {
-  data: Book;
+  data: BookProps;
   responseId: string;
 };
 
 export type ImageResponsePayload = {
-  data: Image;
+  data: ImageProps;
   responseId: string;
 };
 

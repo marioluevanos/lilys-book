@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { BookSchema, GenerateResponseOptions, History } from "./types";
 
-const numberOfPages = 6;
+const numberOfPages = 9;
 
 export const initialImages = Array.from({ length: numberOfPages }).map(() => ({
   responseId: "",
@@ -16,20 +16,28 @@ export const system: { initial: History } = {
 };
 
 export const mainCharacters = `
-  1. Popcorn, a Miniature Schnauzer puppy, white fur, and female. She barks a lot.
-  2. Lily, a 5-year-old girl, has a round face, a round nose, long eyelashes, fair skin, and light-brown hair that is very messy, as if she had just woken up. She wears clothing inspired by Hello Kitty.`;
+  1. Lily, a 5-year-old girl, has a round face, a round nose, long eyelashes, fair skin, and light-brown hair that is very messy, as if she had just woken up. She wears clothing inspired by Hello Kitty.
+  2. Popcorn, a Miniature Schnauzer puppy, white fur, and female. She is very clumsy and she barks a lot.`;
+
+export const optionalCharacters = `
+  1. Mommy, the mother of Lily, is 5'6", medium size, has beautiful eyes, dark wavy brow hair, light brow skin, and a round nose. She is a hair stylist for a high-end boutique.
+  2. Daddy, the father of Lily, is 6'0", medium size, has dark short hair, fair skin, and a sharp nose. He is a Software Engineer and Designer.
+  3. Kiko, the older and bigger brother of Popcorn, an athletic Miniature Schnauzer with gray fur, is male. He barks a lot.`;
 
 export function bookPrompt(input: string): GenerateResponseOptions {
   return {
     instructions: `You are going to write a book in the children's genre. 
-The book should focus on the text content in the <book-summary> markup, and the protagonists should always be the main characters of the story, even if not mentioned in the <book-summary>.
+The book should focus on the text content in the <book-summary> markup, and the protagonists should always be the main characters of the story, even if not mentioned in the <book-summary>. You can use the optional characters as needed for storyline support.
     
 The protagonists are the following characters:
 ${mainCharacters}
 
+The optional characters are:
+${optionalCharacters}
+
 Requirements:
   - Each book should contain ${numberOfPages} pages.
-  - Each page should get about 60 words.
+  - Each page should get about 90 words.
   - It should rhyme a little.
   - The book should have a random fact related to the book's subject matter shown at the end.
   - The response should be in JSON format, should be minified, and have the following schema:
@@ -47,7 +55,12 @@ export function imagePrompt(
   args: Omit<GenerateResponseOptions, "instructions">
 ): GenerateResponseOptions {
   return {
-    instructions: `The image should be 820/1030 aspect ratio and in a Disney art style.`,
+    instructions: `The image should have an aspect ratio of 820/1030 and a Disney art style.
+ Include the main characters, if applicable, with these characteristics:
+    ${mainCharacters}
+  And the optional characters, if applicable:
+    ${optionalCharacters}
+    `,
     input: args.input,
     previousResponseId: args.previousResponseId,
   };

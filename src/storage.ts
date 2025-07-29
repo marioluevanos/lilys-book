@@ -1,5 +1,5 @@
 import { ChatCompletionMessageParam as History } from "openai/resources/index.mjs";
-import { Book, Image } from "./types";
+import { BookProps, ImageProps } from "./types";
 
 const PROMPT_KEY = "prompt";
 const HISTORY_KEY = "history";
@@ -17,10 +17,10 @@ export const KEYS = {
  * Load from local storage
  */
 export function preloadStorage(setters: {
-  getBook: (payload: Book | undefined) => void;
+  getBook: (payload: BookProps | undefined) => void;
   getPrompt: (payload: string) => void;
   getHistory: (payload: History[]) => void;
-  getImages: (payload: Image[]) => void;
+  getImages: (payload: ImageProps[]) => void;
 }) {
   const { getBook, getHistory, getPrompt, getImages } = setters;
 
@@ -77,7 +77,7 @@ export function updateHistory(history: History[] | undefined) {
   }
 }
 
-export function updateBook(bookCreated: Book | undefined) {
+export function updateBook(bookCreated: BookProps | undefined) {
   if (bookCreated) {
     localStorage.setItem(KEYS.BOOK_KEY, JSON.stringify(bookCreated));
     return bookCreated;
@@ -90,7 +90,7 @@ export function updatePrompt(prompt: string | undefined) {
   }
 }
 
-export function updateImages(images: Record<number, Image> | undefined) {
+export function updateImages(images: Record<number, ImageProps> | undefined) {
   if (images) {
     localStorage.setItem(KEYS.IMAGES_KEY, JSON.stringify(images));
   }

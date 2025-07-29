@@ -1,11 +1,13 @@
-import OpenAI from "openai";
+import type OpenAI from "openai";
 import {
-  Book,
+  BookProps,
   BookResponsePayload,
   GenerateResponseOptions,
-  Image,
+  ImageProps,
   ImageResponsePayload,
 } from "./types";
+
+const OPEN_AI_API = "https://api.openai.com/v1/responses";
 
 /**
  * Generate an Image
@@ -13,7 +15,7 @@ import {
 async function generateResponse(
   args: GenerateResponseOptions
 ): Promise<OpenAI.Responses.Response> {
-  const request = await fetch("https://api.openai.com/v1/responses", {
+  const request = await fetch(OPEN_AI_API, {
     method: "POST",
     headers: {
       Authorization: `Bearer ${import.meta.env.VITE_OPENAI_API_KEY}`,
@@ -89,7 +91,7 @@ export async function generateBook(
 
   const book = (bookResponse.output || [])
     .filter((output) => output.type === "message")
-    .reduce<Book | undefined>((acc, output) => {
+    .reduce<BookProps | undefined>((acc, output) => {
       const text = output.content.find((o) => o.type === "output_text");
       if (text && !acc) {
         try {
@@ -110,7 +112,7 @@ export async function generateBook(
   }
 }
 
-export async function uploadBase64Image(base64: string): Promise<Image> {
+export async function uploadBase64Image(base64: string): Promise<ImageProps> {
   const res = await fetch(base64); // Convert base64 to binary
   const blob = await res.blob(); // or use Buffer in Node.js
   const file = new File([blob], "image.png", { type: "image/png" }); // Create a File (browser) or Blob
@@ -118,12 +120,12 @@ export async function uploadBase64Image(base64: string): Promise<Image> {
 
   formData.append("file", file);
 
-  const response = await fetch("http://localhost:5171/api/upload", {
+  const response = await fetch(import.meta.env.VITE_UPLOAD_API, {
     method: "POST",
     body: formData,
   });
 
   const data: { url: string } = await response.json();
 
-  return { url: `http://localhost:5171${data.url}` };
+  return { url: `${import.meta.env.API}${data.url}` };
 }

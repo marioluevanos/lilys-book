@@ -1,6 +1,6 @@
-import { Book } from "../types";
+import { BookProps } from "../types";
 
-const BOOK: Book = {
+const BOOK: BookProps = {
   title: "Rescue Hello Kit!",
   pages: [
     {
@@ -80,7 +80,7 @@ const BOOK: Book = {
     "Lava can reach temperatures of up to 2,200°F (1,200°C)—hot enough to melt rock and metal!",
 };
 
-export const HELLO_KITTY: Book = {
+export const HELLO_KITTY: BookProps = {
   title: BOOK.title,
   pages: BOOK.pages.map((p, i) => ({
     ...p,
