@@ -112,10 +112,13 @@ export async function generateBook(
   }
 }
 
-export async function uploadBase64Image(base64: string): Promise<ImageProps> {
+export async function uploadBase64Image(
+  base64: string,
+  fileName: string
+): Promise<ImageProps> {
   const res = await fetch(base64); // Convert base64 to binary
   const blob = await res.blob(); // or use Buffer in Node.js
-  const file = new File([blob], "image.png", { type: "image/png" }); // Create a File (browser) or Blob
+  const file = new File([blob], fileName, { type: "image/png" }); // Create a File (browser) or Blob
   const formData = new FormData();
 
   formData.append("file", file);
@@ -127,5 +130,5 @@ export async function uploadBase64Image(base64: string): Promise<ImageProps> {
 
   const data: { url: string } = await response.json();
 
-  return { url: `${import.meta.env.API}${data.url}` };
+  return { url: `${import.meta.env.VITE_API}${data.url}` };
 }

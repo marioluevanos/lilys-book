@@ -8,13 +8,16 @@ export type EventPayload = {
   data?: {
     image: ImageProps;
     pageIndex: number;
+    bookTitle: string;
   };
 };
 
+type EventKey = "drawer" | "drawerclose" | "generatedimage";
+
 interface EventEmitter {
-  on: (event: string, listener: (payload: EventPayload) => void) => void;
-  off: (event: string, listener: (payload: EventPayload) => void) => void;
-  emit: (event: string, payload: EventPayload) => void;
+  on: (event: EventKey, listener: (payload: EventPayload) => void) => void;
+  off: (event: EventKey, listener: (payload: EventPayload) => void) => void;
+  emit: (event: EventKey, payload: EventPayload) => void;
 }
 
 /**

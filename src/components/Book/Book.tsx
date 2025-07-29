@@ -35,7 +35,12 @@ export const Book: FC<NovelProps> = (props) => {
    *   2. Update browser storage
    */
   const updatePageWithImage = useCallback(
-    async (page: PageProps, pageIndex: number, previousResponseId?: string) => {
+    async (
+      page: PageProps,
+      pageIndex: number,
+      bookTitle: string,
+      previousResponseId?: string
+    ) => {
       try {
         const hasImage = (images[pageIndex]?.url || "").length > 0;
 
@@ -55,8 +60,8 @@ export const Book: FC<NovelProps> = (props) => {
             return;
           }
 
-          events.emit("genratedimage", {
-            data: { image: response.data, pageIndex },
+          events.emit("generatedimage", {
+            data: { image: response.data, pageIndex, bookTitle },
           });
         }
       } catch (e) {
@@ -79,7 +84,9 @@ export const Book: FC<NovelProps> = (props) => {
       const prevImage = images[pageIndex - 1];
       const previousResponseId = prevImage?.responseId || book.responseId;
 
-      if (page) updatePageWithImage(page, pageIndex, previousResponseId);
+      if (page) {
+        updatePageWithImage(page, pageIndex, book.title, previousResponseId);
+      }
     },
     [updatePageWithImage, images, book]
   );
@@ -111,8 +118,8 @@ export const Book: FC<NovelProps> = (props) => {
                   key={images[i].responseId}
                   alt={page.synopsis}
                   src={images[i].url}
-                  width={512}
-                  height={512}
+                  width={820}
+                  height={1030}
                 />
               </figure>
             ) : (

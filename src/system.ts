@@ -1,32 +1,27 @@
 import { z } from "zod";
-import { BookSchema, GenerateResponseOptions, History } from "./types";
+import { BookSchema, GenerateResponseOptions } from "./types";
 
-const numberOfPages = 9;
+const numberOfPages = 6;
 
 export const initialImages = Array.from({ length: numberOfPages }).map(() => ({
   responseId: "",
   url: "",
 }));
 
-export const system: { initial: History } = {
-  initial: {
-    role: "system",
-    content: `You are an award winning children's book author and illustrator.`,
-  },
-};
-
 export const mainCharacters = `
-  1. Lily, a 5-year-old girl, has a round face, a round nose, long eyelashes, fair skin, and light-brown hair that is very messy, as if she had just woken up. She wears clothing inspired by Hello Kitty.
+  1. Lily, a 5-year-old girl, has a round face, a round nose, long eyelashes, fair skin, and light-brown hair that is very messy, as if she had just woken up. She wears clothing inspired by Hello Kitty and enjoys dancing.
   2. Popcorn, a Miniature Schnauzer puppy, white fur, and female. She is very clumsy and she barks a lot.`;
 
 export const optionalCharacters = `
-  1. Mommy, the mother of Lily, is 5'6", medium size, has beautiful eyes, dark wavy brow hair, light brow skin, and a round nose. She is a hair stylist for a high-end boutique.
-  2. Daddy, the father of Lily, is 6'0", medium size, has dark short hair, fair skin, and a sharp nose. He is a Software Engineer and Designer.
+  1. Mommy, the mother of Lily, is 5'6", medium size, has beautiful eyes, dark wavy brow hair, light brow skin, and a round nose. She is half American, half Salvadoran descent. She is a hair stylist for a high-end boutique.
+  2. Daddy, the father of Lily, is 6'0", medium size, has dark short hair, fair skin, and a sharp nose. He wears jeans, boots, and collared shirts. He is half American, Half Mexican descent. He is a Software Engineer and Designer.
   3. Kiko, the older and bigger brother of Popcorn, an athletic Miniature Schnauzer with gray fur, is male. He barks a lot.`;
 
 export function bookPrompt(input: string): GenerateResponseOptions {
   return {
-    instructions: `You are going to write a book in the children's genre. 
+    instructions: `
+You are an award winning children's book author and illustrator.
+You are going to write a book in the children's genre. 
 The book should focus on the text content in the <book-summary> markup, and the protagonists should always be the main characters of the story, even if not mentioned in the <book-summary>. You can use the optional characters as needed for storyline support.
     
 The protagonists are the following characters:

@@ -1,8 +1,8 @@
 import { BaseSyntheticEvent, useCallback, useEffect, useState } from "react";
 import { generateBook, uploadBase64Image } from "../library";
 import { useModes } from "../hooks/useModes";
-import { BookProps, History, ImageProps } from "../types";
-import { initialImages, system, bookPrompt } from "../system";
+import { BookProps, ImageProps } from "../types";
+import { initialImages, bookPrompt } from "../system";
 import {
   preloadStorage,
   updateBook,
@@ -16,6 +16,7 @@ import { PlusIcon } from "./Icon";
 import { LoadingProgress } from "./LoadingProgress/LoadingProgress";
 import { ActionButton } from "./ActionButton";
 import { Book } from "./Book/Book";
+import { toKebabCase } from "../utils/toKebabCase";
 
 function App() {
   const { size, theme } = useModes();
@@ -23,7 +24,7 @@ function App() {
   const [prompt, setPrompt] = useState("");
   const [book, setBook] = useState<BookProps & { responseId?: string }>();
   const [images, setImages] = useState<ImageProps[]>(initialImages);
-  const [history, setHistory] = useState<History[]>([system.initial]);
+  const [_responseIds, setResponseIds] = useState<string[]>([]);
 
   /**
    * Handle the generated image
@@ -34,10 +35,13 @@ function App() {
     console.log("onGeneratedImage", data);
     const pageIndex = data?.pageIndex || 0;
     const generatedImage = data?.image;
+    const filename = `${toKebabCase(
+      data?.bookTitle || "image"
+    )}-${pageIndex}.png`;
 
     if (generatedImage?.url && (generatedImage?.url || "").length > 0) {
       console.log({ generatedImage });
-      const uploadImage = await uploadBase64Image(generatedImage.url);
+      const uploadImage = await uploadBase64Image(generatedImage.url, filename);
 
       setImages((prev) => {
         const images = prev.map((img, i) => {
@@ -70,9 +74,12 @@ function App() {
     async (event: BaseSyntheticEvent) => {
       event.preventDefault();
       setLoading(true);
+      events.emit("drawerclose", {});
 
       const userInput = getUserInput(event);
-      const bookResponse = await generateBook(bookPrompt(userInput));
+      const prompt = bookPrompt(userInput);
+      console.log({ prompt, userInput });
+      const bookResponse = await generateBook(prompt);
 
       if (bookResponse?.data) {
         const bookCreated: typeof book = {
@@ -80,7 +87,6 @@ function App() {
           responseId: bookResponse.responseId,
         };
         setBook(bookCreated);
-        // setHistory()
         updateBook(bookCreated);
         updatePrompt(userInput);
       }
@@ -90,7 +96,7 @@ function App() {
       setLoading(false);
       events.emit("drawerclose", {});
     },
-    [history, getUserInput]
+    [getUserInput]
   );
 
   /**
@@ -111,11 +117,11 @@ function App() {
     preloadStorage({
       getPrompt: (p) => setPrompt(p),
       getBook: (b) => setBook(b),
-      getHistory: (h) => setHistory(h),
+      getResponseIds: (h) => setResponseIds(h),
       getImages: (h) => setImages(h),
     });
 
-    events.on("genratedimage", onGeneratedImage);
+    events.on("generatedimage", onGeneratedImage);
   }, [onGeneratedImage]);
 
   return (

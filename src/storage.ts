@@ -1,14 +1,13 @@
-import { ChatCompletionMessageParam as History } from "openai/resources/index.mjs";
 import { BookProps, ImageProps } from "./types";
 
 const PROMPT_KEY = "prompt";
-const HISTORY_KEY = "history";
+const RESPONSE_IDS_KEY = "responseIds";
 const IMAGES_KEY = "images";
 const BOOK_KEY = "book";
 
 export const KEYS = {
   PROMPT_KEY,
-  HISTORY_KEY,
+  RESPONSE_IDS_KEY,
   BOOK_KEY,
   IMAGES_KEY,
 };
@@ -19,10 +18,10 @@ export const KEYS = {
 export function preloadStorage(setters: {
   getBook: (payload: BookProps | undefined) => void;
   getPrompt: (payload: string) => void;
-  getHistory: (payload: History[]) => void;
+  getResponseIds: (payload: string[]) => void;
   getImages: (payload: ImageProps[]) => void;
 }) {
-  const { getBook, getHistory, getPrompt, getImages } = setters;
+  const { getBook, getResponseIds, getPrompt, getImages } = setters;
 
   try {
     const prompt = localStorage.getItem(PROMPT_KEY);
@@ -33,12 +32,12 @@ export function preloadStorage(setters: {
     console.warn(error);
   }
 
-  const savedHistory = localStorage.getItem(HISTORY_KEY);
+  const savedHistory = localStorage.getItem(RESPONSE_IDS_KEY);
   if (savedHistory) {
     try {
-      const history = JSON.parse(savedHistory);
-      if (Array.isArray(history)) {
-        getHistory(history);
+      const responseIds = JSON.parse(savedHistory);
+      if (Array.isArray(responseIds)) {
+        getResponseIds(responseIds);
       }
     } catch (error) {
       console.warn(error);
@@ -71,9 +70,9 @@ export function preloadStorage(setters: {
   }
 }
 
-export function updateHistory(history: History[] | undefined) {
-  if (Array.isArray(history)) {
-    localStorage.setItem(KEYS.HISTORY_KEY, JSON.stringify(history));
+export function updateResponseIds(responseIds: string[] | undefined) {
+  if (Array.isArray(responseIds)) {
+    localStorage.setItem(KEYS.RESPONSE_IDS_KEY, JSON.stringify(responseIds));
   }
 }
 
