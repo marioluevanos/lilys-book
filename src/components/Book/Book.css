@@ -31,6 +31,34 @@
     pointer-events: none;
     background: linear-gradient(0deg, black, transparent);
   }
+
+  &.home {
+    align-items: center;
+    justify-content: center;
+
+    & p {
+      margin: 0;
+    }
+
+    & .next-page {
+      align-self: flex-start;
+      margin: 0 2rem;
+    }
+  }
+
+  &.last {
+    align-items: center;
+    justify-content: center;
+
+    & h3 {
+      font-size: 14px;
+    }
+
+    & p {
+      font-size: 1.5rem;
+      margin: 0;
+    }
+  }
 }
 
 /**

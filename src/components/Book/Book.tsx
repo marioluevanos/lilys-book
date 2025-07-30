@@ -107,6 +107,12 @@ export const Book: FC<NovelProps> = (props) => {
       <BookProgress progress={bookProgress} />
       <p className="page-number">{pageIndex + 1}</p>
       <ol className="h-scroll book">
+        <li className="h-scroll-section page home">
+          <h1>{book.title}</h1>
+          <a href="#" onClick={onNextClick} className="next-page">
+            Next &rarr;
+          </a>
+        </li>
         {book.pages.map((page, i) => (
           <li
             key={page.synopsis}
@@ -150,6 +156,10 @@ export const Book: FC<NovelProps> = (props) => {
             </div>
           </li>
         ))}
+        <li className="h-scroll-section page last">
+          <h3>Fun Fact</h3>
+          <p>{book.randomFact}</p>
+        </li>
       </ol>
       <nav className="book-nav" style={{ display: "none" }}>
         <button

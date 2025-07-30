@@ -114,11 +114,9 @@ function App() {
    */
   const onActionClick = useCallback(() => {
     events.emit("drawer", {
-      children: (
-        <Form onSubmit={onSubmit} disabled={loading} defaultValue={prompt} />
-      ),
+      children: <Form onSubmit={onSubmit} disabled={loading} />,
     });
-  }, [loading, onSubmit, prompt]);
+  }, [loading, onSubmit]);
 
   /**
    * Set state from browser storage
@@ -148,9 +146,9 @@ function App() {
             key="Novel"
           />
           <Drawer />
-          {/* <ActionButton onClick={onActionClick}>
+          <ActionButton onClick={onActionClick}>
             <PlusIcon />
-          </ActionButton> */}
+          </ActionButton>
         </>
       ) : (
         <Form onSubmit={onSubmit} disabled={loading} defaultValue={prompt} />
