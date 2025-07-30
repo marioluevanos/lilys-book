@@ -122,12 +122,16 @@ export async function uploadBase64Image(
 
   formData.append("file", file);
 
-  const response = await fetch(import.meta.env.VITE_UPLOAD_API, {
+  const response = await fetch(`${import.meta.env.VITE_API}/api/upload`, {
     method: "POST",
     body: formData,
   });
 
   const data: { url: string } = await response.json();
 
-  return { url: `${import.meta.env.VITE_API}${data.url}` };
+  if (data.url) {
+    return { url: `${data.url}` };
+  }
+
+  return { url: base64 };
 }

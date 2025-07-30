@@ -1,11 +1,13 @@
 import { FC } from "react";
 import { Button, ButtonProps } from "./Button/Button";
+import { PlusIcon } from "./Icon";
 
-export const ActionButton: FC<ButtonProps> = (props) => {
-  const { children, onClick } = props;
+export const ActionButton: FC<Partial<ButtonProps>> = (props) => {
+  const { onClick } = props;
   return (
     <Button
       {...props}
+      className="action-button"
       onClick={onClick}
       style={{
         ...props.style,
@@ -21,7 +23,7 @@ export const ActionButton: FC<ButtonProps> = (props) => {
         zIndex: "200",
       }}
     >
-      {children}
+      <PlusIcon />
     </Button>
   );
 };

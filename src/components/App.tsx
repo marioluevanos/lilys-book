@@ -12,7 +12,6 @@ import {
 import { Form } from "./Form/Form";
 import { Drawer } from "./Drawer/Drawer";
 import { EventPayload, events } from "../events";
-import { PlusIcon } from "./Icon";
 import { LoadingProgress } from "./LoadingProgress/LoadingProgress";
 import { ActionButton } from "./ActionButton";
 import { Book } from "./Book/Book";
@@ -48,13 +47,6 @@ function App() {
 
       setImages((prev) => {
         const images = prev.map((img, i) => {
-          log("setImages map", {
-            i,
-            pageIndex,
-            img,
-            uploadImage,
-            url: uploadImage.url,
-          });
           if (i === pageIndex) {
             log("setImages", { uploadImage, url: uploadImage.url });
             return {
@@ -89,6 +81,10 @@ function App() {
 
       const userInput = getUserInput(event);
       const prompt = bookPrompt(userInput);
+
+      updatePrompt(userInput);
+      setImages(initialImages);
+
       const bookResponse = await generateBook(prompt);
 
       if (bookResponse?.data) {
@@ -98,7 +94,6 @@ function App() {
         };
         setBook(bookCreated);
         updateBook(bookCreated);
-        updatePrompt(userInput);
       }
 
       event.target.value = "";
@@ -146,9 +141,7 @@ function App() {
             key="Novel"
           />
           <Drawer />
-          <ActionButton onClick={onActionClick}>
-            <PlusIcon />
-          </ActionButton>
+          <ActionButton onClick={onActionClick} />
         </>
       ) : (
         <Form onSubmit={onSubmit} disabled={loading} defaultValue={prompt} />

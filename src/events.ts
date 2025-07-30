@@ -1,8 +1,6 @@
 import { ReactNode } from "react";
 import { ImageProps } from "./types";
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 export type EventPayload = {
   children?: ReactNode;
   data?: {
@@ -24,7 +22,9 @@ interface EventEmitter {
  * Typed event emitter
  */
 export function createEventEmitter(): EventEmitter {
-  const listeners: Partial<Record<string, Array<(args: any) => void>>> = {};
+  const listeners: Partial<
+    Record<string, Array<(args: EventPayload) => void>>
+  > = {};
 
   return {
     on(event, fn) {

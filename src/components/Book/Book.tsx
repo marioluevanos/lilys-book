@@ -28,8 +28,7 @@ export const Book: FC<NovelProps> = (props) => {
   const { book, images = [] } = props;
   const bookRef = useRef<HTMLOListElement>(null);
   const [isGeneratingImage, setIsGeneratingImage] = useState(false);
-  const { pagesRef, pageIndex, bookProgress, onPageChange, onNextClick } =
-    useBookObserver();
+  const { pagesRef, pageIndex, bookProgress, onPageChange } = useBookObserver();
 
   /**
    * Generate an image for the page, and
@@ -103,16 +102,17 @@ export const Book: FC<NovelProps> = (props) => {
   }, [pageIndex]);
 
   return (
-    <main id="book">
+    <main id="book" data-page-index={String(pageIndex)}>
       <BookProgress progress={bookProgress} />
-      <p className="page-number">{pageIndex + 1}</p>
+      <p className="page-number">{pageIndex}</p>
       <ol className="h-scroll book">
-        <li className="h-scroll-section page home">
+        {/* <li
+          className="h-scroll-section page home"
+          data-page-index={String(0)}
+          ref={(el) => el && (pagesRef.current[0] = el)}
+        >
           <h1>{book.title}</h1>
-          <a href="#" onClick={onNextClick} className="next-page">
-            Next &rarr;
-          </a>
-        </li>
+        </li> */}
         {book.pages.map((page, i) => (
           <li
             key={page.synopsis}
@@ -150,16 +150,17 @@ export const Book: FC<NovelProps> = (props) => {
               {page.content
                 .split(".")
                 .map((p, i) => p && <p key={i}>{`${p}.`}</p>)}
-              <a href="#" onClick={onNextClick} className="next-page">
-                Next &rarr;
-              </a>
             </div>
           </li>
         ))}
-        <li className="h-scroll-section page last">
+        {/* <li
+          className="h-scroll-section page last"
+          ref={(el) => el && (pagesRef.current[1 + book.pages.length] = el)}
+          data-page-index={String(1 + book.pages.length)}
+        >
           <h3>Fun Fact</h3>
           <p>{book.randomFact}</p>
-        </li>
+        </li> */}
       </ol>
       <nav className="book-nav" style={{ display: "none" }}>
         <button
