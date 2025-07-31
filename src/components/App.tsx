@@ -9,17 +9,15 @@ import {
   uploadBookDB,
 } from "../library";
 import { useModes } from "../hooks/useModes";
-import { BookDB, BookState } from "../types";
+import { BookState } from "../types";
 import { bookPrompt, imagePrompt } from "../system";
 import { preloadStorage, updateBookStorage, updatePrompt } from "../storage";
-import { Form } from "./Form/Form";
 import { Drawer } from "./Drawer/Drawer";
 import { EventMap, events } from "../events";
 import { LoadingProgress } from "./LoadingProgress/LoadingProgress";
-import { ActionButton } from "./ActionButton";
-import { Book } from "./Book/Book";
 import { toKebabCase } from "../utils/toKebabCase";
-import { Books } from "./Books/Books";
+import { HomeView } from "./Views/HomeView";
+import { BookView } from "./Views/BookView";
 
 function App() {
   const { size, theme } = useModes();
@@ -195,11 +193,9 @@ function App() {
   /**
    * Handle the main action button click
    */
-  const onActionClick = useCallback(() => {
-    events.emit("drawer", {
-      children: <Form onSubmit={onSubmit} disabled={loading} />,
-    });
-  }, [loading, onSubmit]);
+  const onHomeView = useCallback(() => {
+    setBook(undefined);
+  }, []);
 
   const bootStrap = useCallback(
     async (b: Array<number | string> | undefined) => {
@@ -223,12 +219,24 @@ function App() {
     [book]
   );
 
+  const onBookClick = useCallback(async (event: BaseSyntheticEvent) => {
+    const bookId = event?.target.dataset.bookId;
+
+    if (bookId) {
+      const book = await getBookDB(bookId);
+      if (book) {
+        setBook(book);
+      }
+    }
+  }, []);
+
   /**
    * Set state from browser storage
    */
   useEffect(() => {
     events.on("pagechange", onPageChange);
-  }, [saveGeneratedImage, onPageChange]);
+    events.on("home-view", onHomeView);
+  }, [saveGeneratedImage, onHomeView, onPageChange]);
 
   /**
    * Set state from browser storage
@@ -244,29 +252,21 @@ function App() {
     <div className="app" data-size={size} data-theme={theme}>
       {loading && <LoadingProgress />}
       {book ? (
-        <>
-          <Book
-            onGenerateImageClick={onGenerateImage}
-            isGeneratingImage={isGeneratingImage}
-            book={{
-              ...book,
-              pages: book.pages || [],
-              title: book.title || "",
-              response_id: book.response_id || "",
-              random_fact: book.random_fact || "",
-            }}
-            key="Novel"
-            form={<Form onSubmit={onSubmit} disabled={loading} />}
-          />
-          <Drawer />
-          <ActionButton onClick={onActionClick} />
-        </>
+        <BookView
+          isGeneratingImage={isGeneratingImage}
+          onGenerateImage={onGenerateImage}
+          onSubmit={onSubmit}
+          book={book}
+          prompt={prompt}
+        />
       ) : (
-        <>
-          <Books />
-          <Form onSubmit={onSubmit} disabled={loading} defaultValue={prompt} />
-        </>
+        <HomeView
+          prompt={prompt}
+          onSubmit={onSubmit}
+          onBookClick={onBookClick}
+        />
       )}
+      <Drawer />
     </div>
   );
 }

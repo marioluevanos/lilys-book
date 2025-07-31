@@ -13,7 +13,7 @@ import { useBookObserver } from "./useBookObserver";
 import { cn } from "../../utils/cn";
 import { events } from "../../events";
 import { BookProgress } from "./BookProgress";
-import { ImageAddIcon } from "../Icon";
+import { ArrowLeftIcon, ImageAddIcon } from "../Icon";
 
 type _BookProps = {
   book: BookDB<PageState>;
@@ -59,6 +59,14 @@ export const Book: FC<_BookProps> = (props) => {
       <ol className="h-scroll book" ref={bookRef}>
         <li className="h-scroll-section page home">
           <h1>{book.title}</h1>
+          <Button
+            className="back-button"
+            onClick={() => {
+              events.emit("home-view", undefined);
+            }}
+          >
+            <ArrowLeftIcon />
+          </Button>
         </li>
         {(book.pages || []).map((page, i) => (
           <li
@@ -99,7 +107,6 @@ export const Book: FC<_BookProps> = (props) => {
                 </Button>
               </div>
             )}
-
             <div className="content">
               {page.content
                 .split(".")

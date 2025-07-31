@@ -3,6 +3,10 @@ import { ImageProps } from "./types";
 
 type EventPayloads =
   | {
+      event: "home-view";
+      payload: undefined;
+    }
+  | {
       event: "drawer";
       payload: { children: ReactNode };
     }

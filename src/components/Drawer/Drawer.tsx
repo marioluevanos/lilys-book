@@ -20,6 +20,7 @@ export const Drawer: FC<DrawerProps> = () => {
 
   useEffect(() => {
     const onDrawer = ({ children }: EventMap["drawer"]) => {
+      console.log({ children });
       setOpen(true);
       setChildren(children);
     };

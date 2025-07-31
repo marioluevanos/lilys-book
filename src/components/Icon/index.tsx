@@ -92,3 +92,36 @@ export function ImageAddIcon({ title = "ImageAddIcon", ...props }: IconProps) {
     </svg>
   );
 }
+
+export function ArrowLeftIcon({ title = "badge 13", ...props }: IconProps) {
+  return (
+    <svg
+      height="16"
+      width="16"
+      viewBox="0 0 16 16"
+      xmlns="http://www.w3.org/2000/svg"
+      {...props}
+    >
+      <title>{title}</title>
+      <g fill="currentColor">
+        <line
+          fill="none"
+          stroke="currentColor"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          x1="15.5"
+          x2="0.5"
+          y1="8"
+          y2="8"
+        />
+        <polyline
+          fill="none"
+          points="5.5 13 0.5 8 5.5 3"
+          stroke="currentColor"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      </g>
+    </svg>
+  );
+}

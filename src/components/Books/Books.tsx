@@ -1,16 +1,17 @@
 import { getBooksDB, getImageDB } from "../../library";
 import { ImageProps } from "../../types";
 import "./Books.css";
-import { FC, useEffect, useState } from "react";
+import { BaseSyntheticEvent, FC, useEffect, useState } from "react";
 
 type BooksProps = {
   className?: string;
+  onBookClick?: (event: BaseSyntheticEvent) => void;
 };
 
 type BookPreview = { id?: number; title: string; image: ImageProps | null };
 
 export const Books: FC<BooksProps> = (props) => {
-  const { className } = props;
+  const { className, onBookClick } = props;
   const [bookPreviews, setBookPreviews] = useState<BookPreview[]>();
 
   useEffect(() => {
@@ -18,7 +19,6 @@ export const Books: FC<BooksProps> = (props) => {
       getBooksDB().then(async (books) => {
         const previews = (books || []).map<Promise<BookPreview>>(async (b) => {
           const imageId = b.pages[0].image_id;
-          console.log({ imageId, ...b });
           if (imageId) {
             return {
               id: b.id || 0,
@@ -38,7 +38,7 @@ export const Books: FC<BooksProps> = (props) => {
   return (
     <main id="books" className={className}>
       <header>
-        <h2>Library of Books</h2>
+        <h2>Lily's Books</h2>
       </header>
       <div className="books-scroll h-scroll">
         {bookPreviews?.map((b) => (
@@ -46,6 +46,7 @@ export const Books: FC<BooksProps> = (props) => {
             key={b.title}
             data-book-id={String(b.id)}
             className="book-preview"
+            onClick={onBookClick}
           >
             <figure className="book-preview-image">
               <img src={b.image?.url} alt="" />
