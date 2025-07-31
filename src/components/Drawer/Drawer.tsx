@@ -3,7 +3,7 @@ import "./Drawer.css";
 import { Drawer as Vaul } from "vaul";
 import { useCallback, useEffect, useState } from "react";
 import type { FC, ReactNode } from "react";
-import { EventPayload, events } from "../../events";
+import { EventMap, events } from "../../events";
 
 type DrawerProps = {
   title?: string;
@@ -19,7 +19,7 @@ export const Drawer: FC<DrawerProps> = () => {
   }, []);
 
   useEffect(() => {
-    const onDrawer = ({ children }: EventPayload) => {
+    const onDrawer = ({ children }: EventMap["drawer"]) => {
       setOpen(true);
       setChildren(children);
     };
@@ -31,7 +31,7 @@ export const Drawer: FC<DrawerProps> = () => {
 
     return () => {
       events.off("drawer", onDrawer);
-      events.off("drawerclose", onDrawer);
+      events.off("drawerclose", onDrawerClose);
     };
   }, []);
 
