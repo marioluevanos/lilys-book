@@ -43,7 +43,7 @@ function App() {
         setBook((prev) => ({
           ...prev,
           pages: (prev?.pages || []).reduce<PageState[]>((acc, p, i) => {
-            if (i === pageIdx) {
+            if (p.content === currentPage.content) {
               acc.push({ ...p, image });
             }
 
