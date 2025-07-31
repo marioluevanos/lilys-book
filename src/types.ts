@@ -41,3 +41,21 @@ export type ImageResponsePayload = {
 };
 
 export type ReponsePayload = BookResponsePayload | ImageResponsePayload;
+
+export type PageDB = PageProps & {
+  imageId?: number; // Reference to images table
+  responseId?: string;
+};
+
+export type BookDB = BookProps & {
+  id?: number;
+  pages: PageDB[];
+  created_at?: string;
+  updated_at?: string;
+};
+
+export type ImageDB = {
+  id: number;
+  filename: string;
+  url: string;
+};

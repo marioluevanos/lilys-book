@@ -1,9 +1,10 @@
 import type OpenAI from "openai";
 import {
+  BookDB,
   BookProps,
   BookResponsePayload,
   GenerateResponseOptions,
-  ImageProps,
+  ImageDB,
   ImageResponsePayload,
 } from "./types";
 
@@ -111,27 +112,87 @@ export async function generateBook(
   }
 }
 
-export async function uploadBase64Image(
+export async function getBookDB(
+  bookId: number | string
+): Promise<BookDB | undefined> {
+  const response = await fetch(
+    `${import.meta.env.VITE_API}/api/books/${bookId}`
+  );
+
+  const data: BookDB = await response.json();
+
+  if (data.title) {
+    return data;
+  }
+}
+
+export async function updateBookDB(
+  book: BookProps,
+  bookId: number
+): Promise<BookDB | undefined> {
+  const response = await fetch(
+    `${import.meta.env.VITE_API}/api/books/${bookId}`,
+    {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(book),
+    }
+  );
+
+  const data: BookDB = await response.json();
+
+  console.log("updateBookDB", { data });
+
+  if (data.title) {
+    return data;
+  }
+}
+
+export async function uploadBookDB(book: BookProps): Promise<BookDB> {
+  const response = await fetch(`${import.meta.env.VITE_API}/api/books`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(book),
+  });
+
+  const data: BookDB = await response.json();
+
+  console.log("upload Book", { data });
+
+  if (data.id) {
+    return data;
+  }
+
+  return book;
+}
+
+export async function uploadBase64ImageDB(
   base64: string,
-  fileName: string
-): Promise<ImageProps> {
+  fileName: string,
+  responseId: string | undefined
+): Promise<ImageDB> {
   const res = await fetch(base64); // Convert base64 to binary
   const blob = await res.blob(); // or use Buffer in Node.js
   const file = new File([blob], fileName, { type: "image/png" }); // Create a File (browser) or Blob
   const formData = new FormData();
 
   formData.append("file", file);
+  formData.append("response_id", responseId || "");
 
-  const response = await fetch(`${import.meta.env.VITE_API}/api/upload`, {
+  const response = await fetch(`${import.meta.env.VITE_API}/api/images`, {
     method: "POST",
     body: formData,
   });
 
-  const data: { url: string } = await response.json();
+  const data: ImageDB = await response.json();
 
   if (data.url) {
-    return { url: `${data.url}` };
+    return data;
   }
 
-  return { url: base64 };
+  return { url: base64, id: 0, filename: "test.png" };
 }

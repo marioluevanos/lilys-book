@@ -1,6 +1,6 @@
 .book {
-  --book-bg: black;
-  --book-text: #ccc;
+  --book-bg: var(--bg);
+  --book-text: var(--text);
 
   height: 100svh;
   padding: 0;
@@ -14,53 +14,61 @@
 .book .page {
   position: relative;
   min-width: 100vw;
-  padding: 0;
-  overflow: hidden;
-  display: flex;
-  align-items: flex-end;
-  flex-direction: column;
+  min-height: 100svh;
+  overflow: hidden auto;
+  /* scroll-snap-type: y proximity; */
+  scroll-behavior: smooth;
+  overscroll-behavior-y: contain;
+  scrollbar-width: none; /* Firefox */
+  overflow: -moz-scrollbars-none;
+  scroll-padding: 1.5rem 1rem 1rem;
+  padding: 1.5rem 0 0;
 
-  &:not(.home):not(.last)::after {
-    content: "";
-    position: absolute;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    height: 6rem;
-    z-index: 1;
-    pointer-events: none;
-    background: linear-gradient(0deg, black, transparent);
+  &::-webkit-scrollbar {
+    display: none; /* Safari and Chrome */
+  }
+
+  & > * {
+    scroll-snap-align: start;
   }
 
   &.home {
+    position: relative;
+    display: flex;
     align-items: center;
     justify-content: center;
-    position: relative;
     background: var(--bg);
 
     & p {
       margin: 0;
     }
-
-    & .next-page {
-      align-self: flex-start;
-      margin: 0 2rem;
-    }
   }
 
   &.last {
-    align-items: flex-start;
-    justify-content: center;
     padding: 2rem;
 
     & h3 {
-      color: var(--accent-text);
+      color: var(--accent-text2);
       font-size: 14px;
     }
 
     & p {
       font-size: 1.5rem;
       margin: 0;
+    }
+
+    & .cta-new-book {
+      margin-top: 1.5rem;
+    }
+
+    & form {
+      margin-top: 1.5rem;
+      padding: 0;
+      background: none;
+
+      & textarea {
+        background: var(--bg1);
+      }
     }
   }
 }
@@ -75,23 +83,10 @@
   flex-direction: column;
   z-index: 1;
   width: 100%;
-  height: 30svh;
-  overflow: hidden auto;
-  padding: 0rem 1rem 9rem;
-  scroll-padding: 2.5rem 0 9rem 0;
-  scroll-behavior: smooth;
-  scroll-snap-type: y mandatory;
-  overscroll-behavior-y: contain;
-  scrollbar-width: none; /* Firefox */
-  overflow: -moz-scrollbars-none;
+  padding: 0rem 1rem 6rem;
   z-index: 1;
 
-  &::-webkit-scrollbar {
-    display: none; /* Safari and Chrome */
-  }
-
   & p {
-    color: white;
     scroll-snap-align: start;
     scroll-snap-stop: normal;
     margin: 0 0 1rem;
@@ -109,13 +104,15 @@
  * Art section
  */
 .book .page .art {
-  position: absolute;
+  position: relative;
   inset: 0;
-  min-width: 100vw;
-  width: 100%;
+  min-width: calc(100vw - 2rem);
+  width: calc(100vw - 2rem);
   min-height: 70svh;
   height: 70svh;
-  margin: 0;
+  margin: 0 1rem 1rem;
+  overflow: hidden;
+  border-radius: 1rem;
 
   & .download {
     position: absolute;
@@ -123,14 +120,6 @@
     right: 1rem;
     color: white;
     z-index: 300;
-  }
-
-  &::before {
-    pointer-events: none;
-    content: "";
-    background: linear-gradient(0deg, var(--book-bg) 0%, transparent 25%);
-    position: absolute;
-    inset: 0 0 -0.5rem 0;
   }
 
   & img {
@@ -149,21 +138,26 @@
   z-index: 100;
   flex: 1;
   display: flex;
-  align-items: flex-end;
+  align-items: flex-start;
   justify-content: center;
   padding: 4rem 1rem 2rem;
   width: 100%;
-  height: 100%;
+  height: min-content;
   position: relative;
 
-  & .button {
+  & .button.generate-image {
     box-shadow: none;
     background: none;
-    border: 1px dotted var(--accent);
-    color: var(--accent-text);
+    border: 1px solid var(--bg2);
+    color: var(--text);
     border-radius: 1rem;
-    height: 100%;
     width: 100%;
+    gap: 1rem;
+
+    & svg {
+      width: 1.5rem;
+      height: 1.5rem;
+    }
   }
 }
 
@@ -192,12 +186,12 @@
 /**
  * Page Number
  */
-.page-number {
+.page .page-number {
   margin: 0;
-  position: fixed;
-  top: 1.5rem;
-  left: 0;
+  position: absolute;
+  top: 3rem;
   right: 0;
+  left: 0;
   margin: auto;
   background: var(--accent);
   color: var(--accent-text);
@@ -209,6 +203,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  scroll-snap-align: unset;
   transition: opacity 0.3s var(--ease-out-sine);
   opacity: 1;
   z-index: 100;

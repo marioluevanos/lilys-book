@@ -1,8 +1,9 @@
 import "./Book.css";
-import { BookProps, ImageProps, PageProps } from "../../types";
+import { BookDB, ImageProps } from "../../types";
 import {
   BaseSyntheticEvent,
   FC,
+  ReactNode,
   useCallback,
   useEffect,
   useRef,
@@ -19,66 +20,37 @@ import { ImageAddIcon } from "../Icon";
 
 const { log } = console;
 
-type NovelProps = {
-  book: BookProps & { responseId: string };
+type _BookProps = {
+  book: BookDB & { responseId: string };
   images: Record<number, ImageProps>;
+  form: ReactNode;
 };
 
-export const Book: FC<NovelProps> = (props) => {
-  const { book, images = [] } = props;
+export const Book: FC<_BookProps> = (props) => {
+  const { book, images = [], form } = props;
   const bookRef = useRef<HTMLOListElement>(null);
   const [isGeneratingImage, setIsGeneratingImage] = useState(false);
   const { pagesRef, pageIndex, bookProgress, onPageChange } = useBookObserver();
+  const currentImageId = book.pages[pageIndex].imageId;
+  const currentImage = images[pageIndex];
 
-  /**
-   * Generate an image for the page, and
-   *   1. Update state and
-   *   2. Update browser storage
-   */
-  const updatePageWithImage = useCallback(
-    async (
-      page: PageProps,
-      pageIndex: number,
-      bookTitle: string,
-      previousResponseId?: string
-    ) => {
-      try {
-        const hasImage = (images[pageIndex]?.url || "").length > 0;
+  console.log({ currentImage, currentImageId });
 
-        if (!hasImage) {
-          setIsGeneratingImage(true);
-          const prompt = imagePrompt({
-            input: page.synopsis,
-            previousResponseId,
-          });
-          log("imagePrompt", { prompt });
-          const response = await generateImage(prompt);
-          log("generateImage", { response });
-
-          if (response.data.url.length <= 0) {
-            console.error("Failed", response);
-            setIsGeneratingImage(false);
-            return;
-          }
-
-          events.emit("generatedimage", {
-            data: { image: response.data, pageIndex, bookTitle },
-          });
-        }
-      } catch (e) {
-        console.error(e);
-      } finally {
-        setIsGeneratingImage(false);
-      }
+  const onNewBook = useCallback(
+    (event: BaseSyntheticEvent) => {
+      event.preventDefault();
+      events.emit("drawer", {
+        children: form,
+      });
     },
-    [images]
+    [form]
   );
 
   /**
    * Handle generate image click
    */
   const onGenerateImage = useCallback(
-    (event: BaseSyntheticEvent) => {
+    async (event: BaseSyntheticEvent) => {
       event.preventDefault();
       const pageIndex = +event.target.dataset.pageIndex;
       const page = book.pages[pageIndex];
@@ -86,33 +58,62 @@ export const Book: FC<NovelProps> = (props) => {
       const previousResponseId = prevImage?.responseId || book.responseId;
 
       if (page) {
-        updatePageWithImage(page, pageIndex, book.title, previousResponseId);
+        try {
+          const hasImage = (images[pageIndex]?.url || "").length > 0;
+
+          if (!hasImage) {
+            setIsGeneratingImage(true);
+            const prompt = imagePrompt({
+              input: page.synopsis,
+              previousResponseId,
+            });
+            log("imagePrompt", { prompt });
+            const response = await generateImage(prompt);
+            log("generateImage", { response });
+
+            if (response.data.url.length <= 0) {
+              console.error("Failed", response);
+              setIsGeneratingImage(false);
+              return;
+            }
+
+            events.emit("generatedimage", {
+              data: { image: response.data, pageIndex, bookTitle: book.title },
+            });
+          }
+        } catch (e) {
+          console.error(e);
+        } finally {
+          setIsGeneratingImage(false);
+        }
       }
     },
-    [updatePageWithImage, images, book]
+    [images, book]
   );
 
-  useEffect(() => {
+  /**
+   * Handle the generated image
+   */
+  const onBookGenerated = useCallback(async () => {
     if (bookRef.current) {
       bookRef.current.scrollTo({
-        left: pageIndex * window.innerWidth,
-        behavior: "smooth",
+        left: 0,
+        behavior: "instant",
       });
     }
-  }, [pageIndex]);
+  }, []);
+
+  useEffect(() => {
+    events.on("generatedbook", onBookGenerated);
+  }, [onBookGenerated]);
 
   return (
     <main id="book" data-page-index={String(pageIndex)}>
       <BookProgress progress={bookProgress} />
-      <p className="page-number">{pageIndex}</p>
-      <ol className="h-scroll book">
-        {/* <li
-          className="h-scroll-section page home"
-          data-page-index={String(0)}
-          ref={(el) => el && (pagesRef.current[0] = el)}
-        >
+      <ol className="h-scroll book" ref={bookRef}>
+        <li className="h-scroll-section page home">
           <h1>{book.title}</h1>
-        </li> */}
+        </li>
         {book.pages.map((page, i) => (
           <li
             key={page.synopsis}
@@ -120,6 +121,7 @@ export const Book: FC<NovelProps> = (props) => {
             data-page-index={String(i)}
             ref={(el) => el && (pagesRef.current[i] = el)}
           >
+            <p className="page-number">{String(i + 1)}</p>
             {images[i]?.url ? (
               <figure className="art">
                 <img
@@ -153,14 +155,13 @@ export const Book: FC<NovelProps> = (props) => {
             </div>
           </li>
         ))}
-        {/* <li
-          className="h-scroll-section page last"
-          ref={(el) => el && (pagesRef.current[1 + book.pages.length] = el)}
-          data-page-index={String(1 + book.pages.length)}
-        >
+        <li className="h-scroll-section page last">
           <h3>Fun Fact</h3>
           <p>{book.randomFact}</p>
-        </li> */}
+          <Button className="cta-new-book" onClick={onNewBook}>
+            Create new book
+          </Button>
+        </li>
       </ol>
       <nav className="book-nav" style={{ display: "none" }}>
         <button

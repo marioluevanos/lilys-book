@@ -5,6 +5,7 @@ import {
   useState,
   BaseSyntheticEvent,
 } from "react";
+import { events } from "../../events";
 
 /**
  * Intersection Observer for the BookProps
@@ -24,6 +25,7 @@ export function useBookObserver() {
         const li = target as HTMLLIElement;
         const { pageIndex } = li.dataset;
         if (pageIndex && !isNaN(+pageIndex)) {
+          events.emit("pagechange", { data: +pageIndex });
           setPageIndex(+pageIndex);
         }
       }

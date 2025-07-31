@@ -1,13 +1,11 @@
-import { BookProps, ImageProps } from "./types";
+import { BookDB, ImageProps } from "./types";
 
 const PROMPT_KEY = "prompt";
-const RESPONSE_IDS_KEY = "responseIds";
 const IMAGES_KEY = "images";
 const BOOK_KEY = "book";
 
 export const KEYS = {
   PROMPT_KEY,
-  RESPONSE_IDS_KEY,
   BOOK_KEY,
   IMAGES_KEY,
 };
@@ -16,12 +14,11 @@ export const KEYS = {
  * Load from local storage
  */
 export function preloadStorage(setters: {
-  getBook: (payload: BookProps | undefined) => void;
+  getBookIds: (payload: Array<number | string> | undefined) => void;
   getPrompt: (payload: string) => void;
-  getResponseIds: (payload: string[]) => void;
   getImages: (payload: ImageProps[]) => void;
 }) {
-  const { getBook, getResponseIds, getPrompt, getImages } = setters;
+  const { getBookIds, getPrompt, getImages } = setters;
 
   try {
     const prompt = localStorage.getItem(PROMPT_KEY);
@@ -32,25 +29,13 @@ export function preloadStorage(setters: {
     console.warn(error);
   }
 
-  const savedHistory = localStorage.getItem(RESPONSE_IDS_KEY);
-  if (savedHistory) {
-    try {
-      const responseIds = JSON.parse(savedHistory);
-      if (Array.isArray(responseIds)) {
-        getResponseIds(responseIds);
-      }
-    } catch (error) {
-      console.warn(error);
-    }
-  }
-
   const savedBook = localStorage.getItem(BOOK_KEY);
   if (savedBook) {
     try {
-      const story = JSON.parse(savedBook);
+      const story: Array<number | string> = JSON.parse(savedBook);
 
-      if (story && typeof story === "object") {
-        getBook(story);
+      if (Array.isArray(story)) {
+        getBookIds(story);
       }
     } catch (error) {
       console.warn(error);
@@ -70,16 +55,12 @@ export function preloadStorage(setters: {
   }
 }
 
-export function updateResponseIds(responseIds: string[] | undefined) {
-  if (Array.isArray(responseIds)) {
-    localStorage.setItem(KEYS.RESPONSE_IDS_KEY, JSON.stringify(responseIds));
-  }
-}
-
-export function updateBook(bookCreated: BookProps | undefined) {
+export function updateBookStorage(bookCreated: BookDB | undefined) {
   if (bookCreated) {
-    localStorage.setItem(KEYS.BOOK_KEY, JSON.stringify(bookCreated));
+    localStorage.setItem(KEYS.BOOK_KEY, JSON.stringify([bookCreated.id]));
     return bookCreated;
+  } else {
+    localStorage.removeItem(KEYS.BOOK_KEY);
   }
 }
 
@@ -89,7 +70,9 @@ export function updatePrompt(prompt: string | undefined) {
   }
 }
 
-export function updateImages(images: Record<number, ImageProps> | undefined) {
+export function updateImageStorage(
+  images: Record<number, ImageProps> | undefined
+) {
   if (images) {
     localStorage.setItem(KEYS.IMAGES_KEY, JSON.stringify(images));
   }

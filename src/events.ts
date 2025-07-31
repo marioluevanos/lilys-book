@@ -1,30 +1,52 @@
 import { ReactNode } from "react";
 import { ImageProps } from "./types";
 
-export type EventPayload = {
-  children?: ReactNode;
-  data?: {
-    image: ImageProps;
-    pageIndex: number;
-    bookTitle: string;
-  };
+type EventPayloads =
+  | {
+      event: "drawer";
+      payload: { children: ReactNode };
+    }
+  | {
+      event: "drawerclose";
+      payload: undefined;
+    }
+  | {
+      event: "generatedbook";
+      payload: undefined;
+    }
+  | {
+      event: "generatedimage";
+      payload: {
+        data: { image: ImageProps; pageIndex: number; bookTitle: string };
+      };
+    }
+  | {
+      event: "pagechange";
+      payload: {
+        data: number;
+      };
+    };
+
+export type EventMap = {
+  [E in EventPayloads as E["event"]]: E["payload"];
 };
 
-type EventKey = "drawer" | "drawerclose" | "generatedimage";
+type EventName = keyof EventMap;
+
+type Listener<K extends EventName> = (payload: EventMap[K]) => void;
 
 interface EventEmitter {
-  on: (event: EventKey, listener: (payload: EventPayload) => void) => void;
-  off: (event: EventKey, listener: (payload: EventPayload) => void) => void;
-  emit: (event: EventKey, payload: EventPayload) => void;
+  on: <K extends EventName>(event: K, listener: Listener<K>) => void;
+  off: <K extends EventName>(event: K, listener: Listener<K>) => void;
+  emit: <K extends EventName>(event: K, payload: EventMap[K]) => void;
 }
 
 /**
  * Typed event emitter
  */
 export function createEventEmitter(): EventEmitter {
-  const listeners: Partial<
-    Record<string, Array<(args: EventPayload) => void>>
-  > = {};
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const listeners: Partial<Record<EventName, Array<(args: any) => void>>> = {};
 
   return {
     on(event, fn) {

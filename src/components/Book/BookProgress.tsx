@@ -16,6 +16,7 @@ export const BookProgress: FC<{ progress: number }> = (props) => {
         transform: `scaleX(${progress})`,
         transition: "0.3s var(--ease-in-out-sine)",
         transformOrigin: "0% 0%",
+        zIndex: 900,
       }}
     ></div>
   );

@@ -1,8 +1,8 @@
 :root {
   --accent: hsl(274deg 71% 50%);
   --accent2: hsl(274deg 71% 30%);
-  --accent-text: hsl(274deg 71% 94%);
-  --secondary: hsl(161deg 40% 87%);
+  --accent-text: hsl(274deg 50% 94%);
+  --accent-text2: hsl(274deg 50% 60%);
   --bg: hsl(210deg 0% 100%);
   --bg1: hsl(210deg 16% 94%);
   --bg2: hsl(210deg 8% 90%);
@@ -17,7 +17,7 @@
     --accent: hsl(274deg 71% 30%);
     --accent2: hsl(274deg 71% 16%);
     --accent-text: hsl(274deg 20% 70%);
-    --secondary: hsl(161deg 40% 66%);
+    --accent-text2: hsl(274deg 51% 94%);
     --bg: hsl(210deg 22% 8%);
     --bg1: hsl(210deg 22% 12%);
     --bg2: hsl(210deg 22% 20%);
