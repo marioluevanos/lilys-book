@@ -1,14 +1,16 @@
 import { BaseSyntheticEvent, useCallback, useEffect, useState } from "react";
 import {
   generateBook,
+  generateImage,
   getBookDB,
+  getImageDB,
   updateBookDB,
   uploadBase64ImageDB,
   uploadBookDB,
 } from "../library";
 import { useModes } from "../hooks/useModes";
-import { BookDB, ImageProps } from "../types";
-import { initialImages, bookPrompt } from "../system";
+import { BookDB, BookState, PageState } from "../types";
+import { bookPrompt, imagePrompt } from "../system";
 import { preloadStorage, updateBookStorage, updatePrompt } from "../storage";
 import { Form } from "./Form/Form";
 import { Drawer } from "./Drawer/Drawer";
@@ -24,79 +26,136 @@ function App() {
   const { size, theme } = useModes();
   const [loading, setLoading] = useState<boolean>(false);
   const [prompt, setPrompt] = useState("");
-  const [book, setBook] = useState<BookDB & { responseId?: string }>();
-  const [images, setImages] = useState<ImageProps[]>(initialImages);
+  const [book, setBook] = useState<BookState>();
+  const [isGeneratingImage, setIsGeneratingImage] = useState(false);
 
   const onPageChange = useCallback(
-    (payload: EventMap["pagechange"]) => {
-      const currentImage = images[payload.data];
-      const currentImageId = book?.pages[payload.data];
+    async (pageIdx: EventMap["pagechange"]) => {
+      const pages = book?.pages || [];
+      const currentPage = pages[pageIdx];
+      const currentImage = pages[pageIdx]?.image?.url;
 
-      if (!currentImage.url) {
-        //
+      if (!currentImage && currentPage?.image?.id) {
+        const image = await getImageDB(currentPage.image.id);
+
+        setBook((prev) => ({
+          ...prev,
+          pages: (prev?.pages || []).reduce<PageState[]>((acc, p, i) => {
+            if (i === pageIdx) {
+              acc.push({ ...p, image });
+            }
+
+            acc.push(p);
+            return acc;
+          }, []),
+        }));
       }
-      console.log(payload, { currentImage, currentImageId });
     },
-    [images, book]
+    [book]
   );
   /**
    * Handle the generated image
    */
   const onGeneratedImage = useCallback(
     async (payload: EventMap["generatedimage"]) => {
-      const { data } = payload;
-      const pageIndex = data?.pageIndex || 0;
-      const generatedImage = data?.image;
+      const pageIndex = payload?.pageIndex || 0;
+      const generatedImage = payload?.image;
       const filename = `${toKebabCase(
-        data?.bookTitle || "image"
+        payload?.bookTitle || "image"
       )}-${pageIndex}.png`;
 
-      log(payload, { generatedImage, filename, pageIndex, data });
+      log(payload, { generatedImage, filename, pageIndex, payload });
 
       if (generatedImage?.url && (generatedImage?.url || "").length > 0) {
-        log("calling uploadBase64Image...", { generatedImage, filename });
+        log("calling uploadBase64Image...", {
+          generatedImage,
+          book,
+          filename,
+        });
         const uploadImage = await uploadBase64ImageDB(
           generatedImage.url,
           filename,
-          generatedImage.responseId
+          generatedImage.response_id
         );
+
         log("uploadBase64Image results:", { uploadImage });
 
         if (book && book.id) {
-          const pageToUpdate = book.pages[pageIndex];
-          if (pageToUpdate) {
-            pageToUpdate.imageId = uploadImage.id;
-            pageToUpdate.responseId = generatedImage.responseId;
+          const pages = book.pages || [];
+          const pageToUpdate = pages[pageIndex];
+
+          // Important assignment, make reference to page to image
+          pageToUpdate.image_id = uploadImage.id;
+
+          if (book) {
+            const bookUpdated: BookState = {
+              ...book,
+              pages: (book?.pages || []).map((p, i) => {
+                return i === pageIndex ? pageToUpdate : p;
+              }),
+            };
+
+            log("bookUpdated", {
+              bookUpdated,
+              pageIndex,
+              pageToUpdate,
+            });
+
+            const bookImageUpdated = await updateBookDB(bookUpdated, book.id);
+            updateBookStorage(bookImageUpdated);
+            setBook(bookImageUpdated);
           }
+        }
+      }
+    },
+    [book]
+  );
 
-          console.log({ pageToUpdate, bookId: book.id });
+  /**
+   * Handle generate image click
+   */
+  const onGenerateImage = useCallback(
+    async (event: BaseSyntheticEvent) => {
+      event.preventDefault();
+      const pageIndex = +event.target.dataset.pageIndex;
+      const pages = book?.pages || [];
+      const page = pages[pageIndex];
+      const prevImage = pages[pageIndex - 1]?.image;
+      const previous_response_id = prevImage?.response_id || book?.response_id;
 
-          const bookUpdated = {
-            ...book,
-            pages: book.pages.map((p, i) => {
-              return i === pageIndex ? pageToUpdate : p;
-            }),
-          };
+      console.log({ previous_response_id, page, prevImage, pages, pageIndex });
+      if (page && previous_response_id) {
+        try {
+          const hasImage = (page?.image?.url || "").length > 0;
 
-          console.log("bookUpdated", bookUpdated);
+          if (!hasImage) {
+            setIsGeneratingImage(true);
+            const prompt = imagePrompt({
+              input: page.synopsis,
+              previous_response_id,
+            });
+            log("imagePrompt", { prompt });
+            const response = await generateImage(prompt);
+            log("generateImage", { response });
 
-          const bookImageUpdated = await updateBookDB(bookUpdated, book.id);
-          updateBookStorage(bookImageUpdated);
-          setBook(bookImageUpdated);
+            if (response.url.length <= 0) {
+              console.error("Failed", response);
+              setIsGeneratingImage(false);
+              return;
+            }
 
-          setImages((prev) =>
-            prev.map((img, i) => {
-              if (i === pageIndex) {
-                log("setImages", { uploadImage, url: uploadImage.url });
-                return {
-                  ...generatedImage,
-                  url: uploadImage.url,
-                };
-              }
-
-              return img;
-            })
-          );
+            if (book) {
+              onGeneratedImage({
+                image: response,
+                pageIndex,
+                bookTitle: book.title,
+              });
+            }
+          }
+        } catch (e) {
+          console.error(e);
+        } finally {
+          setIsGeneratingImage(false);
         }
       }
     },
@@ -124,14 +183,14 @@ function App() {
 
       const bookResponse = await generateBook(prompt);
 
-      if (bookResponse?.data) {
-        const bookCreated: typeof book = {
-          ...bookResponse?.data,
-          responseId: bookResponse.responseId,
-        };
-        const bookUploaded = await uploadBookDB(bookCreated);
-        setBook(bookUploaded);
-        updateBookStorage(bookUploaded);
+      if (bookResponse) {
+        const uploadedBook = await uploadBookDB({
+          ...bookResponse,
+          response_id: bookResponse.response_id,
+        });
+
+        setBook(uploadedBook);
+        updateBookStorage(uploadedBook);
       }
 
       event.target.value = "";
@@ -156,7 +215,6 @@ function App() {
    * Set state from browser storage
    */
   useEffect(() => {
-    events.on("generatedimage", onGeneratedImage);
     events.on("pagechange", onPageChange);
   }, [onGeneratedImage, onPageChange]);
 
@@ -190,13 +248,8 @@ function App() {
           }
         }
       },
-      getImages: (h) => setImages(h),
     });
   }, [book]);
-
-  // useEffect(() => {
-  //   updateImageStorage(images);
-  // }, [images]);
 
   return (
     <div className="app" data-size={size} data-theme={theme}>
@@ -204,11 +257,15 @@ function App() {
       {book ? (
         <>
           <Book
+            onGenerateImageClick={onGenerateImage}
+            isGeneratingImage={isGeneratingImage}
             book={{
               ...book,
-              responseId: book.responseId || "",
+              pages: book.pages || [],
+              title: book.title || "",
+              response_id: book.response_id || "",
+              random_fact: book.random_fact || "",
             }}
-            images={images}
             key="Novel"
             form={<Form onSubmit={onSubmit} disabled={loading} />}
           />

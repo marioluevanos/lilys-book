@@ -25,7 +25,6 @@ export function useBookObserver() {
         const li = target as HTMLLIElement;
         const { pageIndex } = li.dataset;
         if (pageIndex && !isNaN(+pageIndex)) {
-          events.emit("pagechange", { data: +pageIndex });
           setPageIndex(+pageIndex);
         }
       }
@@ -87,6 +86,10 @@ export function useBookObserver() {
       observers.forEach((io) => io.disconnect());
     };
   }, [onIntersection, onTouchEnd]);
+
+  useEffect(() => {
+    events.emit("pagechange", +pageIndex);
+  }, [pageIndex]);
 
   return {
     pagesRef,

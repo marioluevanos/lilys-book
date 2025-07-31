@@ -1,13 +1,11 @@
-import { BookDB, ImageProps } from "./types";
+import { BookDB } from "./types";
 
 const PROMPT_KEY = "prompt";
-const IMAGES_KEY = "images";
 const BOOK_KEY = "book";
 
 export const KEYS = {
   PROMPT_KEY,
   BOOK_KEY,
-  IMAGES_KEY,
 };
 
 /**
@@ -16,9 +14,8 @@ export const KEYS = {
 export function preloadStorage(setters: {
   getBookIds: (payload: Array<number | string> | undefined) => void;
   getPrompt: (payload: string) => void;
-  getImages: (payload: ImageProps[]) => void;
 }) {
-  const { getBookIds, getPrompt, getImages } = setters;
+  const { getBookIds, getPrompt } = setters;
 
   try {
     const prompt = localStorage.getItem(PROMPT_KEY);
@@ -41,18 +38,6 @@ export function preloadStorage(setters: {
       console.warn(error);
     }
   }
-
-  const savedImages = localStorage.getItem(IMAGES_KEY);
-  if (savedImages) {
-    try {
-      const images = JSON.parse(savedImages);
-      if (Array.isArray(images)) {
-        getImages(images);
-      }
-    } catch (error) {
-      console.warn(error);
-    }
-  }
 }
 
 export function updateBookStorage(bookCreated: BookDB | undefined) {
@@ -67,13 +52,5 @@ export function updateBookStorage(bookCreated: BookDB | undefined) {
 export function updatePrompt(prompt: string | undefined) {
   if (prompt) {
     localStorage.setItem(KEYS.PROMPT_KEY, prompt);
-  }
-}
-
-export function updateImageStorage(
-  images: Record<number, ImageProps> | undefined
-) {
-  if (images) {
-    localStorage.setItem(KEYS.IMAGES_KEY, JSON.stringify(images));
   }
 }

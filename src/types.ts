@@ -3,13 +3,13 @@ import { ChatCompletionMessageParam as History } from "openai/resources/index.mj
 
 export type { History };
 
-export type BookProps = z.infer<typeof BookSchema>;
+export type BookProps = z.infer<typeof BookSchema> & { response_id: string };
 export type PageProps = z.infer<typeof PageSchema>;
 export type ImageProps = z.infer<typeof ImageSchema>;
 
 export const ImageSchema = z.object({
   url: z.string(),
-  responseId: z.string().optional(),
+  response_id: z.string(),
 });
 
 export const PageSchema = z.object({
@@ -20,42 +20,41 @@ export const PageSchema = z.object({
 export const BookSchema = z.object({
   title: z.string(),
   pages: z.array(PageSchema),
-  randomFact: z.string(),
+  random_fact: z.string(),
 });
 
 export type GenerateResponseOptions = {
   input: string;
-  previousResponseId: string | undefined;
-  asImage?: boolean;
+  previous_response_id: string | undefined;
+  as_image?: boolean;
   instructions: string;
 };
 
-export type BookResponsePayload = {
-  data: BookProps;
-  responseId: string;
-};
+export type BookResponsePayload = BookProps;
 
-export type ImageResponsePayload = {
-  data: ImageProps;
-  responseId: string;
-};
-
-export type ReponsePayload = BookResponsePayload | ImageResponsePayload;
+export type ImageResponsePayload = ImageProps;
 
 export type PageDB = PageProps & {
-  imageId?: number; // Reference to images table
-  responseId?: string;
+  image_id?: number;
 };
 
-export type BookDB = BookProps & {
+export type PageState = PageProps & {
+  image?: ImageDB;
+  image_id?: string | number;
+};
+
+export type BookDB<T = PageDB> = BookProps & {
   id?: number;
-  pages: PageDB[];
+  pages: T[];
   created_at?: string;
   updated_at?: string;
 };
 
 export type ImageDB = {
-  id: number;
   filename: string;
+  id: number;
   url: string;
+  response_id: string;
 };
+
+export type BookState = Partial<BookDB<PageState>> & { response_id?: string };

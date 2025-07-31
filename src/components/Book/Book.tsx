@@ -1,5 +1,5 @@
 import "./Book.css";
-import { BookDB, ImageProps } from "../../types";
+import { BookDB, ImageProps, PageState } from "../../types";
 import {
   BaseSyntheticEvent,
   FC,
@@ -7,34 +7,25 @@ import {
   useCallback,
   useEffect,
   useRef,
-  useState,
 } from "react";
 import { Button } from "../Button/Button";
 import { useBookObserver } from "./useBookObserver";
 import { cn } from "../../utils/cn";
 import { events } from "../../events";
 import { BookProgress } from "./BookProgress";
-import { generateImage } from "../../library";
-import { imagePrompt } from "../../system";
 import { ImageAddIcon } from "../Icon";
 
-const { log } = console;
-
 type _BookProps = {
-  book: BookDB & { responseId: string };
-  images: Record<number, ImageProps>;
+  book: BookDB<PageState>;
   form: ReactNode;
+  onGenerateImageClick: (event: BaseSyntheticEvent) => void;
+  isGeneratingImage: boolean;
 };
 
 export const Book: FC<_BookProps> = (props) => {
-  const { book, images = [], form } = props;
+  const { book, form, isGeneratingImage, onGenerateImageClick } = props;
   const bookRef = useRef<HTMLOListElement>(null);
-  const [isGeneratingImage, setIsGeneratingImage] = useState(false);
   const { pagesRef, pageIndex, bookProgress, onPageChange } = useBookObserver();
-  const currentImageId = book.pages[pageIndex].imageId;
-  const currentImage = images[pageIndex];
-
-  console.log({ currentImage, currentImageId });
 
   const onNewBook = useCallback(
     (event: BaseSyntheticEvent) => {
@@ -44,51 +35,6 @@ export const Book: FC<_BookProps> = (props) => {
       });
     },
     [form]
-  );
-
-  /**
-   * Handle generate image click
-   */
-  const onGenerateImage = useCallback(
-    async (event: BaseSyntheticEvent) => {
-      event.preventDefault();
-      const pageIndex = +event.target.dataset.pageIndex;
-      const page = book.pages[pageIndex];
-      const prevImage = images[pageIndex - 1];
-      const previousResponseId = prevImage?.responseId || book.responseId;
-
-      if (page) {
-        try {
-          const hasImage = (images[pageIndex]?.url || "").length > 0;
-
-          if (!hasImage) {
-            setIsGeneratingImage(true);
-            const prompt = imagePrompt({
-              input: page.synopsis,
-              previousResponseId,
-            });
-            log("imagePrompt", { prompt });
-            const response = await generateImage(prompt);
-            log("generateImage", { response });
-
-            if (response.data.url.length <= 0) {
-              console.error("Failed", response);
-              setIsGeneratingImage(false);
-              return;
-            }
-
-            events.emit("generatedimage", {
-              data: { image: response.data, pageIndex, bookTitle: book.title },
-            });
-          }
-        } catch (e) {
-          console.error(e);
-        } finally {
-          setIsGeneratingImage(false);
-        }
-      }
-    },
-    [images, book]
   );
 
   /**
@@ -114,7 +60,7 @@ export const Book: FC<_BookProps> = (props) => {
         <li className="h-scroll-section page home">
           <h1>{book.title}</h1>
         </li>
-        {book.pages.map((page, i) => (
+        {(book.pages || []).map((page, i) => (
           <li
             key={page.synopsis}
             className="h-scroll-section page"
@@ -122,12 +68,17 @@ export const Book: FC<_BookProps> = (props) => {
             ref={(el) => el && (pagesRef.current[i] = el)}
           >
             <p className="page-number">{String(i + 1)}</p>
-            {images[i]?.url ? (
+
+            {"image" in page &&
+            page.image &&
+            typeof page.image === "object" &&
+            "url" in page.image &&
+            (page.image as ImageProps).url ? (
               <figure className="art">
                 <img
-                  key={images[i].responseId}
+                  key={`${page.image.url}`}
                   alt={page.synopsis}
-                  src={images[i].url}
+                  src={`${page.image.url}`}
                   width={820}
                   height={1030}
                 />
@@ -136,7 +87,7 @@ export const Book: FC<_BookProps> = (props) => {
               <div className="cta">
                 <Button
                   data-page-index={String(i)}
-                  onClick={onGenerateImage}
+                  onClick={onGenerateImageClick}
                   disabled={isGeneratingImage}
                   className={cn(
                     isGeneratingImage && "loading loading-gradient",
@@ -148,6 +99,7 @@ export const Book: FC<_BookProps> = (props) => {
                 </Button>
               </div>
             )}
+
             <div className="content">
               {page.content
                 .split(".")
@@ -157,7 +109,7 @@ export const Book: FC<_BookProps> = (props) => {
         ))}
         <li className="h-scroll-section page last">
           <h3>Fun Fact</h3>
-          <p>{book.randomFact}</p>
+          <p>{book.random_fact}</p>
           <Button className="cta-new-book" onClick={onNewBook}>
             Create new book
           </Button>

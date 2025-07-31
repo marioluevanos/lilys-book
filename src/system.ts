@@ -4,7 +4,7 @@ import { BookSchema, GenerateResponseOptions } from "./types";
 const numberOfPages = 6;
 
 export const initialImages = Array.from({ length: numberOfPages }).map(() => ({
-  responseId: "",
+  response_id: "",
   url: "",
 }));
 
@@ -42,7 +42,7 @@ Requirements:
 \`\`\`
 `,
     input: `<book-summary>${input}</book-summary>`,
-    previousResponseId: undefined,
+    previous_response_id: undefined,
   };
 }
 
@@ -57,7 +57,7 @@ export function imagePrompt(
     ${optionalCharacters}
     `,
     input: args.input,
-    previousResponseId: args.previousResponseId,
+    previous_response_id: args.previous_response_id,
   };
 }
 
@@ -70,5 +70,5 @@ const schema: z.infer<typeof BookSchema> = {
         "A very detailed scene synopsis. If it's needed, it should mention the environment, the weather, the characters involved, the time of day, etc.",
     },
   ],
-  randomFact: "A random fact about the story.",
+  random_fact: "A random fact about the story.",
 };

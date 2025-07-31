@@ -16,15 +16,11 @@ type EventPayloads =
     }
   | {
       event: "generatedimage";
-      payload: {
-        data: { image: ImageProps; pageIndex: number; bookTitle: string };
-      };
+      payload: { image: ImageProps; pageIndex: number; bookTitle?: string };
     }
   | {
       event: "pagechange";
-      payload: {
-        data: number;
-      };
+      payload: number;
     };
 
 export type EventMap = {
