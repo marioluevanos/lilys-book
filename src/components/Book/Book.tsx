@@ -62,7 +62,7 @@ export const Book: FC<_BookProps> = (props) => {
         </li>
         {(book.pages || []).map((page, i) => (
           <li
-            key={page.synopsis}
+            key={i}
             className="h-scroll-section page"
             data-page-index={String(i)}
             ref={(el) => el && (pagesRef.current[i] = el)}

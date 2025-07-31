@@ -34,9 +34,11 @@ function App() {
       const pages = book?.pages || [];
       const currentPage = pages[pageIdx];
       const currentImage = pages[pageIdx]?.image?.url;
+      const imageId = currentPage?.image_id || currentPage?.image?.id;
 
-      if (!currentImage && currentPage?.image?.id) {
-        const image = await getImageDB(currentPage.image.id);
+      console.log({ currentImage, currentPage, imageId });
+      if (!currentImage && imageId) {
+        const image = await getImageDB(imageId);
 
         setBook((prev) => ({
           ...prev,
@@ -56,7 +58,7 @@ function App() {
   /**
    * Handle the generated image
    */
-  const onGeneratedImage = useCallback(
+  const saveGeneratedImage = useCallback(
     async (payload: EventMap["generatedimage"]) => {
       const pageIndex = payload?.pageIndex || 0;
       const generatedImage = payload?.image;
@@ -95,15 +97,26 @@ function App() {
               }),
             };
 
+            const bookImageUpdated = await updateBookDB(bookUpdated, book.id);
+            updateBookStorage(bookImageUpdated);
+            setBook({
+              ...bookImageUpdated,
+              pages: (book?.pages || []).map((p, i) => {
+                return i === pageIndex
+                  ? {
+                      ...pageToUpdate,
+                      image: uploadImage,
+                    }
+                  : p;
+              }),
+            });
+
             log("bookUpdated", {
               bookUpdated,
               pageIndex,
               pageToUpdate,
+              bookImageUpdated,
             });
-
-            const bookImageUpdated = await updateBookDB(bookUpdated, book.id);
-            updateBookStorage(bookImageUpdated);
-            setBook(bookImageUpdated);
           }
         }
       }
@@ -145,7 +158,7 @@ function App() {
             }
 
             if (book) {
-              onGeneratedImage({
+              saveGeneratedImage({
                 image: response,
                 pageIndex,
                 bookTitle: book.title,
@@ -159,7 +172,7 @@ function App() {
         }
       }
     },
-    [book]
+    [book, saveGeneratedImage]
   );
 
   const getUserInput = useCallback((event: BaseSyntheticEvent): string => {
@@ -216,7 +229,7 @@ function App() {
    */
   useEffect(() => {
     events.on("pagechange", onPageChange);
-  }, [onGeneratedImage, onPageChange]);
+  }, [saveGeneratedImage, onPageChange]);
 
   /**
    * Set state from browser storage
