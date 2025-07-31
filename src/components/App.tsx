@@ -9,7 +9,7 @@ import {
   uploadBookDB,
 } from "../library";
 import { useModes } from "../hooks/useModes";
-import { BookDB, BookState, PageState } from "../types";
+import { BookDB, BookState } from "../types";
 import { bookPrompt, imagePrompt } from "../system";
 import { preloadStorage, updateBookStorage, updatePrompt } from "../storage";
 import { Form } from "./Form/Form";
@@ -19,8 +19,7 @@ import { LoadingProgress } from "./LoadingProgress/LoadingProgress";
 import { ActionButton } from "./ActionButton";
 import { Book } from "./Book/Book";
 import { toKebabCase } from "../utils/toKebabCase";
-
-const { log } = console;
+import { Books } from "./Books/Books";
 
 function App() {
   const { size, theme } = useModes();
@@ -33,23 +32,18 @@ function App() {
     async (pageIdx: EventMap["pagechange"]) => {
       const pages = book?.pages || [];
       const currentPage = pages[pageIdx];
-      const currentImage = pages[pageIdx]?.image?.url;
+      const currentImageUrl = pages[pageIdx]?.image?.url;
       const imageId = currentPage?.image_id || currentPage?.image?.id;
 
-      console.log({ currentImage, currentPage, imageId });
-      if (!currentImage && imageId) {
+      if (!currentImageUrl && imageId) {
         const image = await getImageDB(imageId);
-
+        const pageWImage = {
+          ...currentPage,
+          image,
+        };
         setBook((prev) => ({
           ...prev,
-          pages: (prev?.pages || []).reduce<PageState[]>((acc, p, i) => {
-            if (p.content === currentPage.content) {
-              acc.push({ ...p, image });
-            }
-
-            acc.push(p);
-            return acc;
-          }, []),
+          pages: pages.map((p, i) => (i === pageIdx ? pageWImage : p)),
         }));
       }
     },
@@ -66,25 +60,16 @@ function App() {
         payload?.bookTitle || "image"
       )}-${pageIndex}.png`;
 
-      log(payload, { generatedImage, filename, pageIndex, payload });
-
       if (generatedImage?.url && (generatedImage?.url || "").length > 0) {
-        log("calling uploadBase64Image...", {
-          generatedImage,
-          book,
-          filename,
-        });
         const uploadImage = await uploadBase64ImageDB(
           generatedImage.url,
           filename,
           generatedImage.response_id
         );
 
-        log("uploadBase64Image results:", { uploadImage });
-
         if (book && book.id) {
           const pages = book.pages || [];
-          const pageToUpdate = pages[pageIndex];
+          const { image: _, ...pageToUpdate } = pages[pageIndex];
 
           // Important assignment, make reference to page to image
           pageToUpdate.image_id = uploadImage.id;
@@ -110,13 +95,6 @@ function App() {
                   : p;
               }),
             });
-
-            log("bookUpdated", {
-              bookUpdated,
-              pageIndex,
-              pageToUpdate,
-              bookImageUpdated,
-            });
           }
         }
       }
@@ -136,20 +114,19 @@ function App() {
       const prevImage = pages[pageIndex - 1]?.image;
       const previous_response_id = prevImage?.response_id || book?.response_id;
 
-      console.log({ previous_response_id, page, prevImage, pages, pageIndex });
       if (page && previous_response_id) {
         try {
           const hasImage = (page?.image?.url || "").length > 0;
 
           if (!hasImage) {
             setIsGeneratingImage(true);
+
             const prompt = imagePrompt({
               input: page.synopsis,
               previous_response_id,
             });
-            log("imagePrompt", { prompt });
+
             const response = await generateImage(prompt);
-            log("generateImage", { response });
 
             if (response.url.length <= 0) {
               console.error("Failed", response);
@@ -159,9 +136,9 @@ function App() {
 
             if (book) {
               saveGeneratedImage({
+                bookTitle: book.title,
                 image: response,
                 pageIndex,
-                bookTitle: book.title,
               });
             }
           }
@@ -224,6 +201,28 @@ function App() {
     });
   }, [loading, onSubmit]);
 
+  const bootStrap = useCallback(
+    async (b: Array<number | string> | undefined) => {
+      if (book) return;
+      try {
+        const promises = (b || []).map((id) => getBookDB(id));
+        if (promises.some((v) => v)) {
+          const responses = await Promise.all(promises);
+          if (responses.some((v) => v)) {
+            const [dbBook] = responses;
+            if (dbBook) setBook(dbBook);
+          } else {
+            updateBookStorage(undefined);
+          }
+        }
+      } catch (error) {
+        console.error(error);
+        updateBookStorage(undefined);
+      }
+    },
+    [book]
+  );
+
   /**
    * Set state from browser storage
    */
@@ -237,32 +236,9 @@ function App() {
   useEffect(() => {
     preloadStorage({
       getPrompt: (p) => setPrompt(p),
-      getBookIds: async (b) => {
-        if (!book) {
-          try {
-            const promises = (b || []).map((id) => getBookDB(id));
-            if (promises.some((v) => v)) {
-              const responses = await Promise.all(promises);
-
-              if (responses.some((v) => v)) {
-                const [dbBook] = responses;
-
-                if (dbBook) {
-                  console.log(dbBook);
-                  setBook(dbBook as BookDB);
-                }
-              } else {
-                updateBookStorage(undefined);
-              }
-            }
-          } catch (error) {
-            log(error);
-            updateBookStorage(undefined);
-          }
-        }
-      },
+      getBookIds: bootStrap,
     });
-  }, [book]);
+  }, [bootStrap]);
 
   return (
     <div className="app" data-size={size} data-theme={theme}>
@@ -286,7 +262,10 @@ function App() {
           <ActionButton onClick={onActionClick} />
         </>
       ) : (
-        <Form onSubmit={onSubmit} disabled={loading} defaultValue={prompt} />
+        <>
+          <Books />
+          <Form onSubmit={onSubmit} disabled={loading} defaultValue={prompt} />
+        </>
       )}
     </div>
   );

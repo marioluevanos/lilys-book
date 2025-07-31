@@ -26,6 +26,7 @@ async function generateResponse(
     },
     body: JSON.stringify(getResponseOptions(args)),
   });
+
   const response = await request.json();
 
   return response;
@@ -51,7 +52,7 @@ function getResponseOptions(
 
 export async function generateImage(
   args: GenerateResponseOptions
-): Promise<ImageResponsePayload> {
+): Promise<ImageResponsePayload & { error?: unknown }> {
   const imageResponse = await generateResponse({
     ...args,
     as_image: true,
@@ -75,6 +76,7 @@ export async function generateImage(
   return {
     url: "",
     response_id: "",
+    error: imageResponse,
   };
 }
 
@@ -107,6 +109,21 @@ export async function generateBook(
 
   if (book) {
     return book;
+  }
+}
+
+export async function getBooksDB(): Promise<BookDB[] | undefined> {
+  const response = await fetch(
+    `${import.meta.env.VITE_API}/api/books?populate=images`,
+    {
+      method: "GET",
+    }
+  );
+
+  const data: BookDB[] = await response.json();
+
+  if (Array.isArray(data)) {
+    return data;
   }
 }
 
