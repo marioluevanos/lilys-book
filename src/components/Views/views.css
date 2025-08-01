@@ -37,6 +37,7 @@ main.view#home-view {
   z-index: 1;
 
   &::before {
+    pointer-events: none;
     z-index: 1;
     content: "";
     position: absolute;
