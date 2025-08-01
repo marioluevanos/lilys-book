@@ -16,23 +16,27 @@ export const BookFlip: FC<{ book?: BooksPreviewtate }> = (props) => {
    * Book pages
    */
   useEffect(() => {
-    gsap.to(".book-flip", {
-      scrollTrigger: {
-        scrub: 1,
-        start: () => 0,
-        end: () => window.innerHeight * 1,
-      },
-      scale: 0.5,
-    });
+    gsap.fromTo(
+      ".book-flip",
+      { scale: 0.5 },
+      {
+        scrollTrigger: {
+          scrub: 1,
+          start: () => 0,
+          end: () => window.innerHeight * 1,
+        },
+        scale: 1,
+      }
+    );
 
-    const PAGES = [...document.querySelectorAll(".book__page")];
+    const PAGES = [...document.querySelectorAll(".book-flip-page")];
 
-    PAGES.forEach((pagina, index) => {
-      gsap.set(pagina, { z: index === 0 ? PAGES.length + 1 : -index * 1 });
+    PAGES.forEach((page, index) => {
+      gsap.set(page, { z: index === 0 ? PAGES.length + 1 : -index * 1 });
 
       if (index === PAGES.length - 1) return false;
 
-      gsap.to(pagina, {
+      gsap.to(page, {
         rotateY: `-=${180 - index / 2}`,
         scrollTrigger: {
           scrub: 1,
@@ -41,7 +45,7 @@ export const BookFlip: FC<{ book?: BooksPreviewtate }> = (props) => {
         },
       });
 
-      gsap.to(pagina, {
+      gsap.to(page, {
         rotateY: `-=${180 - index / 2}`,
         scrollTrigger: {
           scrub: 1,
@@ -50,7 +54,7 @@ export const BookFlip: FC<{ book?: BooksPreviewtate }> = (props) => {
         },
       });
 
-      gsap.to(pagina, {
+      gsap.to(page, {
         z: index === 0 ? -(PAGES.length + 1) : index,
         scrollTrigger: {
           scrub: 1,
@@ -63,40 +67,47 @@ export const BookFlip: FC<{ book?: BooksPreviewtate }> = (props) => {
 
   return (
     <div className="book-flip">
-      <div className="book__spine"></div>
+      <div className="book-flip-spine"></div>
 
       <div
-        className={cn("pagina book__page", "book__cover book__cover--front")}
+        className={cn(
+          "pagina book-flip-page",
+          "book-flip-cover book-flip-cover-front"
+        )}
       >
-        <div className="page__half page__half--front">
+        <div className="book-flip-page-half book-flip-page-half-front">
           <p>{book?.title}</p>
-          <div className="page__number">{0}</div>
+          <div className="book-flip-page-number">{0}</div>
         </div>
-        <div className="page__half page__half--back">
+        <div className="book-flip-page-half book-flip-page-half-back">
           {pages[0]?.image?.url && <img src={pages[0].image?.url} />}
-          <div className="page__number">{1}</div>
+          <div className="book-flip-page-number">{1}</div>
         </div>
       </div>
-
-      {((book?.pages || []) as PageState[]).map((p, i, arr) => (
-        <div
-          key={i}
-          className={cn(
-            "pagina book__page",
-            i === 0 && "book__cover book__cover--front",
-            i === arr.length - 1 && "book__cover book__cover--back"
-          )}
-        >
-          <div className="page__half page__half--front">
+      {((book?.pages || []) as PageState[]).map((p, i) => (
+        <div key={i} className={cn("pagina book-flip-page")}>
+          <div className="book-flip-page-half">
             <p>{p.content}</p>
-            <div className="page__number">{i}</div>
+            <div className="book-flip-page-number">{i}</div>
           </div>
-          <div className="page__half page__half--back">
+          <div className="book-flip-page-half book-flip-page-half-back">
             {pages[i + 1]?.image?.url && <img src={pages[i + 1]?.image?.url} />}
-            <div className="page__number">{i + 1}</div>
+            <div className="book-flip-page-number">{i + 1}</div>
           </div>
         </div>
       ))}
+      <div
+        className={cn(
+          "pagina book-flip-page",
+          "book-flip-cover book-flip-cover-back"
+        )}
+      >
+        <div className="book-flip-page-half">
+          <p>randomf a</p>
+          <p>{book?.random_fact}</p>
+        </div>
+        <div className="book-flip-page-half book-flip-page-half-back"></div>
+      </div>
     </div>
   );
 };

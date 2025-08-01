@@ -1,4 +1,4 @@
-import "./BooksPreview.css";
+import "./BookShelf.css";
 
 import { getBooksPreviewDB, getImageDB } from "../../library";
 import { BookDB, ImageProps } from "../../types";
@@ -10,7 +10,7 @@ import {
   useEffect,
   useState,
 } from "react";
-import { useBooksPreview } from "./useBooksPreview";
+import { useBookShelf } from "./useBookShelf";
 
 type BooksPreviewProps = {
   className?: string;
@@ -34,11 +34,11 @@ function onIntersection(
   }
 }
 
-export const BooksPreview: FC<BooksPreviewProps> = (props) => {
+export const BookShelf: FC<BooksPreviewProps> = (props) => {
   const { onBookClick } = props;
   const [bookPreviews, setBookPreviews] = useState<BookPreview[]>();
   const [activeIndex, setActiveIndex] = useState(0);
-  const { booksRef } = useBooksPreview(
+  const { booksRef } = useBookShelf(
     bookPreviews?.length || 0,
     onIntersection.bind(null, setActiveIndex)
   );
@@ -74,29 +74,40 @@ export const BooksPreview: FC<BooksPreviewProps> = (props) => {
    */
   useEffect(() => {
     if (!bookPreviews) getBooksPreviewDB().then(fetchImageForBook);
-  }, [bookPreviews]);
+  }, [bookPreviews, fetchImageForBook]);
 
   return (
-    <section className="books-preview-scroll h-scroll">
-      {bookPreviews?.map((b, i) => (
-        <article
-          key={b.title}
-          className={cn("book-preview", activeIndex === i && "active")}
-          data-book-index={String(i)}
-        >
-          <figure
-            onClick={onBookClick}
-            ref={(el) => el && (booksRef.current[i] = el)}
-            className={cn("book-preview-image")}
-            data-book-id={String(b.id)}
+    <section className="book-shelf">
+      <div className="book-shelf-scroll h-scroll">
+        {bookPreviews?.map((b, i) => (
+          <article
+            key={b.title}
+            className={cn("book-shelf-book", activeIndex === i && "active")}
             data-book-index={String(i)}
           >
-            <img src={b.image?.url} alt="" />
-            <img src={b.image?.url} alt="" />
-          </figure>
-          <h3>{b.title}</h3>
-        </article>
-      ))}
+            <figure
+              onClick={onBookClick}
+              ref={(el) => el && (booksRef.current[i] = el)}
+              className={cn("book-shelf-image")}
+              data-book-id={String(b.id)}
+              data-book-index={String(i)}
+            >
+              <img src={b.image?.url} alt="" />
+              <img src={b.image?.url} alt="" />
+            </figure>
+            <h3 className="book-shelf-title">{b.title}</h3>
+          </article>
+        ))}
+
+        <div className="box">
+          <div className="box__face box__face--front">front</div>
+          <div className="box__face box__face--back">back</div>
+          <div className="box__face box__face--right">right</div>
+          <div className="box__face box__face--left">left</div>
+          <div className="box__face box__face--top">top</div>
+          <div className="box__face box__face--bottom">bottom</div>
+        </div>
+      </div>
     </section>
   );
 };

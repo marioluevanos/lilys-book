@@ -153,7 +153,7 @@ function App() {
         }
       }
     },
-    [book, saveGeneratedImage]
+    [book, saveGeneratedImage, options]
   );
 
   /**
@@ -239,7 +239,7 @@ function App() {
       setOptions(inputOptions);
       onFinalize(event);
     },
-    [getUserInput]
+    [getUserInput, onFinalize]
   );
 
   /**

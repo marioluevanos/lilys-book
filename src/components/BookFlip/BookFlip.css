@@ -21,22 +21,7 @@ body:has(.book-flip) {
 
 .book-flip {
   position: fixed;
-  width: 80vmin;
-  aspect-ratio: 8/11.5;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%) scale(1);
-  transform-style: preserve-3d;
-  perspective: 1200px;
-
-  & h1 {
-    font-size: 2rem;
-  }
-}
-
-.book-flip {
-  position: fixed;
-  width: 80vmin;
+  width: 92vmin;
   aspect-ratio: 8/11.5;
   top: 50%;
   left: 50%;
@@ -62,18 +47,18 @@ body:has(.book-flip) {
   }
 }
 
-.pagina .page__number {
+.pagina .book-flip-page-number {
   position: absolute;
   bottom: 1rem;
   font-size: 1vmin;
 }
-.page__half--front .page__number {
+.book-flip-page-half-front .book-flip-page-number {
   right: 1rem;
 }
-.page__half--back .page__number {
+.book-flip-page-half-back .book-flip-page-number {
   left: 1rem;
 }
-.page__half {
+.book-flip-page-half {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -87,14 +72,14 @@ body:has(.book-flip) {
   -webkit-clip-path: inset(0 0.5% 0 0.5%);
   clip-path: inset(0 0.5% 0 0.5%);
 }
-.page__half--front {
+.book-flip-page-half-front {
   --rotation: 0;
   --coefficient: 0;
   -webkit-backface-visibility: hidden;
   backface-visibility: hidden;
   border-radius: 0 5% 5% 0;
 }
-.page__half--back {
+.book-flip-page-half-back {
   --rotation: 180;
   --coefficient: 2;
   border-radius: 5% 0 0 5%;
@@ -111,7 +96,7 @@ body:has(.book-flip) {
   transform: translate(0, -50%);
   border-radius: 5% 0 0 5%;
 }
-.book__spine {
+.book-flip-spine {
   height: 100%;
   left: 0;
   top: 0;
@@ -121,7 +106,7 @@ body:has(.book-flip) {
   width: 12px;
   transform: translate3d(0, 0, -13px) scaleX(1) rotateY(0deg);
 }
-.book__page {
+.book-flip-page {
   position: absolute;
   left: 2%;
   top: 50%;
@@ -132,7 +117,7 @@ body:has(.book-flip) {
   z-index: calc(((var(--page-count) + 2) - var(--page-index)) * 2);
   transform-origin: 0% 50%;
 }
-.book__cover {
+.book-flip-cover {
   border-radius: 0 5% 5% 0;
   height: 100%;
   width: 100%;
@@ -141,23 +126,23 @@ body:has(.book-flip) {
   left: 0;
   background: var(--cover);
 }
-.book__cover--front {
+.book-flip-cover-front {
   transform-origin: 0 50%;
 }
-.book__cover--front .page__half--back {
+.book-flip-cover-front .book-flip-page-half-back {
   border-right: 1rem solid var(--spine);
 }
-.book__cover--back {
+.book-flip-cover-back {
   transform-origin: 0% 50%;
 }
-.book__cover--back .page__half--front {
+.book-flip-cover-back .book-flip-page-half-front {
   border-left: 1rem solid var(--spine);
 }
-.book__cover--back .book__insert {
+.book-flip-cover-back .book__insert {
   left: 0;
   border-radius: 0 5% 5% 0;
 }
-.book__page:not(.book__cover) .page__half {
+.book-flip-page:not(.book-flip-cover) .book-flip-page-half {
   background: repeating-linear-gradient(
         0deg,
         transparent 0 1rem,

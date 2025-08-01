@@ -1,8 +1,9 @@
 import "./views.css";
 
 import { BaseSyntheticEvent, FC } from "react";
-import { Book } from "../Book/Book";
 import { BooksPreviewtate } from "../../types";
+// import { BookFlip } from "../BookFlip/BookFlip";
+import { Book } from "../Book/Book";
 
 export const BookView: FC<{
   onGenerateImage: (event: BaseSyntheticEvent) => Promise<void>;
@@ -13,6 +14,7 @@ export const BookView: FC<{
   return (
     book && (
       <main id="book-view" className="view">
+        {/* <BookFlip book={book} /> */}
         <Book
           book={book}
           isGeneratingImage={isGeneratingImage}

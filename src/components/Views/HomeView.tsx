@@ -5,7 +5,7 @@ import { Button } from "../Button/Button";
 import { events } from "../../events";
 import { Form } from "../Form/Form";
 import { PlusIcon } from "../Icon";
-import { BooksPreview } from "../BooksPreview/BooksPreview";
+import { BookShelf } from "../BookShelf/BookShelf";
 
 export const HomeView: FC<{
   onBookClick: (event: BaseSyntheticEvent) => void;
@@ -20,7 +20,7 @@ export const HomeView: FC<{
         <h2>Lily's Books</h2>
       </header>
 
-      <BooksPreview onBookClick={onBookClick} />
+      <BookShelf onBookClick={onBookClick} />
 
       <footer className="app-cta">
         <Button

@@ -3,7 +3,7 @@ import { useRef, useEffect } from "react";
 /**
  * Intersection Observer for the BookProps
  */
-export function useBooksPreview(
+export function useBookShelf(
   length: number,
   callback: (event: IntersectionObserverEntry) => void
 ) {
