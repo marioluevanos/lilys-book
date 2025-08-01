@@ -284,14 +284,10 @@ function App() {
         <BookView
           isGeneratingImage={isGeneratingImage}
           onGenerateImage={onGenerateImage}
-          onSubmit={onSubmit}
-          onChange={onChange}
           book={book}
-          prompt={options?.input}
         />
       ) : (
         <HomeView
-          prompt={options?.input}
           onSubmit={onSubmit}
           onChange={onChange}
           onBookClick={onBookClick}

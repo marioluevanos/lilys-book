@@ -12,9 +12,8 @@ export const HomeView: FC<{
   onSubmit: (event: BaseSyntheticEvent) => void;
   onChange: (event: BaseSyntheticEvent) => void;
   disabled?: boolean;
-  prompt?: string;
 }> = (props) => {
-  const { onBookClick, onChange, onSubmit, disabled, prompt } = props;
+  const { onBookClick, onChange, onSubmit, disabled } = props;
   return (
     <main id="home-view" className="view">
       <header>
@@ -31,7 +30,6 @@ export const HomeView: FC<{
                 <Form
                   onChange={onChange}
                   onSubmit={onSubmit}
-                  promptDefaultValue={prompt}
                   disabled={disabled}
                 />
               ),
