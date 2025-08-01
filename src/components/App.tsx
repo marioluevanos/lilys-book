@@ -9,9 +9,9 @@ import {
   uploadBookDB,
 } from "../library";
 import { useModes } from "../hooks/useModes";
-import { BookState, InputOptions } from "../types";
+import { BooksPreviewtate, InputOptions } from "../types";
 import { bookPrompt, imagePrompt } from "../system";
-import { preloadStorage, updatePrompt } from "../storage";
+import { preloadStorage, updateUserOptions } from "../storage";
 import { Drawer } from "./Drawer/Drawer";
 import { EventMap, events } from "../events";
 import { LoadingProgress } from "./LoadingProgress/LoadingProgress";
@@ -23,7 +23,7 @@ function App() {
   const { size, theme } = useModes();
   const [loading, setLoading] = useState<boolean>(false);
   const [options, setOptions] = useState<InputOptions>();
-  const [book, setBook] = useState<BookState>();
+  const [book, setBook] = useState<BooksPreviewtate>();
   const [isGeneratingImage, setIsGeneratingImage] = useState(false);
 
   /**
@@ -50,6 +50,7 @@ function App() {
     },
     [book]
   );
+
   /**
    * Handle the generated image
    */
@@ -76,7 +77,7 @@ function App() {
           pageToUpdate.image_id = uploadImage.id;
 
           if (book) {
-            const bookUpdated: BookState = {
+            const bookUpdated: BooksPreviewtate = {
               ...book,
               pages: (book?.pages || []).map((p, i) => {
                 return i === pageIndex ? pageToUpdate : p;
@@ -128,7 +129,7 @@ function App() {
               art_style: options?.art_style,
             });
 
-            const response = await generateImage(prompt);
+            const response = await generateImage(prompt, options);
 
             if (response.url.length <= 0) {
               console.error("Failed", response);
@@ -154,15 +155,20 @@ function App() {
     [book, saveGeneratedImage]
   );
 
+  /**
+   * Get the users input as InputOptions
+   */
   const getUserInput = useCallback(
     (event: BaseSyntheticEvent): InputOptions => {
       const form = event.target as HTMLFormElement;
       const prompt = form.elements.namedItem("prompt") as HTMLTextAreaElement;
+      const apikey = form.elements.namedItem("apikey") as HTMLInputElement;
       const art_style = form.elements.namedItem(
         "art_style"
       ) as HTMLSelectElement;
 
       return {
+        apikey: apikey.value,
         prompt: prompt.value,
         art_style: art_style.value,
       };
@@ -180,9 +186,25 @@ function App() {
       setOptions((prev) => ({
         ...prev,
         prompt: prev?.prompt || "",
+        apikey: prev?.apikey || "",
         art_style,
       }));
     }
+  }, []);
+
+  /**
+   * Cleanup events and reset form inputs
+   */
+  const onFinalize = useCallback((event: BaseSyntheticEvent) => {
+    const textArea = event.target.elements.namedItem(
+      "prompt"
+    ) as HTMLTextAreaElement | null;
+
+    if (textArea) textArea.value = "";
+
+    setLoading(false);
+    events.emit("drawerclose", undefined);
+    events.emit("generatedbook", undefined);
   }, []);
 
   /**
@@ -193,12 +215,9 @@ function App() {
       event.preventDefault();
       setLoading(true);
 
-      const userInput = getUserInput(event);
-      const prompt = bookPrompt(userInput.prompt);
-
-      updatePrompt(userInput);
-
-      const bookResponse = await generateBook(prompt);
+      const inputOptions = getUserInput(event);
+      const prompt = bookPrompt(inputOptions.prompt);
+      const bookResponse = await generateBook(prompt, inputOptions);
 
       if (bookResponse) {
         const uploadedBook = await uploadBookDB({
@@ -207,13 +226,11 @@ function App() {
         });
 
         setBook(uploadedBook);
+        updateUserOptions(inputOptions);
       }
 
-      event.target.value = "";
-
-      setLoading(false);
-      events.emit("drawerclose", undefined);
-      events.emit("generatedbook", undefined);
+      setOptions(inputOptions);
+      onFinalize(event);
     },
     [getUserInput]
   );
@@ -224,25 +241,6 @@ function App() {
   const onHomeView = useCallback(() => {
     setBook(undefined);
   }, []);
-
-  const bootStrap = useCallback(
-    async (b: Array<number | string> | undefined) => {
-      if (book) return;
-      try {
-        const promises = (b || []).map((id) => getBookDB(id));
-        if (promises.some((v) => v)) {
-          const responses = await Promise.all(promises);
-          if (responses.some((v) => v)) {
-            const [dbBook] = responses;
-            if (dbBook) setBook(dbBook);
-          }
-        }
-      } catch (error) {
-        console.error(error);
-      }
-    },
-    [book]
-  );
 
   const onBookClick = useCallback(async (event: BaseSyntheticEvent) => {
     const bookId = event?.target.dataset.bookId;
@@ -270,7 +268,7 @@ function App() {
     preloadStorage({
       getPrompt: (p) => setOptions(p),
     });
-  }, [bootStrap]);
+  }, []);
 
   return (
     <div className="app" data-size={size} data-theme={theme}>

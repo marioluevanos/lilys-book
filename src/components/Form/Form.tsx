@@ -20,6 +20,10 @@ export const Form: FC<{
         defaultValue={defaultValue}
         placeholder="What kind of book would you like?"
       />
+      <label className="apikey">
+        OpenAI API Key
+        <input type="text" name="apikey" placeholder="sk-proj..." />
+      </label>
       <label className="art-style">
         <span>Art Style</span>
         <select name="art_style" disabled={disabled} onChange={onChange}>

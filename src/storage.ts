@@ -24,7 +24,7 @@ export function preloadStorage(setters: {
   }
 }
 
-export function updatePrompt(args: InputOptions | undefined) {
+export function updateUserOptions(args: InputOptions | undefined) {
   if (args) {
     localStorage.setItem(KEYS.PROMPT_KEY, JSON.stringify(args));
   }

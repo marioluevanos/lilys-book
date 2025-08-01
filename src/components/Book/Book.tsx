@@ -1,5 +1,5 @@
 import "./Book.css";
-import { BookDB, ImageProps, PageState } from "../../types";
+import { BooksPreviewtate, ImageProps } from "../../types";
 import {
   BaseSyntheticEvent,
   FC,
@@ -16,7 +16,7 @@ import { BookProgress } from "./BookProgress";
 import { HomeIcon, ImageAddIcon } from "../Icon";
 
 type _BookProps = {
-  book: BookDB<PageState>;
+  book: BooksPreviewtate;
   form: ReactNode;
   onGenerateImageClick: (event: BaseSyntheticEvent) => void;
   isGeneratingImage: boolean;
@@ -54,7 +54,7 @@ export const Book: FC<_BookProps> = (props) => {
   }, [onBookGenerated]);
 
   return (
-    <main
+    <section
       id="book"
       data-book-id={String(book.id)}
       data-page-index={String(pageIndex)}
@@ -81,8 +81,6 @@ export const Book: FC<_BookProps> = (props) => {
             data-page-index={String(i)}
             ref={(el) => el && (pagesRef.current[i] = el)}
           >
-            <p className="page-number">{String(i + 1)}</p>
-
             {"image" in page &&
             page.image &&
             typeof page.image === "object" &&
@@ -96,6 +94,7 @@ export const Book: FC<_BookProps> = (props) => {
                   width={820}
                   height={1030}
                 />
+                <p className="page-number">{String(i + 1)}</p>
               </figure>
             ) : (
               <div className="cta">
@@ -113,11 +112,7 @@ export const Book: FC<_BookProps> = (props) => {
                 </Button>
               </div>
             )}
-            <div className="content">
-              {page.content
-                .split(".")
-                .map((p, i) => p && <p key={i}>{`${p}.`}</p>)}
-            </div>
+            <div className="content">{page.content}</div>
           </li>
         ))}
         <li className="h-scroll-section page last">
@@ -146,6 +141,6 @@ export const Book: FC<_BookProps> = (props) => {
           Next
         </button>
       </nav>
-    </main>
+    </section>
   );
 };

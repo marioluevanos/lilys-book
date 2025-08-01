@@ -11,7 +11,7 @@ import { events } from "../../events";
  * Intersection Observer for the BookProps
  */
 export function useBookObserver() {
-  const pagesRef = useRef<HTMLLIElement[]>([]);
+  const pagesRef = useRef<HTMLElement[]>([]);
   const [pageIndex, setPageIndex] = useState(0);
 
   /**w

@@ -1,14 +1,16 @@
+import "./views.css";
+
 import { BaseSyntheticEvent, FC } from "react";
 import { Form } from "../Form/Form";
 import { Book } from "../Book/Book";
-import { BookState } from "../../types";
+import { BooksPreviewtate } from "../../types";
 
 export const BookView: FC<{
   onGenerateImage: (event: BaseSyntheticEvent) => Promise<void>;
   onSubmit: (event: BaseSyntheticEvent) => void;
   onChange: (event: BaseSyntheticEvent) => void;
   isGeneratingImage?: boolean;
-  book?: BookState | undefined;
+  book?: BooksPreviewtate;
   prompt?: string;
 }> = (props) => {
   const {
@@ -21,18 +23,11 @@ export const BookView: FC<{
   } = props;
   return (
     book && (
-      <div className="book-view">
+      <main id="book-view" className="view">
         <Book
-          onGenerateImageClick={onGenerateImage}
+          book={book}
           isGeneratingImage={isGeneratingImage}
-          book={{
-            ...book,
-            pages: book.pages || [],
-            title: book.title || "",
-            response_id: book.response_id || "",
-            random_fact: book.random_fact || "",
-          }}
-          key="Novel"
+          onGenerateImageClick={onGenerateImage}
           form={
             <Form
               onChange={onChange}
@@ -42,7 +37,7 @@ export const BookView: FC<{
             />
           }
         />
-      </div>
+      </main>
     )
   );
 };

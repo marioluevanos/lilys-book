@@ -22,7 +22,7 @@
   scrollbar-width: none; /* Firefox */
   overflow: -moz-scrollbars-none;
   scroll-padding: 1.5rem 1rem 1rem;
-  padding: 1.5rem 0 0;
+  padding: 0;
 
   &::-webkit-scrollbar {
     display: none; /* Safari and Chrome */
@@ -87,19 +87,10 @@
   width: 100%;
   padding: 0rem 1rem 6rem;
   z-index: 1;
-
-  & p {
-    scroll-snap-align: start;
-    scroll-snap-stop: normal;
-    margin: 0 0 1rem;
-    font: 400 1.5rem/1.75 var(--font-family-body);
-  }
-
-  & .next-page {
-    display: block;
-    color: var(--accent-text);
-    margin: 0 0 6rem auto;
-  }
+  scroll-snap-align: start;
+  scroll-snap-stop: normal;
+  margin: 0 0 1rem;
+  font: 400 1.5rem/1.75 var(--font-family-body);
 }
 
 /**
@@ -108,13 +99,13 @@
 .book .page .art {
   position: relative;
   inset: 0;
-  min-width: calc(100vw - 2rem);
-  width: calc(100vw - 2rem);
+  min-width: calc(100vw);
+  width: calc(100vw);
   min-height: 70svh;
   height: 70svh;
-  margin: 0 1rem 1rem;
+  margin: 0 0 1.5rem;
   overflow: hidden;
-  border-radius: 1rem;
+  border-radius: 0;
 
   & .download {
     position: absolute;
@@ -191,12 +182,11 @@
 .page .page-number {
   margin: 0;
   position: absolute;
-  top: 3rem;
-  right: 0;
-  left: 0;
+  bottom: 1.5rem;
+  right: 1rem;
   margin: auto;
-  background: var(--accent);
-  color: var(--accent-text);
+  /* background: var(--accent-text); */
+  color: white;
   border-radius: 1rem;
   width: 1.5rem;
   height: 1.5rem;

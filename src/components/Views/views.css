@@ -15,8 +15,8 @@ main.view header {
   }
 }
 
-main.view:has(.books-scroll:empty) {
-  & .books-scroll {
+main.view:has(.BooksPreview-scroll:empty) {
+  & .BooksPreview-scroll {
     padding: 0;
   }
   & header {
@@ -29,7 +29,7 @@ main.view:has(.books-scroll:empty) {
   padding: 1rem;
 }
 
-.book-view button.home-button {
+#book-view button.home-button {
   box-shadow: 0 4px 0 var(--accent2);
   padding: 0;
   line-height: 3rem;

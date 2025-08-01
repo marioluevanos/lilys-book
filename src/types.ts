@@ -35,6 +35,7 @@ export const ART_STYLES = ["Dr. Seuss", "Disney"] as const;
 
 export type InputOptions = {
   prompt: string;
+  apikey: string;
   art_style: GenerateResponseOptions["art_style"] | (string & {});
 };
 
@@ -65,4 +66,6 @@ export type ImageDB = {
   response_id: string;
 };
 
-export type BookState = Partial<BookDB<PageState>> & { response_id?: string };
+export type BooksPreviewtate = Partial<BookDB<PageState>> & {
+  response_id?: string;
+};

@@ -3,10 +3,11 @@ import {
   BookDB,
   BookProps,
   BookResponsePayload,
-  BookState,
+  BooksPreviewtate,
   GenerateResponseOptions,
   ImageDB,
   ImageResponsePayload,
+  InputOptions,
 } from "./types";
 
 const OPEN_AI_API = "https://api.openai.com/v1/responses";
@@ -15,12 +16,18 @@ const OPEN_AI_API = "https://api.openai.com/v1/responses";
  * Generate an Image
  */
 async function generateResponse(
-  args: GenerateResponseOptions
-): Promise<OpenAI.Responses.Response> {
+  args: GenerateResponseOptions,
+  options: InputOptions | undefined
+): Promise<OpenAI.Responses.Response | undefined> {
+  if (!options?.apikey) {
+    console.error("Missing API Key");
+    return undefined;
+  }
+
   const request = await fetch(OPEN_AI_API, {
     method: "POST",
     headers: {
-      Authorization: `Bearer ${import.meta.env.VITE_OPENAI_API_KEY}`,
+      Authorization: `Bearer ${options?.apikey}`,
       "Content-Type": "application/json",
       "Access-Control-Allow-Origin": "*",
     },
@@ -51,21 +58,25 @@ function getResponseOptions(
 }
 
 export async function generateImage(
-  args: GenerateResponseOptions
+  args: GenerateResponseOptions,
+  options: InputOptions | undefined
 ): Promise<ImageResponsePayload & { error?: unknown }> {
-  const imageResponse = await generateResponse({
-    ...args,
-    as_image: true,
-  });
+  const imageResponse = await generateResponse(
+    {
+      ...args,
+      as_image: true,
+    },
+    options
+  );
 
-  const imageResults = (imageResponse.output || [])
+  const imageResults = (imageResponse?.output || [])
     .filter((output) => output.type === "image_generation_call")
     .map((output) => output.result);
 
   if (imageResults.length > 0) {
     const imageBase64 = imageResults[0];
 
-    if (imageBase64) {
+    if (imageBase64 && imageResponse?.id) {
       return {
         url: `data:image/png;base64, ${imageBase64}`,
         response_id: imageResponse.id,
@@ -85,21 +96,25 @@ export async function generateImage(
  * @param prompt The engineered prompt
  */
 export async function generateBook(
-  args: GenerateResponseOptions
+  args: GenerateResponseOptions,
+  options: InputOptions
 ): Promise<BookResponsePayload | undefined> {
-  const bookResponse = await generateResponse(args);
+  const bookResponse = await generateResponse(args, options);
 
-  const book = (bookResponse.output || [])
+  const book = (bookResponse?.output || [])
     .filter((output) => output.type === "message")
     .reduce<BookProps | undefined>((acc, output) => {
       const text = output.content.find((o) => o.type === "output_text");
       if (text && !acc) {
         try {
           const data = JSON.parse(text.text);
-          acc = {
-            ...data,
-            response_id: bookResponse.id,
-          };
+
+          if (bookResponse?.id) {
+            acc = {
+              ...data,
+              response_id: bookResponse.id,
+            };
+          }
         } catch (error) {
           console.error(error);
         }
@@ -112,7 +127,7 @@ export async function generateBook(
   }
 }
 
-export async function getBooksDB(): Promise<BookDB[] | undefined> {
+export async function getBooksPreviewDB(): Promise<BookDB[] | undefined> {
   const response = await fetch(
     `${import.meta.env.VITE_API}/api/books?populate=images`,
     {
@@ -145,16 +160,14 @@ export async function getBookDB(
 }
 
 export async function updateBookDB(
-  book: BookState,
+  book: BooksPreviewtate,
   bookId: number
 ): Promise<BookDB | undefined> {
   const response = await fetch(
     `${import.meta.env.VITE_API}/api/books/${bookId}`,
     {
       method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify(book),
     }
   );
@@ -171,9 +184,7 @@ export async function uploadBookDB(
 ): Promise<BookDB | undefined> {
   const response = await fetch(`${import.meta.env.VITE_API}/api/books`, {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify(book),
   });
 
