@@ -125,3 +125,33 @@ export function ArrowLeftIcon({ title = "badge 13", ...props }: IconProps) {
     </svg>
   );
 }
+
+export function HomeIcon({ title = "badge 13", ...props }: IconProps) {
+  return (
+    <svg
+      height="16"
+      width="16"
+      viewBox="0 0 16 16"
+      xmlns="http://www.w3.org/2000/svg"
+      {...props}
+    >
+      <title>{title}</title>
+      <g fill="currentColor">
+        <polyline
+          fill="none"
+          points=" 15.5,7.5 8,0.5 0.5,7.5 "
+          stroke="currentColor"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+        <polyline
+          fill="none"
+          points="2.5,8.5 2.5,15.5 6.5,15.5 6.5,11.5 9.5,11.5 9.5,15.5 13.5,15.5 13.5,8.5 "
+          stroke="currentColor"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      </g>
+    </svg>
+  );
+}

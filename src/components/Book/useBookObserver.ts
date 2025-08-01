@@ -32,10 +32,6 @@ export function useBookObserver() {
     []
   );
 
-  const onTouchEnd = useCallback(() => {
-    // console.log(event);
-  }, []);
-
   /**
    * Handle on page change clicks
    */
@@ -78,14 +74,13 @@ export function useBookObserver() {
    */
   useEffect(() => {
     const observers = pagesRef.current.map((element) => {
-      element.addEventListener("touchend", onTouchEnd);
       return initObserver(element, onIntersection);
     });
 
     return () => {
       observers.forEach((io) => io.disconnect());
     };
-  }, [onIntersection, onTouchEnd]);
+  }, [onIntersection]);
 
   useEffect(() => {
     events.emit("pagechange", +pageIndex);

@@ -15,7 +15,10 @@ export const HomeView: FC<{
 }> = (props) => {
   const { onBookClick, onSubmit, disabled, prompt } = props;
   return (
-    <div className="home-view">
+    <main className="view home-view">
+      <header>
+        <h2>Lily's Books</h2>
+      </header>
       <Books onBookClick={onBookClick} />
       <div className="app-cta">
         <Button
@@ -34,6 +37,6 @@ export const HomeView: FC<{
           <PlusIcon /> New Book
         </Button>
       </div>
-    </div>
+    </main>
   );
 };

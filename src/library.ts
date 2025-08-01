@@ -197,7 +197,6 @@ export async function uploadBase64ImageDB(
   formData.append("file", file);
   formData.append("response_id", response_id || "");
 
-  console.log("uploadBase64ImageDB width:", { response_id });
   const response = await fetch(`${import.meta.env.VITE_API}/api/images`, {
     method: "POST",
     body: formData,

@@ -11,7 +11,7 @@ type BooksProps = {
 type BookPreview = { id?: number; title: string; image: ImageProps | null };
 
 export const Books: FC<BooksProps> = (props) => {
-  const { className, onBookClick } = props;
+  const { onBookClick } = props;
   const [bookPreviews, setBookPreviews] = useState<BookPreview[]>();
 
   useEffect(() => {
@@ -36,25 +36,20 @@ export const Books: FC<BooksProps> = (props) => {
   }, [bookPreviews]);
 
   return (
-    <main id="books" className={className}>
-      <header>
-        <h2>Lily's Books</h2>
-      </header>
-      <div className="books-scroll h-scroll">
-        {bookPreviews?.map((b) => (
-          <div
-            key={b.title}
-            data-book-id={String(b.id)}
-            className="book-preview"
-            onClick={onBookClick}
-          >
-            <figure className="book-preview-image">
-              <img src={b.image?.url} alt="" />
-            </figure>
-            <h3>{b.title}</h3>
-          </div>
-        ))}
-      </div>
-    </main>
+    <div className="books-scroll h-scroll">
+      {bookPreviews?.map((b) => (
+        <div
+          key={b.title}
+          data-book-id={String(b.id)}
+          className="book-preview"
+          onClick={onBookClick}
+        >
+          <figure className="book-preview-image">
+            <img src={b.image?.url} alt="" />
+          </figure>
+          <h3>{b.title}</h3>
+        </div>
+      ))}
+    </div>
   );
 };

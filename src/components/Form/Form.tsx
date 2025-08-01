@@ -18,6 +18,7 @@ export const Form: FC<{
         defaultValue={defaultValue}
         placeholder="What kind of book would you like?"
       />
+      <input name="artstyle" type="text" disabled={disabled} />
       <Button
         type="submit"
         name="cta"

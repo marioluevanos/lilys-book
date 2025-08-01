@@ -40,13 +40,13 @@ export function preloadStorage(setters: {
   }
 }
 
-export function updateBookStorage(bookCreated: BookDB | undefined) {
-  if (bookCreated) {
-    localStorage.setItem(KEYS.BOOK_KEY, JSON.stringify([bookCreated.id]));
-    return bookCreated;
-  } else {
-    localStorage.removeItem(KEYS.BOOK_KEY);
-  }
+export function updateBookStorage(_bookCreated: BookDB | undefined) {
+  // if (bookCreated) {
+  //   localStorage.setItem(KEYS.BOOK_KEY, JSON.stringify([bookCreated.id]));
+  //   return bookCreated;
+  // } else {
+  //   localStorage.removeItem(KEYS.BOOK_KEY);
+  // }
 }
 
 export function updatePrompt(prompt: string | undefined) {

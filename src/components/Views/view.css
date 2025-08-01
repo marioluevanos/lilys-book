@@ -1,13 +1,32 @@
+main.view {
+  min-height: initial;
+  padding: 0;
+}
+
+main.view header {
+  padding: 0 1rem;
+
+  & h2 {
+    font-size: 1.5rem;
+    font-weight: 700;
+  }
+}
+
+main.view:has(.books-scroll:empty) {
+  & .books-scroll {
+    padding: 0;
+  }
+  & header {
+    display: none;
+  }
+}
+
 .app-cta {
   padding: 1rem;
 }
 
 .book-view button.back-button {
-  box-shadow: 0 0px 0px var(--accent2);
-  border: 1px solid var(--accent);
-  color: var(--accent);
-  background: none;
-  border-radius: 16px;
+  box-shadow: 0 4px 0 var(--accent2);
   padding: 0;
   line-height: 3rem;
   position: absolute;

@@ -14,9 +14,9 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --accent: hsl(274deg 71% 30%);
-    --accent2: hsl(274deg 71% 16%);
-    --accent-text: hsl(274deg 20% 70%);
+    --accent: hsl(274deg 71% 40%);
+    --accent2: hsl(274deg 71% 26%);
+    --accent-text: hsl(274deg 20% 100%);
     --accent-text2: hsl(274deg 51% 94%);
     --bg: hsl(210deg 22% 8%);
     --bg1: hsl(210deg 22% 12%);
