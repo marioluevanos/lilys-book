@@ -2,7 +2,6 @@ import "./views.css";
 
 import { BaseSyntheticEvent, FC } from "react";
 import { BooksPreviewtate } from "../../types";
-// import { BookFlip } from "../BookFlip/BookFlip";
 import { Book } from "../Book/Book";
 
 export const BookView: FC<{
@@ -14,7 +13,6 @@ export const BookView: FC<{
   return (
     book && (
       <main id="book-view" className="view">
-        {/* <BookFlip book={book} /> */}
         <Book
           book={book}
           isGeneratingImage={isGeneratingImage}

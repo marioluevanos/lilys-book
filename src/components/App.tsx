@@ -180,18 +180,23 @@ function App() {
   /**
    * Handle form submit
    */
-  const onChange = useCallback(async (event: BaseSyntheticEvent) => {
-    const art_style = event.target.value as InputOptions["art_style"];
+  const onChange = useCallback(
+    async (event: BaseSyntheticEvent) => {
+      const art_style = event.target.value as InputOptions["art_style"];
 
-    if (art_style) {
-      setOptions((prev) => ({
-        ...prev,
-        input: prev?.input || "",
-        apikey: prev?.apikey || "",
-        art_style,
-      }));
-    }
-  }, []);
+      if (art_style) {
+        const _options = {
+          ...options,
+          input: options?.input || "",
+          apikey: options?.apikey || "",
+          art_style,
+        };
+        setOptions(_options);
+        updateUserOptions(_options);
+      }
+    },
+    [options]
+  );
 
   /**
    * Cleanup events and reset form inputs
@@ -236,7 +241,6 @@ function App() {
         updateUserOptions(inputOptions);
       }
 
-      setOptions(inputOptions);
       onFinalize(event);
     },
     [getUserInput, onFinalize]

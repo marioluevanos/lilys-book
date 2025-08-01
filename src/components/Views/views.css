@@ -29,6 +29,27 @@ main.view:has(.BooksPreview-scroll:empty) {
   padding: 1rem;
 }
 
+/**
+ * Home view
+ */
+main.view#home-view {
+  position: relative;
+  z-index: 1;
+
+  &::before {
+    z-index: 1;
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(
+      circle at 25% 0%,
+      hsl(0deg 0% 100% / 16%),
+      hsl(360deg 100% 0% / 0%),
+      hsl(360deg 100% 0% / 0%)
+    );
+  }
+}
+
 #book-view button.home-button {
   padding: 0;
   line-height: 3rem;
