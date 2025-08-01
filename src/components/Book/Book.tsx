@@ -60,11 +60,12 @@ export const Book: FC<_BookProps> = (props) => {
       data-page-index={String(pageIndex)}
     >
       <BookProgress progress={bookProgress} />
+
       <ol className="h-scroll book" ref={bookRef}>
         <li className="h-scroll-section page home">
           <h1>{book.title}</h1>
           <Button
-            className="back-button"
+            className="home-button"
             onClick={() => {
               events.emit("home-view", undefined);
             }}
@@ -72,6 +73,7 @@ export const Book: FC<_BookProps> = (props) => {
             <HomeIcon />
           </Button>
         </li>
+
         {(book.pages || []).map((page, i) => (
           <li
             key={i}

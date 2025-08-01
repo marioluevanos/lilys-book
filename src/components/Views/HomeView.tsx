@@ -10,10 +10,11 @@ import { PlusIcon } from "../Icon";
 export const HomeView: FC<{
   onBookClick: (event: BaseSyntheticEvent) => void;
   onSubmit: (event: BaseSyntheticEvent) => void;
+  onChange: (event: BaseSyntheticEvent) => void;
   disabled?: boolean;
   prompt?: string;
 }> = (props) => {
-  const { onBookClick, onSubmit, disabled, prompt } = props;
+  const { onBookClick, onChange, onSubmit, disabled, prompt } = props;
   return (
     <main className="view home-view">
       <header>
@@ -26,6 +27,7 @@ export const HomeView: FC<{
             events.emit("drawer", {
               children: (
                 <Form
+                  onChange={onChange}
                   onSubmit={onSubmit}
                   defaultValue={prompt}
                   disabled={disabled}

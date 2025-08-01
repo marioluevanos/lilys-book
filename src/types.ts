@@ -28,6 +28,14 @@ export type GenerateResponseOptions = {
   previous_response_id: string | undefined;
   as_image?: boolean;
   instructions: string;
+  art_style?: (typeof ART_STYLES)[number] | (string & {});
+};
+
+export const ART_STYLES = ["Dr. Seuss", "Disney"] as const;
+
+export type InputOptions = {
+  prompt: string;
+  art_style: GenerateResponseOptions["art_style"] | (string & {});
 };
 
 export type BookResponsePayload = BookProps;

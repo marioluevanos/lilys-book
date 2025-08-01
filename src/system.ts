@@ -50,7 +50,9 @@ export function imagePrompt(
   args: Omit<GenerateResponseOptions, "instructions">
 ): GenerateResponseOptions {
   return {
-    instructions: `The image should have an aspect ratio of 820/1030 and a Dr. Seuss art style.
+    instructions: `The image should have an aspect ratio of 820/1030 and a ${
+      args.art_style || "Dr. Seuss"
+    } art style.
  Include the main characters, if applicable, with these characteristics:
     ${mainCharacters}
   And the optional characters, if applicable:

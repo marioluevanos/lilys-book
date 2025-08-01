@@ -1,13 +1,15 @@
 import "./Form.css";
 import { Button } from "../Button/Button";
 import { BaseSyntheticEvent, FC } from "react";
+import { ART_STYLES } from "../../types";
 
 export const Form: FC<{
   onSubmit: (event: BaseSyntheticEvent) => void;
+  onChange: (event: BaseSyntheticEvent) => void;
   disabled?: boolean;
   defaultValue?: string;
 }> = (props) => {
-  const { onSubmit, disabled, defaultValue } = props;
+  const { onSubmit, onChange, disabled, defaultValue } = props;
   return (
     <form onSubmit={onSubmit} aria-disabled={disabled}>
       <textarea
@@ -18,7 +20,14 @@ export const Form: FC<{
         defaultValue={defaultValue}
         placeholder="What kind of book would you like?"
       />
-      <input name="artstyle" type="text" disabled={disabled} />
+      <label className="art-style">
+        <span>Art Style</span>
+        <select name="art_style" disabled={disabled} onChange={onChange}>
+          {ART_STYLES.map((s) => (
+            <option key={s}> {s}</option>
+          ))}
+        </select>
+      </label>
       <Button
         type="submit"
         name="cta"

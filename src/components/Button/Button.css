@@ -7,7 +7,7 @@
   letter-spacing: 0.1em;
   text-transform: uppercase;
   background: var(--accent);
-  box-shadow: 0 8px 0px var(--accent2);
+  box-shadow: 0 4px 0px var(--accent2);
   color: var(--accent-text);
   cursor: pointer;
   transition: all 0.15s var(--ease-out-sine);

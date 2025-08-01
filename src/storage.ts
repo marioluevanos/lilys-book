@@ -1,56 +1,31 @@
-import { BookDB } from "./types";
+import { InputOptions } from "./types";
 
 const PROMPT_KEY = "prompt";
-const BOOK_KEY = "book";
 
 export const KEYS = {
   PROMPT_KEY,
-  BOOK_KEY,
 };
 
 /**
  * Load from local storage
  */
 export function preloadStorage(setters: {
-  getBookIds: (payload: Array<number | string> | undefined) => void;
-  getPrompt: (payload: string) => void;
+  getPrompt: (payload: InputOptions) => void;
 }) {
-  const { getBookIds, getPrompt } = setters;
+  const { getPrompt } = setters;
 
   try {
     const prompt = localStorage.getItem(PROMPT_KEY);
     if (typeof prompt === "string" && prompt !== "undefined") {
-      getPrompt(prompt);
+      getPrompt(JSON.parse(prompt));
     }
   } catch (error) {
     console.warn(error);
   }
-
-  const savedBook = localStorage.getItem(BOOK_KEY);
-  if (savedBook) {
-    try {
-      const story: Array<number | string> = JSON.parse(savedBook);
-
-      if (Array.isArray(story)) {
-        getBookIds(story);
-      }
-    } catch (error) {
-      console.warn(error);
-    }
-  }
 }
 
-export function updateBookStorage(_bookCreated: BookDB | undefined) {
-  // if (bookCreated) {
-  //   localStorage.setItem(KEYS.BOOK_KEY, JSON.stringify([bookCreated.id]));
-  //   return bookCreated;
-  // } else {
-  //   localStorage.removeItem(KEYS.BOOK_KEY);
-  // }
-}
-
-export function updatePrompt(prompt: string | undefined) {
-  if (prompt) {
-    localStorage.setItem(KEYS.PROMPT_KEY, prompt);
+export function updatePrompt(args: InputOptions | undefined) {
+  if (args) {
+    localStorage.setItem(KEYS.PROMPT_KEY, JSON.stringify(args));
   }
 }

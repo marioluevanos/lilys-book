@@ -6,12 +6,14 @@ import { BookState } from "../../types";
 export const BookView: FC<{
   onGenerateImage: (event: BaseSyntheticEvent) => Promise<void>;
   onSubmit: (event: BaseSyntheticEvent) => void;
+  onChange: (event: BaseSyntheticEvent) => void;
   isGeneratingImage?: boolean;
   book?: BookState | undefined;
   prompt?: string;
 }> = (props) => {
   const {
     onGenerateImage,
+    onChange,
     onSubmit,
     book,
     prompt,
@@ -33,6 +35,7 @@ export const BookView: FC<{
           key="Novel"
           form={
             <Form
+              onChange={onChange}
               onSubmit={onSubmit}
               disabled={isGeneratingImage}
               defaultValue={prompt}

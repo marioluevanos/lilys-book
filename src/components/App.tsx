@@ -9,9 +9,9 @@ import {
   uploadBookDB,
 } from "../library";
 import { useModes } from "../hooks/useModes";
-import { BookState } from "../types";
+import { BookState, InputOptions } from "../types";
 import { bookPrompt, imagePrompt } from "../system";
-import { preloadStorage, updateBookStorage, updatePrompt } from "../storage";
+import { preloadStorage, updatePrompt } from "../storage";
 import { Drawer } from "./Drawer/Drawer";
 import { EventMap, events } from "../events";
 import { LoadingProgress } from "./LoadingProgress/LoadingProgress";
@@ -22,10 +22,13 @@ import { BookView } from "./Views/BookView";
 function App() {
   const { size, theme } = useModes();
   const [loading, setLoading] = useState<boolean>(false);
-  const [prompt, setPrompt] = useState("");
+  const [options, setOptions] = useState<InputOptions>();
   const [book, setBook] = useState<BookState>();
   const [isGeneratingImage, setIsGeneratingImage] = useState(false);
 
+  /**
+   * On page change (horizontal page change)
+   */
   const onPageChange = useCallback(
     async (pageIdx: EventMap["pagechange"]) => {
       const pages = book?.pages || [];
@@ -81,7 +84,7 @@ function App() {
             };
 
             const bookImageUpdated = await updateBookDB(bookUpdated, book.id);
-            updateBookStorage(bookImageUpdated);
+
             setBook({
               ...bookImageUpdated,
               pages: (book?.pages || []).map((p, i) => {
@@ -122,6 +125,7 @@ function App() {
             const prompt = imagePrompt({
               input: page.synopsis,
               previous_response_id,
+              art_style: options?.art_style,
             });
 
             const response = await generateImage(prompt);
@@ -150,10 +154,35 @@ function App() {
     [book, saveGeneratedImage]
   );
 
-  const getUserInput = useCallback((event: BaseSyntheticEvent): string => {
-    const form = event.target;
-    const textArea = form.firstElementChild;
-    return textArea.value;
+  const getUserInput = useCallback(
+    (event: BaseSyntheticEvent): InputOptions => {
+      const form = event.target as HTMLFormElement;
+      const prompt = form.elements.namedItem("prompt") as HTMLTextAreaElement;
+      const art_style = form.elements.namedItem(
+        "art_style"
+      ) as HTMLSelectElement;
+
+      return {
+        prompt: prompt.value,
+        art_style: art_style.value,
+      };
+    },
+    []
+  );
+
+  /**
+   * Handle form submit
+   */
+  const onChange = useCallback(async (event: BaseSyntheticEvent) => {
+    const art_style = event.target.value as InputOptions["art_style"];
+
+    if (art_style) {
+      setOptions((prev) => ({
+        ...prev,
+        prompt: prev?.prompt || "",
+        art_style,
+      }));
+    }
   }, []);
 
   /**
@@ -165,7 +194,7 @@ function App() {
       setLoading(true);
 
       const userInput = getUserInput(event);
-      const prompt = bookPrompt(userInput);
+      const prompt = bookPrompt(userInput.prompt);
 
       updatePrompt(userInput);
 
@@ -178,7 +207,6 @@ function App() {
         });
 
         setBook(uploadedBook);
-        updateBookStorage(uploadedBook);
       }
 
       event.target.value = "";
@@ -207,13 +235,10 @@ function App() {
           if (responses.some((v) => v)) {
             const [dbBook] = responses;
             if (dbBook) setBook(dbBook);
-          } else {
-            updateBookStorage(undefined);
           }
         }
       } catch (error) {
         console.error(error);
-        updateBookStorage(undefined);
       }
     },
     [book]
@@ -243,8 +268,7 @@ function App() {
    */
   useEffect(() => {
     preloadStorage({
-      getPrompt: (p) => setPrompt(p),
-      getBookIds: bootStrap,
+      getPrompt: (p) => setOptions(p),
     });
   }, [bootStrap]);
 
@@ -256,13 +280,15 @@ function App() {
           isGeneratingImage={isGeneratingImage}
           onGenerateImage={onGenerateImage}
           onSubmit={onSubmit}
+          onChange={onChange}
           book={book}
-          prompt={prompt}
+          prompt={options?.prompt}
         />
       ) : (
         <HomeView
-          prompt={prompt}
+          prompt={options?.prompt}
           onSubmit={onSubmit}
+          onChange={onChange}
           onBookClick={onBookClick}
         />
       )}
