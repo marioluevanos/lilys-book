@@ -33,7 +33,7 @@ export const BookView: FC<{
               onChange={onChange}
               onSubmit={onSubmit}
               disabled={isGeneratingImage}
-              defaultValue={prompt}
+              promptDefaultValue={prompt}
             />
           }
         />

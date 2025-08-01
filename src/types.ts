@@ -34,7 +34,7 @@ export type GenerateResponseOptions = {
 export const ART_STYLES = ["Dr. Seuss", "Disney"] as const;
 
 export type InputOptions = {
-  prompt: string;
+  input: string;
   apikey: string;
   art_style: GenerateResponseOptions["art_style"] | (string & {});
 };

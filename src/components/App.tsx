@@ -129,8 +129,9 @@ function App() {
               art_style: options?.art_style,
             });
 
-            const response = await generateImage(prompt, options);
-
+            console.log({ prompt });
+            const response = await generateImage(prompt);
+            console.log({ response });
             if (response.url.length <= 0) {
               console.error("Failed", response);
               setIsGeneratingImage(false);
@@ -169,7 +170,7 @@ function App() {
 
       return {
         apikey: apikey.value,
-        prompt: prompt.value,
+        input: prompt.value,
         art_style: art_style.value,
       };
     },
@@ -185,7 +186,7 @@ function App() {
     if (art_style) {
       setOptions((prev) => ({
         ...prev,
-        prompt: prev?.prompt || "",
+        input: prev?.input || "",
         apikey: prev?.apikey || "",
         art_style,
       }));
@@ -216,9 +217,15 @@ function App() {
       setLoading(true);
 
       const inputOptions = getUserInput(event);
-      const prompt = bookPrompt(inputOptions.prompt);
-      const bookResponse = await generateBook(prompt, inputOptions);
+      const prompt = bookPrompt(inputOptions.input);
 
+      setOptions(inputOptions);
+
+      console.log({ inputOptions, prompt });
+
+      const bookResponse = await generateBook(prompt);
+
+      console.log({ bookResponse });
       if (bookResponse) {
         const uploadedBook = await uploadBookDB({
           ...bookResponse,
@@ -266,7 +273,7 @@ function App() {
    */
   useEffect(() => {
     preloadStorage({
-      getPrompt: (p) => setOptions(p),
+      getSettings: (p) => setOptions(p),
     });
   }, []);
 
@@ -280,11 +287,11 @@ function App() {
           onSubmit={onSubmit}
           onChange={onChange}
           book={book}
-          prompt={options?.prompt}
+          prompt={options?.input}
         />
       ) : (
         <HomeView
-          prompt={options?.prompt}
+          prompt={options?.input}
           onSubmit={onSubmit}
           onChange={onChange}
           onBookClick={onBookClick}

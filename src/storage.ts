@@ -1,31 +1,35 @@
 import { InputOptions } from "./types";
 
-const PROMPT_KEY = "prompt";
+const SETTINGS = "settings";
 
 export const KEYS = {
-  PROMPT_KEY,
+  SETTINGS,
 };
 
-/**
- * Load from local storage
- */
-export function preloadStorage(setters: {
-  getPrompt: (payload: InputOptions) => void;
-}) {
-  const { getPrompt } = setters;
-
+export function getOptions(): InputOptions | undefined {
   try {
-    const prompt = localStorage.getItem(PROMPT_KEY);
-    if (typeof prompt === "string" && prompt !== "undefined") {
-      getPrompt(JSON.parse(prompt));
+    const settings = localStorage.getItem(SETTINGS);
+    if (typeof settings === "string" && settings !== "undefined") {
+      return JSON.parse(settings);
     }
   } catch (error) {
     console.warn(error);
   }
 }
 
+/**
+ * Load from local storage
+ */
+export function preloadStorage(setters: {
+  getSettings: (payload: InputOptions) => void;
+}) {
+  const { getSettings } = setters;
+  const options = getOptions();
+  if (options) getSettings(options);
+}
+
 export function updateUserOptions(args: InputOptions | undefined) {
   if (args) {
-    localStorage.setItem(KEYS.PROMPT_KEY, JSON.stringify(args));
+    localStorage.setItem(KEYS.SETTINGS, JSON.stringify(args));
   }
 }

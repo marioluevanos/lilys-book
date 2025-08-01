@@ -32,6 +32,10 @@
     scroll-snap-align: start;
   }
 
+  & h1 {
+    font-family: var(--font-family-body);
+  }
+
   &.home {
     position: relative;
     display: flex;
@@ -47,6 +51,7 @@
   &.last {
     padding: 2rem;
     display: flex;
+    justify-content: center;
     flex-direction: column;
 
     & h3 {
@@ -90,7 +95,7 @@
   scroll-snap-align: start;
   scroll-snap-stop: normal;
   margin: 0 0 1rem;
-  font: 400 1.5rem/1.75 var(--font-family-body);
+  font: 400 1.5rem/1.75 var(--font-family-heading);
 }
 
 /**
@@ -131,17 +136,20 @@
   z-index: 100;
   flex: 1;
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: center;
-  padding: 4rem 1rem 2rem;
+  padding: 0 2rem;
+  margin-bottom: 1.5rem;
   width: 100%;
   height: min-content;
   position: relative;
+  height: 70svh;
+  background: var(--bg1);
 
   & .button.generate-image {
     box-shadow: none;
     background: none;
-    border: 1px solid var(--bg2);
+    border: 1px solid var(--text);
     color: var(--text);
     border-radius: 1rem;
     width: 100%;
@@ -185,7 +193,6 @@
   bottom: 1.5rem;
   right: 1rem;
   margin: auto;
-  /* background: var(--accent-text); */
   color: white;
   border-radius: 1rem;
   width: 1.5rem;

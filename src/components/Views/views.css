@@ -30,7 +30,6 @@ main.view:has(.BooksPreview-scroll:empty) {
 }
 
 #book-view button.home-button {
-  box-shadow: 0 4px 0 var(--accent2);
   padding: 0;
   line-height: 3rem;
   position: fixed;

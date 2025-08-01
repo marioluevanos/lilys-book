@@ -1,13 +1,6 @@
 import "./Book.css";
 import { BooksPreviewtate, ImageProps } from "../../types";
-import {
-  BaseSyntheticEvent,
-  FC,
-  ReactNode,
-  useCallback,
-  useEffect,
-  useRef,
-} from "react";
+import { BaseSyntheticEvent, FC, useCallback, useEffect, useRef } from "react";
 import { Button } from "../Button/Button";
 import { useBookObserver } from "./useBookObserver";
 import { cn } from "../../utils/cn";
@@ -17,25 +10,14 @@ import { HomeIcon, ImageAddIcon } from "../Icon";
 
 type _BookProps = {
   book: BooksPreviewtate;
-  form: ReactNode;
   onGenerateImageClick: (event: BaseSyntheticEvent) => void;
   isGeneratingImage: boolean;
 };
 
 export const Book: FC<_BookProps> = (props) => {
-  const { book, form, isGeneratingImage, onGenerateImageClick } = props;
+  const { book, isGeneratingImage, onGenerateImageClick } = props;
   const bookRef = useRef<HTMLOListElement>(null);
   const { pagesRef, pageIndex, bookProgress, onPageChange } = useBookObserver();
-
-  const onNewBook = useCallback(
-    (event: BaseSyntheticEvent) => {
-      event.preventDefault();
-      events.emit("drawer", {
-        children: form,
-      });
-    },
-    [form]
-  );
 
   /**
    * Handle the generated image
@@ -118,9 +100,6 @@ export const Book: FC<_BookProps> = (props) => {
         <li className="h-scroll-section page last">
           <h3>Fun Fact</h3>
           <p>{book.random_fact}</p>
-          <Button className="cta-new-book" onClick={onNewBook}>
-            Create new book
-          </Button>
         </li>
       </ol>
       <nav className="book-nav" style={{ display: "none" }}>

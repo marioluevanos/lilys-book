@@ -59,6 +59,7 @@ export function imagePrompt(
     ${optionalCharacters}
     `,
     input: args.input,
+    as_image: true,
     previous_response_id: args.previous_response_id,
   };
 }

@@ -31,7 +31,7 @@ export const HomeView: FC<{
                 <Form
                   onChange={onChange}
                   onSubmit={onSubmit}
-                  defaultValue={prompt}
+                  promptDefaultValue={prompt}
                   disabled={disabled}
                 />
               ),

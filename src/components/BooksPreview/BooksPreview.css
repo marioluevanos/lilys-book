@@ -1,11 +1,10 @@
 .books-preview-scroll {
   gap: 1rem 2rem;
-  background: var(--bg);
+  background: linear-gradient(180deg, var(--bg1), transparent);
   padding: 1rem 1rem 1.5rem;
 }
 
 .book-preview {
-  cursor: pointer;
   padding: 0;
   min-width: 12rem;
   width: 100%;
@@ -32,6 +31,7 @@
 }
 
 .book-preview-image {
+  cursor: pointer;
   margin: 0;
   width: 100%;
   aspect-ratio: 3/4;
@@ -63,13 +63,15 @@
   z-index: 1;
 }
 
+/* White pages */
 .book-preview-image:after {
   content: "";
   position: absolute;
-  background: white;
-  box-shadow: 1px 1px 0 white, 2px 2px 0 #666666, 3px 3px 0 white,
-    4px 4px 0 #666666, 5px 5px 0 white, 6px 6px 0 #666666, 7px 7px 0 white,
-    8px 8px 0 #666666, 9px 9px 0 white, 10px 10px 0 #666666;
+  background: var(--bg);
+  box-shadow: 1px 1px 0 var(--bg), 2px 2px 0 var(--bg3), 3px 3px 0 var(--bg),
+    4px 4px 0 var(--bg3), 5px 5px 0 var(--bg), 6px 6px 0 var(--bg3),
+    7px 7px 0 var(--bg), 8px 8px 0 var(--bg3), 9px 9px 0 var(--bg),
+    10px 10px 0 var(--bg3);
   transform: translate(1px, 1px);
   top: 2px;
   right: 2px;
@@ -89,12 +91,12 @@
 }
 
 .book-preview-image img:last-of-type {
-  box-shadow: 0 5px 2px rgba(0, 0, 0, 0.6), 0 15px 60px rgba(0, 0, 0, 0.6);
+  box-shadow: 0 5px 2px rgba(0, 0, 0, 0.6), 0 15px 60px rgba(0, 0, 0, 0.24);
   position: absolute;
   top: 0;
   left: 0;
   transform: translate(12px, 12px) scale(-1, 1);
-  filter: brightness(0.25);
+  filter: brightness(0.75);
   z-index: -1;
 }
 

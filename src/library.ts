@@ -1,4 +1,3 @@
-import type OpenAI from "openai";
 import {
   BookDB,
   BookProps,
@@ -7,87 +6,27 @@ import {
   GenerateResponseOptions,
   ImageDB,
   ImageResponsePayload,
-  InputOptions,
 } from "./types";
 
-const OPEN_AI_API = "https://api.openai.com/v1/responses";
-
-/**
- * Generate an Image
- */
-async function generateResponse(
-  args: GenerateResponseOptions,
-  options: InputOptions | undefined
-): Promise<OpenAI.Responses.Response | undefined> {
-  if (!options?.apikey) {
-    console.error("Missing API Key");
-    return undefined;
-  }
-
-  const request = await fetch(OPEN_AI_API, {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${options?.apikey}`,
-      "Content-Type": "application/json",
-      "Access-Control-Allow-Origin": "*",
-    },
-    body: JSON.stringify(getResponseOptions(args)),
-  });
-
-  const response = await request.json();
-
-  return response;
-}
-
-function getResponseOptions(
-  args: GenerateResponseOptions
-): OpenAI.Responses.ResponseCreateParams {
-  const options: OpenAI.Responses.ResponseCreateParams = {
-    model: "gpt-4.1-mini",
-    input: args.input,
-    tool_choice: args.as_image ? "required" : undefined,
-    tools: args.as_image ? [{ type: "image_generation" }] : undefined,
-    instructions: args.instructions,
-  };
-
-  if (args.previous_response_id) {
-    options.previous_response_id = args.previous_response_id;
-  }
-
-  return options;
-}
-
 export async function generateImage(
-  args: GenerateResponseOptions,
-  options: InputOptions | undefined
+  args: GenerateResponseOptions
 ): Promise<ImageResponsePayload & { error?: unknown }> {
-  const imageResponse = await generateResponse(
-    {
+  const response = await fetch(`${import.meta.env.VITE_API}/api/ai`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
       ...args,
       as_image: true,
-    },
-    options
-  );
+    }),
+  });
 
-  const imageResults = (imageResponse?.output || [])
-    .filter((output) => output.type === "image_generation_call")
-    .map((output) => output.result);
-
-  if (imageResults.length > 0) {
-    const imageBase64 = imageResults[0];
-
-    if (imageBase64 && imageResponse?.id) {
-      return {
-        url: `data:image/png;base64, ${imageBase64}`,
-        response_id: imageResponse.id,
-      };
-    }
+  if (response.ok) {
+    return response.json();
   }
 
   return {
     url: "",
     response_id: "",
-    error: imageResponse,
   };
 }
 
@@ -96,34 +35,18 @@ export async function generateImage(
  * @param prompt The engineered prompt
  */
 export async function generateBook(
-  args: GenerateResponseOptions,
-  options: InputOptions
+  args: GenerateResponseOptions
 ): Promise<BookResponsePayload | undefined> {
-  const bookResponse = await generateResponse(args, options);
+  const response = await fetch(`${import.meta.env.VITE_API}/api/ai`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(args),
+  });
 
-  const book = (bookResponse?.output || [])
-    .filter((output) => output.type === "message")
-    .reduce<BookProps | undefined>((acc, output) => {
-      const text = output.content.find((o) => o.type === "output_text");
-      if (text && !acc) {
-        try {
-          const data = JSON.parse(text.text);
-
-          if (bookResponse?.id) {
-            acc = {
-              ...data,
-              response_id: bookResponse.id,
-            };
-          }
-        } catch (error) {
-          console.error(error);
-        }
-      }
-      return acc;
-    }, undefined);
-
-  if (book) {
-    return book;
+  if (response.ok) {
+    return response.json();
   }
 }
 
@@ -225,9 +148,7 @@ export async function uploadBase64ImageDB(
 export async function getImageDB(imageId: string | number): Promise<ImageDB> {
   const response = await fetch(
     `${import.meta.env.VITE_API}/api/images/${imageId}`,
-    {
-      method: "GET",
-    }
+    { method: "GET" }
   );
 
   const data: ImageDB = await response.json();
