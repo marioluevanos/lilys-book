@@ -8,13 +8,13 @@ import { events } from "../../events";
 import { BookProgress } from "./BookProgress";
 import { HomeIcon, ImageAddIcon } from "../Icon";
 
-type _BookProps = {
+type BookProps = {
   book: BooksPreviewtate;
   onGenerateImageClick: (event: BaseSyntheticEvent) => void;
   isGeneratingImage: boolean;
 };
 
-export const Book: FC<_BookProps> = (props) => {
+export const Book: FC<BookProps> = (props) => {
   const { book, isGeneratingImage, onGenerateImageClick } = props;
   const bookRef = useRef<HTMLOListElement>(null);
   const { pagesRef, pageIndex, bookProgress, onPageChange } = useBookObserver();
@@ -76,7 +76,6 @@ export const Book: FC<_BookProps> = (props) => {
                   width={820}
                   height={1030}
                 />
-                <p className="page-number">{String(i + 1)}</p>
               </figure>
             ) : (
               <div className="cta">
@@ -102,6 +101,9 @@ export const Book: FC<_BookProps> = (props) => {
           <p>{book.random_fact}</p>
         </li>
       </ol>
+      {pageIndex >= 0 ? (
+        <p className="page-number">{String(pageIndex)}</p>
+      ) : null}
       <nav className="book-nav" style={{ display: "none" }}>
         <button
           onClick={onPageChange}

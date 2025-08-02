@@ -62,4 +62,5 @@
 .button[type="submit"] {
   min-width: 90px;
   align-self: flex-end;
+  background: var(--text);
 }

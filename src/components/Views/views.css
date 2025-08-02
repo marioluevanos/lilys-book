@@ -55,10 +55,16 @@ main.view#home-view {
   padding: 0;
   line-height: 3rem;
   position: fixed;
-  bottom: 1rem;
-  right: 1rem;
-  width: 3rem;
-  height: 3rem;
+  bottom: 1.5rem;
+  right: 1.5rem;
+  width: 2.5rem;
+  height: 2.5rem;
   z-index: 300;
+  background: var(--accent2);
   transition: opacity 0.3s var(--ease-out-sine);
+  & svg {
+    stroke-width: 2;
+    width: 0.75rem;
+    height: 0.75rem;
+  }
 }

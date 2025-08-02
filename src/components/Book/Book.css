@@ -16,7 +16,6 @@
   min-width: 100vw;
   min-height: 100svh;
   overflow: hidden auto;
-  /* scroll-snap-type: y proximity; */
   scroll-behavior: smooth;
   overscroll-behavior-y: contain;
   scrollbar-width: none; /* Firefox */
@@ -35,47 +34,55 @@
   & h1 {
     font-family: var(--font-family-body);
   }
+}
 
-  &.home {
-    position: relative;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: var(--bg);
+/**
+ * Home Page
+ */
+.book .page.home {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--accent);
+  color: var(--accent-text);
+  min-height: 100svh;
 
-    & p {
-      margin: 0;
-    }
+  & p {
+    margin: 0;
+  }
+}
+
+/**
+ * Last Page
+ */
+.book .page.last {
+  padding: 2rem;
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+
+  & h3 {
+    color: var(--accent-text2);
+    font-size: 14px;
   }
 
-  &.last {
-    padding: 2rem;
-    display: flex;
-    justify-content: center;
-    flex-direction: column;
+  & p {
+    font-size: 1.5rem;
+    margin: 0;
+  }
 
-    & h3 {
-      color: var(--accent-text2);
-      font-size: 14px;
-    }
+  & .cta-new-book {
+    margin-top: 1.5rem;
+  }
 
-    & p {
-      font-size: 1.5rem;
-      margin: 0;
-    }
+  & form {
+    margin-top: 1.5rem;
+    padding: 0;
+    background: none;
 
-    & .cta-new-book {
-      margin-top: 1.5rem;
-    }
-
-    & form {
-      margin-top: 1.5rem;
-      padding: 0;
-      background: none;
-
-      & textarea {
-        background: var(--bg1);
-      }
+    & textarea {
+      background: var(--bg1);
     }
   }
 }
@@ -187,13 +194,14 @@
 /**
  * Page Number
  */
-.page .page-number {
+.page-number {
   margin: 0;
-  position: absolute;
-  bottom: 1.5rem;
-  right: 1rem;
+  position: fixed;
+  top: 1.5rem;
+  right: 1.5rem;
   margin: auto;
   color: white;
+  background: var(--accent2);
   border-radius: 1rem;
   width: 1.5rem;
   height: 1.5rem;
