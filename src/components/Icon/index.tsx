@@ -6,7 +6,37 @@ type IconProps = SVGProps<SVGSVGElement> & {
   title?: string;
 };
 
-export function PlusIcon({ title = "Plus", ...props }: IconProps) {
+export function TestIcon({ title = "Test Icon", ...props }: IconProps) {
+  return (
+    <svg
+      height="16"
+      width="16"
+      viewBox="0 0 16 16"
+      xmlns="http://www.w3.org/2000/svg"
+      {...props}
+    >
+      <title>{title}</title>
+      <g fill="currentColor">
+        <path
+          d="M12.5.5h-9v3h9Z"
+          fill="none"
+          stroke="currentColor"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+        <path
+          d="M6,5.5V9L2.589,13.031A1.5,1.5,0,0,0,3.734,15.5h8.532a1.5,1.5,0,0,0,1.145-2.469L10,9V5.5"
+          fill="none"
+          stroke="currentColor"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      </g>
+    </svg>
+  );
+}
+
+export function PlusIcon({ title = "Plus Icon", ...props }: IconProps) {
   return (
     <svg
       height="16"
@@ -42,7 +72,10 @@ export function PlusIcon({ title = "Plus", ...props }: IconProps) {
   );
 }
 
-export function ImageAddIcon({ title = "ImageAddIcon", ...props }: IconProps) {
+export function ImageAddIcon({
+  title = "Image Add Icon",
+  ...props
+}: IconProps) {
   return (
     <svg
       height="16"
@@ -93,7 +126,10 @@ export function ImageAddIcon({ title = "ImageAddIcon", ...props }: IconProps) {
   );
 }
 
-export function ArrowLeftIcon({ title = "badge 13", ...props }: IconProps) {
+export function ArrowLeftIcon({
+  title = "Arrow Left Icon",
+  ...props
+}: IconProps) {
   return (
     <svg
       height="16"
@@ -126,7 +162,7 @@ export function ArrowLeftIcon({ title = "badge 13", ...props }: IconProps) {
   );
 }
 
-export function HomeIcon({ title = "badge 13", ...props }: IconProps) {
+export function HomeIcon({ title = "Home Icon", ...props }: IconProps) {
   return (
     <svg
       height="16"

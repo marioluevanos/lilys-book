@@ -52,19 +52,8 @@ main.view#home-view {
 }
 
 #book-view button.home-button {
-  padding: 0;
-  line-height: 3rem;
   position: fixed;
   bottom: 1.5rem;
   right: 1.5rem;
-  width: 2.5rem;
-  height: 2.5rem;
   z-index: 300;
-  background: var(--accent2);
-  transition: opacity 0.3s var(--ease-out-sine);
-  & svg {
-    stroke-width: 2;
-    width: 0.75rem;
-    height: 0.75rem;
-  }
 }

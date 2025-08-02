@@ -48,6 +48,7 @@ export const Book: FC<BookProps> = (props) => {
           <h1>{book.title}</h1>
           <Button
             className="home-button"
+            data-variant="icon"
             onClick={() => {
               events.emit("home-view", undefined);
             }}
@@ -63,6 +64,7 @@ export const Book: FC<BookProps> = (props) => {
             data-page-index={String(i)}
             ref={(el) => el && (pagesRef.current[i] = el)}
           >
+            <p className="page-number">{String(i + 1)}</p>
             {"image" in page &&
             page.image &&
             typeof page.image === "object" &&
@@ -101,9 +103,7 @@ export const Book: FC<BookProps> = (props) => {
           <p>{book.random_fact}</p>
         </li>
       </ol>
-      {pageIndex >= 0 ? (
-        <p className="page-number">{String(pageIndex)}</p>
-      ) : null}
+
       <nav className="book-nav" style={{ display: "none" }}>
         <button
           onClick={onPageChange}

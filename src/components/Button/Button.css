@@ -64,3 +64,19 @@
   align-self: flex-end;
   background: var(--text);
 }
+
+.button[data-variant="icon"] {
+  padding: 0;
+  line-height: 3rem;
+  width: 2.5rem;
+  height: 2.5rem;
+  background: var(--accent2);
+  color: var(--accent-text);
+
+  & svg {
+    stroke: currentColor;
+    stroke-width: 2;
+    width: 0.75rem;
+    height: 0.75rem;
+  }
+}
