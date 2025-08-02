@@ -17,7 +17,7 @@ export const HomeView: FC<{
   return (
     <main id="home-view" className="view">
       <header>
-        <h2>Lily's Books</h2>
+        <h1>Lily's Books</h1>
       </header>
 
       <BookShelf onBookClick={onBookClick} />

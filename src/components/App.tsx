@@ -226,11 +226,7 @@ function App() {
 
       setOptions(inputOptions);
 
-      console.log({ inputOptions, prompt });
-
       const bookResponse = await generateBook(prompt);
-
-      console.log({ bookResponse });
       if (bookResponse) {
         const uploadedBook = await uploadBookDB({
           ...bookResponse,

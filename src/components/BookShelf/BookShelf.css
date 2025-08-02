@@ -110,6 +110,7 @@
   position: absolute;
   top: 0;
   left: 0;
+  height: 98%;
   transform: translate3d(8px, 0, 24px) scale(-1, 1);
   filter: brightness(0.75);
   z-index: -1;
