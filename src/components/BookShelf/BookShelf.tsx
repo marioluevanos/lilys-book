@@ -1,6 +1,6 @@
 import "./BookShelf.css";
 
-import { getBooksPreviewDB, getImageDB } from "../../library";
+import { deleteBookDB, getBooksPreviewDB, getImageDB } from "../../library";
 import { BookDB, ImageProps } from "../../types";
 import { cn } from "../../utils/cn";
 import {
@@ -11,6 +11,8 @@ import {
   useState,
 } from "react";
 import { useBookShelf } from "./useBookShelf";
+import { Button } from "../Button/Button";
+import { TrashIcon } from "../Icon";
 
 type BooksPreviewProps = {
   className?: string;
@@ -42,6 +44,20 @@ export const BookShelf: FC<BooksPreviewProps> = (props) => {
     bookPreviews?.length || 0,
     onIntersection.bind(null, setActiveIndex)
   );
+
+  /**
+   * Delete a book
+   */
+  const onBookDeleteClick = useCallback(async (event: BaseSyntheticEvent) => {
+    event.preventDefault();
+    const bookId = event.target.dataset.bookId;
+    if (bookId) {
+      const apiResponse = await deleteBookDB(bookId);
+      if (apiResponse.message) {
+        console.log("deleted");
+      }
+    }
+  }, []);
 
   /**
    * Fetch the first image in the book to use as the preview
@@ -85,6 +101,14 @@ export const BookShelf: FC<BooksPreviewProps> = (props) => {
             className={cn("book-shelf-book", activeIndex === i && "active")}
             data-book-index={String(i)}
           >
+            <Button
+              data-variant="icon"
+              data-book-id={String(b.id)}
+              className="book-delete"
+              onClick={onBookDeleteClick}
+            >
+              <TrashIcon />
+            </Button>
             <figure
               onClick={onBookClick}
               ref={(el) => el && (booksRef.current[i] = el)}

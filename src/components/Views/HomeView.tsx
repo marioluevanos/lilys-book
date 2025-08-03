@@ -24,7 +24,6 @@ export const HomeView: FC<{
 
       <footer className="app-cta">
         <Button
-          data-variant="icon"
           onClick={() => {
             events.emit("drawer", {
               children: (

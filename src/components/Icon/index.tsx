@@ -6,6 +6,24 @@ type IconProps = SVGProps<SVGSVGElement> & {
   title?: string;
 };
 
+export function TrashIcon({ title = "Trash Icon", ...props }: IconProps) {
+  return (
+    <svg
+      width="16"
+      height="16"
+      viewBox="0 0 16 16"
+      xmlns="http://www.w3.org/2000/svg"
+      {...props}
+    >
+      {/* <path d="M10 11v6"></path>
+      <path d="M14 11v6"></path>
+      <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"></path>
+      <path d="M3 6h18"></path>
+      <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path> */}
+    </svg>
+  );
+}
+
 export function TestIcon({ title = "Test Icon", ...props }: IconProps) {
   return (
     <svg

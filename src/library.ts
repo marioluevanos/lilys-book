@@ -102,6 +102,22 @@ export async function updateBookDB(
   }
 }
 
+export async function deleteBookDB(
+  bookId: string
+): Promise<{ message?: string; error?: string }> {
+  const response = await fetch(
+    `${import.meta.env.VITE_API}/api/books/${bookId}`,
+    {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+    }
+  );
+
+  const data: { message?: string; error?: string } = await response.json();
+
+  return data;
+}
+
 export async function uploadBookDB(
   book: BookProps
 ): Promise<BookDB | undefined> {
