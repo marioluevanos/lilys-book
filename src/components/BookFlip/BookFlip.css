@@ -7,7 +7,6 @@
   --underline: rgba(64, 64, 64, 0.5);
   --spine: var(--accent2);
   --cover: var(--accent);
-  --bg: var(--bg);
   --insert: var(--bg1);
   --page: var(--bg2);
 }

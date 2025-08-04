@@ -1,7 +1,7 @@
 import "./Form.css";
 import { Button } from "../Button/Button";
 import { BaseSyntheticEvent, FC, useEffect, useState } from "react";
-import { ART_STYLES, InputOptions } from "../../types";
+import { ART_STYLES, StorageOptions } from "../../types";
 import { cn } from "../../utils/cn";
 import { getOptions } from "../../storage";
 
@@ -11,7 +11,7 @@ export const Form: FC<{
   disabled?: boolean;
 }> = (props) => {
   const { onSubmit, onChange, disabled } = props;
-  const [options, setOptions] = useState<InputOptions>();
+  const [options, setOptions] = useState<StorageOptions>();
 
   useEffect(() => {
     const options = getOptions();

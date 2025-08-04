@@ -1,16 +1,15 @@
 import { BaseSyntheticEvent, useCallback, useEffect, useState } from "react";
 import {
-  generateBook,
-  generateImage,
+  aiGenerateBook,
+  aiGenerateImage,
   getBookDB,
-  getImageDB,
   updateBookDB,
   uploadBase64ImageDB,
   uploadBookDB,
 } from "../library";
 import { useModes } from "../hooks/useModes";
-import { BooksPreviewtate, InputOptions } from "../types";
-import { bookPrompt, imagePrompt } from "../system";
+import { BookDB, StorageOptions } from "../types";
+import { bookResponseOptions, imageResponseOptions } from "../system";
 import { preloadStorage, updateUserOptions } from "../storage";
 import { Drawer } from "./Drawer/Drawer";
 import { EventMap, events } from "../events";
@@ -22,34 +21,9 @@ import { BookView } from "./Views/BookView";
 function App() {
   const { size, theme } = useModes();
   const [loading, setLoading] = useState<boolean>(false);
-  const [options, setOptions] = useState<InputOptions>();
-  const [book, setBook] = useState<BooksPreviewtate>();
+  const [options, setOptions] = useState<StorageOptions>();
+  const [book, setBook] = useState<BookDB>();
   const [isGeneratingImage, setIsGeneratingImage] = useState(false);
-
-  /**
-   * On page change (horizontal page change)
-   */
-  const onPageChange = useCallback(
-    async (pageIdx: EventMap["pagechange"]) => {
-      const pages = book?.pages || [];
-      const currentPage = pages[pageIdx];
-      const currentImageUrl = pages[pageIdx]?.image?.url;
-      const imageId = currentPage?.image_id || currentPage?.image?.id;
-
-      if (!currentImageUrl && imageId) {
-        const image = await getImageDB(imageId);
-        const pageWImage = {
-          ...currentPage,
-          image,
-        };
-        setBook((prev) => ({
-          ...prev,
-          pages: pages.map((p, i) => (i === pageIdx ? pageWImage : p)),
-        }));
-      }
-    },
-    [book]
-  );
 
   /**
    * Handle the generated image
@@ -77,7 +51,7 @@ function App() {
           pageToUpdate.image_id = uploadImage.id;
 
           if (book) {
-            const bookUpdated: BooksPreviewtate = {
+            const bookUpdated: BookDB = {
               ...book,
               pages: (book?.pages || []).map((p, i) => {
                 return i === pageIndex ? pageToUpdate : p;
@@ -87,11 +61,16 @@ function App() {
             const bookImageUpdated = await updateBookDB(bookUpdated, book.id);
 
             setBook({
-              ...bookImageUpdated,
+              id: bookImageUpdated?.id || "",
+              title: bookImageUpdated?.title || "",
+              random_fact: bookImageUpdated?.random_fact || "",
+              response_id: bookImageUpdated?.response_id || "",
               pages: (book?.pages || []).map((p, i) => {
                 return i === pageIndex
                   ? {
-                      ...pageToUpdate,
+                      synopsis: pageToUpdate.synopsis,
+                      content: pageToUpdate.content,
+                      image_id: pageToUpdate.image_id,
                       image: uploadImage,
                     }
                   : p;
@@ -107,7 +86,7 @@ function App() {
   /**
    * Handle generate image click
    */
-  const onGenerateImage = useCallback(
+  const onGenerateImageClick = useCallback(
     async (event: BaseSyntheticEvent) => {
       event.preventDefault();
       const pageIndex = +event.target.dataset.pageIndex;
@@ -123,14 +102,14 @@ function App() {
           if (!hasImage) {
             setIsGeneratingImage(true);
 
-            const prompt = imagePrompt({
+            const prompt = imageResponseOptions({
               input: page.synopsis,
               previous_response_id,
               art_style: options?.art_style,
             });
 
             console.log({ prompt });
-            const response = await generateImage(prompt);
+            const response = await aiGenerateImage(prompt);
             console.log({ response });
             if (response.url.length <= 0) {
               console.error("Failed", response);
@@ -157,10 +136,10 @@ function App() {
   );
 
   /**
-   * Get the users input as InputOptions
+   * Get the users input as StorageOptions
    */
   const getUserInput = useCallback(
-    (event: BaseSyntheticEvent): InputOptions => {
+    (event: BaseSyntheticEvent): StorageOptions => {
       const form = event.target as HTMLFormElement;
       const prompt = form.elements.namedItem("prompt") as HTMLTextAreaElement;
       const apikey = form.elements.namedItem("apikey") as HTMLInputElement;
@@ -180,9 +159,9 @@ function App() {
   /**
    * Handle form submit
    */
-  const onChange = useCallback(
+  const onChangeOptions = useCallback(
     async (event: BaseSyntheticEvent) => {
-      const art_style = event.target.value as InputOptions["art_style"];
+      const art_style = event.target.value as StorageOptions["art_style"];
 
       if (art_style) {
         const _options = {
@@ -222,11 +201,11 @@ function App() {
       setLoading(true);
 
       const inputOptions = getUserInput(event);
-      const prompt = bookPrompt(inputOptions.input);
+      const options = bookResponseOptions(inputOptions.input);
 
       setOptions(inputOptions);
 
-      const bookResponse = await generateBook(prompt);
+      const bookResponse = await aiGenerateBook(options);
       if (bookResponse) {
         const uploadedBook = await uploadBookDB({
           ...bookResponse,
@@ -249,6 +228,9 @@ function App() {
     setBook(undefined);
   }, []);
 
+  /**
+   * Handle book clicks
+   */
   const onBookClick = useCallback(async (event: BaseSyntheticEvent) => {
     const bookId = event?.target.dataset.bookId;
 
@@ -264,9 +246,8 @@ function App() {
    * Set state from browser storage
    */
   useEffect(() => {
-    events.on("pagechange", onPageChange);
     events.on("home-view", onHomeView);
-  }, [saveGeneratedImage, onHomeView, onPageChange]);
+  }, [onHomeView]);
 
   /**
    * Set state from browser storage
@@ -283,13 +264,13 @@ function App() {
       {book ? (
         <BookView
           isGeneratingImage={isGeneratingImage}
-          onGenerateImage={onGenerateImage}
+          onGenerateImageClick={onGenerateImageClick}
           book={book}
         />
       ) : (
         <HomeView
           onSubmit={onSubmit}
-          onChange={onChange}
+          onChange={onChangeOptions}
           onBookClick={onBookClick}
         />
       )}

@@ -17,7 +17,7 @@ export const optionalCharacters = `
   2. Daddy, the father of Lily, is 6'0", medium size, has dark short hair, fair skin, a short beard and a sharp nose. He wears jeans, boots, and collared shirts. He is half American, Half Mexican descent. He is a Software Engineer and Designer.
   3. Kiko, the older and bigger brother of Popcorn, an athletic Miniature Schnauzer with gray fur, is male. He barks a lot.`;
 
-export function bookPrompt(input: string): GenerateResponseOptions {
+export function bookResponseOptions(input: string): GenerateResponseOptions {
   return {
     instructions: `
 You are an award winning children's book author and illustrator.
@@ -46,7 +46,7 @@ Requirements:
   };
 }
 
-export function imagePrompt(
+export function imageResponseOptions(
   args: Omit<GenerateResponseOptions, "instructions">
 ): GenerateResponseOptions {
   return {

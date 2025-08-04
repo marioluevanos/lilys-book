@@ -3,12 +3,12 @@ import "./BookFlip.css";
 import { FC, useEffect } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { BooksPreviewtate, PageState } from "../../types";
+import { BookDB, PageState } from "../../types";
 import { cn } from "../../utils/cn";
 
 gsap.registerPlugin(ScrollTrigger);
 
-export const BookFlip: FC<{ book?: BooksPreviewtate }> = (props) => {
+export const BookFlip: FC<{ book?: BookDB }> = (props) => {
   const { book } = props;
   const pages = book?.pages || [];
 

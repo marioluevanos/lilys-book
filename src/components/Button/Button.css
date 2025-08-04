@@ -63,6 +63,7 @@
   min-width: 90px;
   align-self: flex-end;
   background: var(--text);
+  color: var(--bg);
 }
 
 .button[data-variant="icon"] {

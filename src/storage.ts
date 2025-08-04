@@ -1,4 +1,4 @@
-import { InputOptions } from "./types";
+import { StorageOptions } from "./types";
 
 const SETTINGS = "settings";
 
@@ -6,7 +6,7 @@ export const KEYS = {
   SETTINGS,
 };
 
-export function getOptions(): InputOptions | undefined {
+export function getOptions(): StorageOptions | undefined {
   try {
     const settings = localStorage.getItem(SETTINGS);
     if (typeof settings === "string" && settings !== "undefined") {
@@ -21,14 +21,14 @@ export function getOptions(): InputOptions | undefined {
  * Load from local storage
  */
 export function preloadStorage(setters: {
-  getSettings: (payload: InputOptions) => void;
+  getSettings: (payload: StorageOptions) => void;
 }) {
   const { getSettings } = setters;
   const options = getOptions();
   if (options) getSettings(options);
 }
 
-export function updateUserOptions(args: InputOptions | undefined) {
+export function updateUserOptions(args: StorageOptions | undefined) {
   if (args) {
     localStorage.setItem(KEYS.SETTINGS, JSON.stringify(args));
   }

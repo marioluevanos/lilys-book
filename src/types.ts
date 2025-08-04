@@ -26,6 +26,7 @@ export const BookSchema = z.object({
 export type GenerateResponseOptions = {
   input: string;
   previous_response_id: string | undefined;
+  with_images?: boolean;
   as_image?: boolean;
   instructions: string;
   art_style?: (typeof ART_STYLES)[number] | (string & {});
@@ -33,39 +34,28 @@ export type GenerateResponseOptions = {
 
 export const ART_STYLES = ["Dr. Seuss", "Disney"] as const;
 
-export type InputOptions = {
+export type StorageOptions = {
   input: string;
   apikey: string;
   art_style: GenerateResponseOptions["art_style"] | (string & {});
 };
 
-export type BookResponsePayload = BookProps;
-
-export type ImageResponsePayload = ImageProps;
-
 export type PageDB = PageProps & {
-  image_id?: number;
-};
-
-export type PageState = PageProps & {
   image?: ImageDB;
   image_id?: string | number;
 };
 
-export type BookDB<T = PageDB> = BookProps & {
-  id?: number;
-  pages: T[];
+export type BookDB = BookProps & {
+  id: string;
+  pages: PageDB[];
   created_at?: string;
   updated_at?: string;
+  response_id: string;
 };
 
 export type ImageDB = {
   filename: string;
-  id: number;
+  id: string;
   url: string;
   response_id: string;
-};
-
-export type BooksPreviewtate = Partial<BookDB<PageState>> & {
-  response_id?: string;
 };

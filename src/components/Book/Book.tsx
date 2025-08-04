@@ -1,5 +1,5 @@
 import "./Book.css";
-import { BooksPreviewtate, ImageProps } from "../../types";
+import { BookDB, ImageProps } from "../../types";
 import { BaseSyntheticEvent, FC, useCallback, useEffect, useRef } from "react";
 import { Button } from "../Button/Button";
 import { useBookObserver } from "./useBookObserver";
@@ -9,7 +9,7 @@ import { BookProgress } from "./BookProgress";
 import { HomeIcon, ImageAddIcon } from "../Icon";
 
 type BookProps = {
-  book: BooksPreviewtate;
+  book: BookDB;
   onGenerateImageClick: (event: BaseSyntheticEvent) => void;
   isGeneratingImage: boolean;
 };

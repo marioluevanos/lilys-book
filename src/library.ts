@@ -1,16 +1,14 @@
 import {
   BookDB,
   BookProps,
-  BookResponsePayload,
-  BooksPreviewtate,
   GenerateResponseOptions,
   ImageDB,
-  ImageResponsePayload,
+  ImageProps,
 } from "./types";
 
-export async function generateImage(
+export async function aiGenerateImage(
   args: GenerateResponseOptions
-): Promise<ImageResponsePayload & { error?: unknown }> {
+): Promise<ImageProps & { error?: unknown }> {
   const response = await fetch(`${import.meta.env.VITE_API}/api/ai`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -34,9 +32,9 @@ export async function generateImage(
  * Generate a book with AI. Handles the prompt engineering and book creation.
  * @param prompt The engineered prompt
  */
-export async function generateBook(
+export async function aiGenerateBook(
   args: GenerateResponseOptions
-): Promise<BookResponsePayload | undefined> {
+): Promise<(BookProps & { response_id: string }) | undefined> {
   const response = await fetch(`${import.meta.env.VITE_API}/api/ai`, {
     method: "POST",
     headers: {
@@ -83,8 +81,8 @@ export async function getBookDB(
 }
 
 export async function updateBookDB(
-  book: BooksPreviewtate,
-  bookId: number
+  book: BookDB,
+  bookId: string
 ): Promise<BookDB | undefined> {
   const response = await fetch(
     `${import.meta.env.VITE_API}/api/books/${bookId}`,
@@ -158,7 +156,7 @@ export async function uploadBase64ImageDB(
     return data;
   }
 
-  return { url: base64, id: 0, filename: "", response_id: "" };
+  return { url: base64, id: "", filename: "", response_id: "" };
 }
 
 export async function getImageDB(imageId: string | number): Promise<ImageDB> {
@@ -173,5 +171,5 @@ export async function getImageDB(imageId: string | number): Promise<ImageDB> {
     return data;
   }
 
-  return { url: "", id: 0, filename: "", response_id: "" };
+  return { url: "", id: "", filename: "", response_id: "" };
 }
