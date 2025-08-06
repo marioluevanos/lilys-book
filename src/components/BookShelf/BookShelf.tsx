@@ -53,7 +53,8 @@ export const BookShelf: FC<BooksPreviewProps> = (props) => {
   const onBookDeleteClick = useCallback(async (event: BaseSyntheticEvent) => {
     event.preventDefault();
     const bookId = event.target.dataset.bookId;
-    if (bookId) {
+    const yes = confirm("Are you sure?");
+    if (bookId && yes) {
       const apiResponse = await deleteBookDB(bookId);
       if (apiResponse.message) {
         events.emit("deletedbook", bookId);
