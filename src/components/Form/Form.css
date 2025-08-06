@@ -9,6 +9,10 @@ form {
   box-sizing: border-box;
 }
 
+form.disabled * {
+  pointer-events: none;
+}
+
 form label {
   white-space: nowrap;
   text-wrap: balance;

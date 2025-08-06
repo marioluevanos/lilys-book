@@ -3,7 +3,7 @@ import "./BookFlip.css";
 import { FC, useEffect } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { BookDB, PageState } from "../../types";
+import { BookDB, PageDB } from "../../types";
 import { cn } from "../../utils/cn";
 
 gsap.registerPlugin(ScrollTrigger);
@@ -84,7 +84,7 @@ export const BookFlip: FC<{ book?: BookDB }> = (props) => {
           <div className="book-flip-page-number">{1}</div>
         </div>
       </div>
-      {((book?.pages || []) as PageState[]).map((p, i) => (
+      {((book?.pages || []) as PageDB[]).map((p, i) => (
         <div key={i} className={cn("pagina book-flip-page")}>
           <div className="book-flip-page-half">
             <p>{p.content}</p>

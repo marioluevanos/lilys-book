@@ -37,7 +37,11 @@ export const Form: FC<{
   }, []);
 
   return (
-    <form onSubmit={onSubmit} aria-disabled={disabled}>
+    <form
+      onSubmit={onSubmit}
+      className={cn(disabled && "disabled")}
+      aria-disabled={disabled}
+    >
       <textarea
         id="input"
         name="input"

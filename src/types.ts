@@ -49,7 +49,6 @@ export const ART_STYLES = [
   "Line Drawing",
   "Sketch",
   "Abstract",
-  "Stylized and Exaggerated",
   "Vintage",
   "Bold and Bright",
   "Muted or Subdued",

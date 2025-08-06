@@ -150,7 +150,7 @@ function App() {
    */
   const onFinalize = useCallback((event: BaseSyntheticEvent) => {
     const textArea = event.target.elements.namedItem(
-      "prompt"
+      "input"
     ) as HTMLTextAreaElement | null;
 
     if (textArea) textArea.value = "";
