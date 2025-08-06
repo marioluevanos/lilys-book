@@ -88,7 +88,6 @@ form .input ~ .clear-btn {
   background: var(--bg1);
   border: 1px solid var(--bg2);
   border-radius: 0 12px 12px 0;
-  box-shadow: -4px 0 16px hsl(0deg 0% 0%/16%);
 
   & .delete-icon {
     pointer-events: none;

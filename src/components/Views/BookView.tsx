@@ -1,6 +1,6 @@
 import "./views.css";
 
-import { BaseSyntheticEvent, FC, useState } from "react";
+import { FC, useState } from "react";
 import { BookDB } from "../../types";
 import { BookHorizontal } from "../BookHorizontal/BookHorizontal";
 import { BookFlip } from "../BookFlip/BookFlip";
@@ -8,11 +8,10 @@ import { Button } from "../Button/Button";
 import { TestIcon } from "../Icon";
 
 export const BookView: FC<{
-  onGenerateImageClick: (event: BaseSyntheticEvent) => Promise<void>;
   isGeneratingImage?: boolean;
   book?: BookDB;
 }> = (props) => {
-  const { onGenerateImageClick, book, isGeneratingImage = false } = props;
+  const { book, isGeneratingImage = false } = props;
   const [useFlip, setUseFlip] = useState(false);
   return (
     book && (
@@ -33,11 +32,7 @@ export const BookView: FC<{
         {useFlip ? (
           <BookFlip book={book} />
         ) : (
-          <BookHorizontal
-            book={book}
-            isGeneratingImage={isGeneratingImage}
-            onGenerateImageClick={onGenerateImageClick}
-          />
+          <BookHorizontal book={book} isGeneratingImage={isGeneratingImage} />
         )}
       </main>
     )

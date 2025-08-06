@@ -224,7 +224,8 @@ function App() {
   useEffect(() => {
     events.on("home-view", onHomeView);
     events.on("formblur", onFormBlur);
-  }, [onHomeView, onFormBlur]);
+    events.on("generateimageclick", onGenerateImageClick);
+  }, [onHomeView, onFormBlur, onGenerateImageClick]);
 
   /**
    * Set state from browser storage
@@ -238,11 +239,7 @@ function App() {
     <div className="app" data-size={size} data-theme={theme}>
       {loading && <LoadingProgress />}
       {book ? (
-        <BookView
-          isGeneratingImage={isGeneratingImage}
-          onGenerateImageClick={onGenerateImageClick}
-          book={book}
-        />
+        <BookView isGeneratingImage={isGeneratingImage} book={book} />
       ) : (
         <HomeView
           onSubmit={onSubmitAIRequest}

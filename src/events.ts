@@ -27,6 +27,10 @@ type EventPayloads =
       payload: undefined;
     }
   | {
+      event: "generateimageclick";
+      payload: BaseSyntheticEvent;
+    }
+  | {
       event: "generatedimage";
       payload: { image: ImageProps; pageIndex: number; bookTitle?: string };
     }

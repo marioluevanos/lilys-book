@@ -10,12 +10,11 @@ import { HomeIcon, ImageAddIcon } from "../Icon";
 
 type BookHorizontalProps = {
   book: BookDB;
-  onGenerateImageClick: (event: BaseSyntheticEvent) => void;
   isGeneratingImage: boolean;
 };
 
 export const BookHorizontal: FC<BookHorizontalProps> = (props) => {
-  const { book, isGeneratingImage, onGenerateImageClick } = props;
+  const { book, isGeneratingImage } = props;
   const bookRef = useRef<HTMLOListElement>(null);
   const { pagesRef, pageIndex, bookProgress, onPageChange } = useBookObserver();
 
@@ -29,6 +28,11 @@ export const BookHorizontal: FC<BookHorizontalProps> = (props) => {
         behavior: "instant",
       });
     }
+  }, []);
+
+  const onGenerateImageClick = useCallback((event: BaseSyntheticEvent) => {
+    event.preventDefault();
+    events.emit("generateimageclick", event);
   }, []);
 
   useEffect(() => {

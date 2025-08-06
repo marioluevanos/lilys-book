@@ -18,7 +18,7 @@ export function cn(...args: ArgumentArray): string {
 
     const argType = typeof arg;
 
-    if (argType === 'string' || argType === 'number') {
+    if (argType === "string" || argType === "number") {
       classes.push(arg);
     } else if (Array.isArray(arg)) {
       if (arg.length) {
@@ -27,9 +27,9 @@ export function cn(...args: ArgumentArray): string {
           classes.push(inner);
         }
       }
-    } else if (argType === 'object') {
+    } else if (argType === "object") {
       if (
-        typeof arg === 'object' &&
+        typeof arg === "object" &&
         arg.toString === Object.prototype.toString
       ) {
         for (const key in arg) {
@@ -43,5 +43,5 @@ export function cn(...args: ArgumentArray): string {
     }
   }
 
-  return classes.join(' ');
+  return classes.join(" ");
 }

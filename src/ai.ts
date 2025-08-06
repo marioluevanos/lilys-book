@@ -1,4 +1,4 @@
-import { BookProps, GenerateResponseOptions, ImageProps } from "./types";
+import { BookDB, GenerateResponseOptions, ImageProps } from "./types";
 
 export async function aiGenerateImage(
   args: GenerateResponseOptions
@@ -28,7 +28,7 @@ export async function aiGenerateImage(
  */
 export async function aiGenerateBook(
   args: GenerateResponseOptions
-): Promise<(BookProps & { response_id: string }) | undefined> {
+): Promise<BookDB | undefined> {
   const response = await fetch(`${import.meta.env.VITE_API}/api/ai`, {
     method: "POST",
     headers: {
