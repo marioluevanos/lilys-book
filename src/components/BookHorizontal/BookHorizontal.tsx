@@ -1,20 +1,28 @@
 import "./BookHorizontal.css";
 import { BookDB, ImageProps } from "../../types";
-import { BaseSyntheticEvent, FC, useCallback, useEffect, useRef } from "react";
+import {
+  BaseSyntheticEvent,
+  FC,
+  ReactNode,
+  useCallback,
+  useEffect,
+  useRef,
+} from "react";
 import { Button } from "../Button/Button";
 import { useBookObserver } from "./useBookHorizontalObserver";
 import { cn } from "../../utils/cn";
 import { events } from "../../events";
 import { BookHorizontalProgress } from "./BookHorizontalProgress";
-import { HomeIcon, ImageAddIcon } from "../Icon";
+import { HomeIcon, ImageAddIcon, TrashIcon } from "../Icon";
 
 type BookHorizontalProps = {
   book: BookDB;
   isGeneratingImage: boolean;
+  firstPage?: ReactNode;
 };
 
 export const BookHorizontal: FC<BookHorizontalProps> = (props) => {
-  const { book, isGeneratingImage } = props;
+  const { book, isGeneratingImage, firstPage } = props;
   const bookRef = useRef<HTMLOListElement>(null);
   const { pagesRef, pageIndex, bookProgress, onPageChange } = useBookObserver();
 
@@ -33,6 +41,14 @@ export const BookHorizontal: FC<BookHorizontalProps> = (props) => {
   const onGenerateImageClick = useCallback((event: BaseSyntheticEvent) => {
     event.preventDefault();
     events.emit("generateimageclick", event);
+  }, []);
+
+  const onDeleteImageClick = useCallback((event: BaseSyntheticEvent) => {
+    event.preventDefault();
+    events.emit("deleteimageclick", {
+      url: event.target.dataset.url,
+      pageIndex: +event.target.dataset.pageIndex,
+    });
   }, []);
 
   useEffect(() => {
@@ -59,6 +75,7 @@ export const BookHorizontal: FC<BookHorizontalProps> = (props) => {
           >
             <HomeIcon />
           </Button>
+          {firstPage}
         </li>
 
         {(book.pages || []).map((page, i) => (
@@ -75,6 +92,15 @@ export const BookHorizontal: FC<BookHorizontalProps> = (props) => {
             "url" in page.image &&
             (page.image as ImageProps).url ? (
               <figure className="art">
+                <Button
+                  data-variant="icon"
+                  data-page-index={String(i)}
+                  data-url={`${page.image.url}`}
+                  className="delete-image"
+                  onClick={onDeleteImageClick}
+                >
+                  <TrashIcon />
+                </Button>
                 <img
                   key={`${page.image.url}`}
                   alt={page.synopsis}

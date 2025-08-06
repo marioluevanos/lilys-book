@@ -16,23 +16,29 @@ export const BookView: FC<{
   return (
     book && (
       <main id="book-view" className="view">
-        <Button
-          data-variant="icon"
-          style={{
-            position: "fixed",
-            top: "1.5rem",
-            left: "1.5rem",
-
-            zIndex: 1000,
-          }}
-          onClick={() => setUseFlip((prev) => !prev)}
-        >
-          <TestIcon />
-        </Button>
         {useFlip ? (
           <BookFlip book={book} />
         ) : (
-          <BookHorizontal book={book} isGeneratingImage={isGeneratingImage} />
+          <BookHorizontal
+            book={book}
+            isGeneratingImage={isGeneratingImage}
+            firstPage={
+              <Button
+                data-variant="icon"
+                style={{
+                  position: "absolute",
+                  top: "1.5rem",
+                  left: "1.5rem",
+                  background: "none",
+                  border: "1px solid white",
+                  zIndex: 1000,
+                }}
+                onClick={() => setUseFlip((prev) => !prev)}
+              >
+                <TestIcon />
+              </Button>
+            }
+          />
         )}
       </main>
     )

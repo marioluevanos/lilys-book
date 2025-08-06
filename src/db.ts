@@ -156,21 +156,17 @@ export async function saveGeneratedImage(
     if (book && book.id) {
       const pages = book.pages || [];
       const { image: _, ...pageToUpdate } = pages[pageIndex];
-
       // Important assignment, make reference to page to image
       const updatedPage: PageDB = {
         ...pageToUpdate,
         image_id: uploadImage.id,
       };
-      // pageToUpdate.image_id = uploadImage.id;
-
       const bookUpdated: BookDB = {
         ...book,
         pages: (book?.pages || []).map((p, i) => {
           return i === pageIndex ? updatedPage : p;
         }),
       };
-
       const updatedBook = await updateBookDB(bookUpdated, book.id);
 
       return {

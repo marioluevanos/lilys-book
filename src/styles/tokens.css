@@ -32,7 +32,7 @@
  * FONT-FAMILY "default" mode
  */
 :root {
-  --font-family-heading: "Playpen Sans", sans-serif;
+  --font-family-heading: "Nata Sans", "Playpen Sans", sans-serif;
   --font-family-body: "Nata Sans", "Playpen Sans", "Roboto", sans-serif;
 }
 

@@ -14,6 +14,8 @@ export async function aiGenerateImage(
 
   if (response.ok) {
     return response.json();
+  } else {
+    console.error(response);
   }
 
   return {
@@ -39,5 +41,7 @@ export async function aiGenerateBook(
 
   if (response.ok) {
     return response.json();
+  } else {
+    console.error(response);
   }
 }

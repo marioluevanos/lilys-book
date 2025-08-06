@@ -53,7 +53,8 @@ export const BookShelf: FC<BooksPreviewProps> = (props) => {
   const onBookDeleteClick = useCallback(async (event: BaseSyntheticEvent) => {
     event.preventDefault();
     const bookId = event.target.dataset.bookId;
-    const yes = confirm("Are you sure?");
+    const title = event.target.dataset.title;
+    const yes = confirm(`Delete ${title}?`);
     if (bookId && yes) {
       const apiResponse = await deleteBookDB(bookId);
       if (apiResponse.message) {
@@ -102,13 +103,14 @@ export const BookShelf: FC<BooksPreviewProps> = (props) => {
       <div className="book-shelf-scroll h-scroll">
         {bookPreviews?.map((b, i) => (
           <article
-            key={b.title}
+            key={i}
             className={cn("book-shelf-book", activeIndex === i && "active")}
             data-book-index={String(i)}
           >
             <Button
               data-variant="icon"
               data-book-id={String(b.id)}
+              data-title={String(b.title)}
               className="book-delete"
               onClick={onBookDeleteClick}
             >

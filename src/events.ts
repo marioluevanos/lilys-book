@@ -15,6 +15,13 @@ type EventPayloads =
       payload: string;
     }
   | {
+      event: "deleteimageclick";
+      payload: {
+        url: string;
+        pageIndex: number;
+      };
+    }
+  | {
       event: "formblur";
       payload: BaseSyntheticEvent;
     }

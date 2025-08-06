@@ -5,7 +5,7 @@ import { BookDB, StorageOptions } from "./types";
 import { bookResponseOptions, imageResponseOptions } from "./system";
 import { getStorageOptions, setStorageOptions } from "./storage";
 import { Drawer } from "./components/Drawer/Drawer";
-import { events } from "./events";
+import { EventMap, events } from "./events";
 import { LoadingProgress } from "./components/LoadingProgress/LoadingProgress";
 import { HomeView } from "./components/Views/HomeView";
 import { BookView } from "./components/Views/BookView";
@@ -19,6 +19,35 @@ function App() {
   const [isGeneratingImage, setIsGeneratingImage] = useState(false);
 
   /**
+   * Delete image
+   */
+  const onDeleteImageClick = useCallback(
+    async (event: EventMap["deleteimageclick"]) => {
+      const { pageIndex } = event;
+      const yes = confirm(`Delete page ${pageIndex + 1} image?`);
+      if (book && yes) {
+        const updated = {
+          ...book,
+          pages: (book?.pages || []).map((p, i) => {
+            if (i === pageIndex && "image" in p && p.image) {
+              delete p.image;
+            }
+
+            if (i === pageIndex && "image_id" in p && p.image_id) {
+              delete p.image_id;
+            }
+
+            return p;
+          }),
+        };
+        const uploadedBook = await uploadBookDB(updated);
+        setBook(uploadedBook);
+      }
+    },
+    [book]
+  );
+
+  /**
    * Handle generate image click
    */
   const onGenerateImageClick = useCallback(
@@ -29,47 +58,46 @@ function App() {
       const page = pages[pageIndex];
       const prevImage = pages[pageIndex - 1]?.image;
       const previous_response_id = prevImage?.response_id || book?.response_id;
+      const hasImage = (page?.image?.url || "").length > 0;
 
+      if (isGeneratingImage) return;
+      if (hasImage) return;
       if (page && previous_response_id) {
         try {
-          const hasImage = (page?.image?.url || "").length > 0;
+          setIsGeneratingImage(true);
 
-          if (!hasImage) {
-            setIsGeneratingImage(true);
+          const prompt = imageResponseOptions({
+            input: page.synopsis,
+            previous_response_id,
+            art_style: options?.art_style,
+          });
 
-            const prompt = imageResponseOptions({
-              input: page.synopsis,
-              previous_response_id,
-              art_style: options?.art_style,
-            });
+          console.log("%cIMAGE Promt", "color: lime; background: black", {
+            prompt,
+            JSON: JSON.stringify(prompt),
+          });
+          const response = await aiGenerateImage(prompt);
+          console.log("%cIMAGE Response", "color: white; background: blue", {
+            response,
+            JSON: JSON.stringify(response),
+          });
+          if (response.url.length <= 0) {
+            console.error("Failed", response);
+            setIsGeneratingImage(false);
+            return;
+          }
 
-            console.log("%cIMAGE Promt", "color: lime; background: black", {
-              prompt,
-              JSON: JSON.stringify(prompt),
-            });
-            const response = await aiGenerateImage(prompt);
-            console.log("%cIMAGE Response", "color: white; background: blue", {
-              response,
-              JSON: JSON.stringify(response),
-            });
-            if (response.url.length <= 0) {
-              console.error("Failed", response);
-              setIsGeneratingImage(false);
-              return;
-            }
+          if (book) {
+            const updatedBook = await saveGeneratedImage(
+              {
+                bookTitle: book.title,
+                image: response,
+                pageIndex,
+              },
+              book
+            );
 
-            if (book) {
-              const updatedBook = await saveGeneratedImage(
-                {
-                  bookTitle: book.title,
-                  image: response,
-                  pageIndex,
-                },
-                book
-              );
-
-              setBook(mergeBook(book, updatedBook, pageIndex));
-            }
+            setBook(mergeBook(book, updatedBook, pageIndex));
           }
         } catch (e) {
           console.error(e);
@@ -78,7 +106,7 @@ function App() {
         }
       }
     },
-    [book, options]
+    [book, options, isGeneratingImage]
   );
 
   /**
@@ -225,7 +253,15 @@ function App() {
     events.on("home-view", onHomeView);
     events.on("formblur", onFormBlur);
     events.on("generateimageclick", onGenerateImageClick);
-  }, [onHomeView, onFormBlur, onGenerateImageClick]);
+    events.on("deleteimageclick", onDeleteImageClick);
+
+    return () => {
+      events.off("home-view", onHomeView);
+      events.off("formblur", onFormBlur);
+      events.off("generateimageclick", onGenerateImageClick);
+      events.off("deleteimageclick", onDeleteImageClick);
+    };
+  }, [onHomeView, onFormBlur, onDeleteImageClick, onGenerateImageClick]);
 
   /**
    * Set state from browser storage
