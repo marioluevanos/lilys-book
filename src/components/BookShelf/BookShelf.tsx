@@ -1,6 +1,5 @@
 import "./BookShelf.css";
 
-import { deleteBookDB, getBooksPreviewDB, getImageDB } from "../../library";
 import { BookDB, ImageProps } from "../../types";
 import { cn } from "../../utils/cn";
 import {
@@ -13,13 +12,14 @@ import {
 import { useBookShelf } from "./useBookShelf";
 import { Button } from "../Button/Button";
 import { TrashIcon } from "../Icon";
+import { deleteBookDB, getBooksDB, getImageDB } from "../../db";
 
 type BooksPreviewProps = {
   className?: string;
   onBookClick?: (event: BaseSyntheticEvent) => void;
 };
 
-type BookPreview = { id?: number; title: string; image: ImageProps | null };
+type BookPreview = { id?: string; title: string; image: ImageProps | null };
 
 /**
  * For each Intersection Observer, add onScrollPosition callback
@@ -66,13 +66,14 @@ export const BookShelf: FC<BooksPreviewProps> = (props) => {
     async (bPreviews: BookDB[] | undefined) => {
       const withImage = await Promise.all(
         (bPreviews || []).map<Promise<BookPreview>>(async (bookPre) => {
-          const imageId = bookPre.pages[0].image_id;
+          const [firstPage] = bookPre.pages;
+          const imageId = firstPage.image_id;
 
           if (imageId) {
             return {
-              id: bookPre.id || 0,
-              title: bookPre.title || "",
-              image: (await getImageDB(imageId)) || null,
+              id: bookPre.id,
+              title: bookPre.title,
+              image: await getImageDB(imageId),
             };
           }
 
@@ -89,7 +90,7 @@ export const BookShelf: FC<BooksPreviewProps> = (props) => {
    * Fetch book previews
    */
   useEffect(() => {
-    if (!bookPreviews) getBooksPreviewDB().then(fetchImageForBook);
+    if (!bookPreviews) getBooksDB().then(fetchImageForBook);
   }, [bookPreviews, fetchImageForBook]);
 
   return (

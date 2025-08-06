@@ -1,22 +1,15 @@
 import { BaseSyntheticEvent, useCallback, useEffect, useState } from "react";
-import {
-  aiGenerateBook,
-  aiGenerateImage,
-  getBookDB,
-  updateBookDB,
-  uploadBase64ImageDB,
-  uploadBookDB,
-} from "../library";
-import { useModes } from "../hooks/useModes";
-import { BookDB, StorageOptions } from "../types";
-import { bookResponseOptions, imageResponseOptions } from "../system";
-import { preloadStorage, updateUserOptions } from "../storage";
-import { Drawer } from "./Drawer/Drawer";
-import { EventMap, events } from "../events";
-import { LoadingProgress } from "./LoadingProgress/LoadingProgress";
-import { toKebabCase } from "../utils/toKebabCase";
-import { HomeView } from "./Views/HomeView";
-import { BookView } from "./Views/BookView";
+import { aiGenerateBook, aiGenerateImage } from "./ai";
+import { useModes } from "./hooks/useModes";
+import { BookDB, StorageOptions } from "./types";
+import { bookResponseOptions, imageResponseOptions } from "./system";
+import { preloadStorage, updateUserOptions } from "./storage";
+import { Drawer } from "./components/Drawer/Drawer";
+import { events } from "./events";
+import { LoadingProgress } from "./components/LoadingProgress/LoadingProgress";
+import { HomeView } from "./components/Views/HomeView";
+import { BookView } from "./components/Views/BookView";
+import { getBookDB, mergeBook, saveGeneratedImage, uploadBookDB } from "./db";
 
 function App() {
   const { size, theme } = useModes();
@@ -24,64 +17,6 @@ function App() {
   const [options, setOptions] = useState<StorageOptions>();
   const [book, setBook] = useState<BookDB>();
   const [isGeneratingImage, setIsGeneratingImage] = useState(false);
-
-  /**
-   * Handle the generated image
-   */
-  const saveGeneratedImage = useCallback(
-    async (payload: EventMap["generatedimage"]) => {
-      const pageIndex = payload?.pageIndex || 0;
-      const generatedImage = payload?.image;
-      const filename = `${toKebabCase(
-        payload?.bookTitle || "image"
-      )}-${pageIndex}.png`;
-
-      if (generatedImage?.url && (generatedImage?.url || "").length > 0) {
-        const uploadImage = await uploadBase64ImageDB(
-          generatedImage.url,
-          filename,
-          generatedImage.response_id
-        );
-
-        if (book && book.id) {
-          const pages = book.pages || [];
-          const { image: _, ...pageToUpdate } = pages[pageIndex];
-
-          // Important assignment, make reference to page to image
-          pageToUpdate.image_id = uploadImage.id;
-
-          if (book) {
-            const bookUpdated: BookDB = {
-              ...book,
-              pages: (book?.pages || []).map((p, i) => {
-                return i === pageIndex ? pageToUpdate : p;
-              }),
-            };
-
-            const bookImageUpdated = await updateBookDB(bookUpdated, book.id);
-
-            setBook({
-              id: bookImageUpdated?.id || "",
-              title: bookImageUpdated?.title || "",
-              random_fact: bookImageUpdated?.random_fact || "",
-              response_id: bookImageUpdated?.response_id || "",
-              pages: (book?.pages || []).map((p, i) => {
-                return i === pageIndex
-                  ? {
-                      synopsis: pageToUpdate.synopsis,
-                      content: pageToUpdate.content,
-                      image_id: pageToUpdate.image_id,
-                      image: uploadImage,
-                    }
-                  : p;
-              }),
-            });
-          }
-        }
-      }
-    },
-    [book]
-  );
 
   /**
    * Handle generate image click
@@ -108,9 +43,15 @@ function App() {
               art_style: options?.art_style,
             });
 
-            console.log({ prompt });
+            console.log("%cIMAGE Promt", "color: lime; background: black", {
+              prompt,
+              JSON: JSON.stringify(prompt),
+            });
             const response = await aiGenerateImage(prompt);
-            console.log({ response });
+            console.log("%cIMAGE Response", "color: white; background: blue", {
+              response,
+              JSON: JSON.stringify(response),
+            });
             if (response.url.length <= 0) {
               console.error("Failed", response);
               setIsGeneratingImage(false);
@@ -118,11 +59,16 @@ function App() {
             }
 
             if (book) {
-              saveGeneratedImage({
-                bookTitle: book.title,
-                image: response,
-                pageIndex,
-              });
+              const updatedBook = await saveGeneratedImage(
+                {
+                  bookTitle: book.title,
+                  image: response,
+                  pageIndex,
+                },
+                book
+              );
+
+              setBook(mergeBook(book, updatedBook, pageIndex));
             }
           }
         } catch (e) {
@@ -132,7 +78,7 @@ function App() {
         }
       }
     },
-    [book, saveGeneratedImage, options]
+    [book, options]
   );
 
   /**
@@ -195,7 +141,7 @@ function App() {
   /**
    * Handle form submit
    */
-  const onSubmit = useCallback(
+  const onSubmitAIRequest = useCallback(
     async (event: BaseSyntheticEvent) => {
       event.preventDefault();
       setLoading(true);
@@ -204,8 +150,16 @@ function App() {
       const options = bookResponseOptions(inputOptions.input);
 
       setOptions(inputOptions);
-
+      console.log("%cBOOK options", "color: green; background: yellow", {
+        options,
+        JSON: JSON.stringify(options),
+      });
       const bookResponse = await aiGenerateBook(options);
+      console.log("%cBOOK bookResponse", "color: green; background: yellow", {
+        bookResponse,
+        JSON: JSON.stringify(bookResponse),
+      });
+
       if (bookResponse) {
         const uploadedBook = await uploadBookDB({
           ...bookResponse,
@@ -269,7 +223,7 @@ function App() {
         />
       ) : (
         <HomeView
-          onSubmit={onSubmit}
+          onSubmit={onSubmitAIRequest}
           onChange={onChangeOptions}
           onBookClick={onBookClick}
         />

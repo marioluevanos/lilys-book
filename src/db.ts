@@ -1,54 +1,8 @@
-import {
-  BookDB,
-  BookProps,
-  GenerateResponseOptions,
-  ImageDB,
-  ImageProps,
-} from "./types";
+import { EventMap } from "./events";
+import { BookDB, BookProps, ImageDB, PageDB } from "./types";
+import { toKebabCase } from "./utils/toKebabCase";
 
-export async function aiGenerateImage(
-  args: GenerateResponseOptions
-): Promise<ImageProps & { error?: unknown }> {
-  const response = await fetch(`${import.meta.env.VITE_API}/api/ai`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      ...args,
-      as_image: true,
-    }),
-  });
-
-  if (response.ok) {
-    return response.json();
-  }
-
-  return {
-    url: "",
-    response_id: "",
-  };
-}
-
-/**
- * Generate a book with AI. Handles the prompt engineering and book creation.
- * @param prompt The engineered prompt
- */
-export async function aiGenerateBook(
-  args: GenerateResponseOptions
-): Promise<(BookProps & { response_id: string }) | undefined> {
-  const response = await fetch(`${import.meta.env.VITE_API}/api/ai`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(args),
-  });
-
-  if (response.ok) {
-    return response.json();
-  }
-}
-
-export async function getBooksPreviewDB(): Promise<BookDB[] | undefined> {
+export async function getBooksDB(): Promise<BookDB[] | undefined> {
   const response = await fetch(
     `${import.meta.env.VITE_API}/api/books?populate=images`,
     {
@@ -172,4 +126,88 @@ export async function getImageDB(imageId: string | number): Promise<ImageDB> {
   }
 
   return { url: "", id: "", filename: "", response_id: "" };
+}
+
+/**
+ * Handle the generated image
+ */
+
+export async function saveGeneratedImage(
+  payload: EventMap["generatedimage"],
+  book: BookDB
+): Promise<{
+  uploadImage: ImageDB | undefined;
+  updatedBook: BookDB | undefined;
+  updatedPage: PageDB | undefined;
+}> {
+  const pageIndex = payload?.pageIndex || 0;
+  const generatedImage = payload?.image;
+  const filename = `${toKebabCase(
+    payload?.bookTitle || "image"
+  )}-${pageIndex}.png`;
+
+  if (generatedImage?.url && (generatedImage?.url || "").length > 0) {
+    const uploadImage = await uploadBase64ImageDB(
+      generatedImage.url,
+      filename,
+      generatedImage.response_id
+    );
+
+    if (book && book.id) {
+      const pages = book.pages || [];
+      const { image: _, ...pageToUpdate } = pages[pageIndex];
+
+      // Important assignment, make reference to page to image
+      const updatedPage: PageDB = {
+        ...pageToUpdate,
+        image_id: uploadImage.id,
+      };
+      // pageToUpdate.image_id = uploadImage.id;
+
+      const bookUpdated: BookDB = {
+        ...book,
+        pages: (book?.pages || []).map((p, i) => {
+          return i === pageIndex ? updatedPage : p;
+        }),
+      };
+
+      const updatedBook = await updateBookDB(bookUpdated, book.id);
+
+      return {
+        uploadImage,
+        updatedBook,
+        updatedPage,
+      };
+    }
+  }
+
+  return {
+    uploadImage: undefined,
+    updatedBook: undefined,
+    updatedPage: undefined,
+  };
+}
+
+export function mergeBook(
+  currentBook: BookDB | undefined,
+  updated: Awaited<ReturnType<typeof saveGeneratedImage>>,
+  pageIndex: number
+): BookDB {
+  const { updatedBook, updatedPage, uploadImage } = updated;
+  return {
+    id: updatedBook?.id || "",
+    title: updatedBook?.title || "",
+    random_fact: updatedBook?.random_fact || "",
+    response_id: updatedBook?.response_id || "",
+    pages: (currentBook?.pages || []).map((p, i) => {
+      return i === pageIndex && (updatedPage?.content || updatedPage?.synopsis)
+        ? {
+            synopsis: updatedPage?.synopsis,
+            content: updatedPage?.content,
+            image_id: updatedPage?.image_id,
+            image: uploadImage,
+          }
+        : p;
+    }),
+  };
 }
