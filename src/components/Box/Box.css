@@ -1,0 +1,116 @@
+.box {
+  position: absolute;
+  left: 2rem;
+  bottom: calc(var(--h) * 0);
+  right: 0;
+  width: var(--w);
+  height: var(--h);
+  transform-style: preserve-3d;
+  transform: translate3d(16px, calc(var(--h) * -5), 24px) rotateX(0deg);
+  transition: transform 1s;
+  z-index: -1;
+}
+
+/* Shadow */
+.box:after {
+  content: "";
+  height: 80px;
+  width: 100%;
+  position: absolute;
+  top: 24px;
+  left: -8px;
+  display: block;
+  background: linear-gradient(
+    180deg,
+    hsl(0 0% 75% / 1) 0%,
+    hsl(0 0% 80% / 1) 0% 10%,
+    transparent 50%
+  );
+  -webkit-clip-path: polygon(0% 0%, 100% 0%, 97% 100%, 3% 100%);
+  clip-path: polygon(0% 0%, 100% 0%, 97% 100%, 3% 100%);
+  z-index: -1;
+}
+
+@media (prefers-color-scheme: dark) {
+  .box:after {
+    background: linear-gradient(
+      180deg,
+      hsl(0 0% 0% / 1) 0%,
+      hsl(0 0% 0% / 1) 0% 20%,
+      transparent 50%
+    );
+  }
+}
+
+.box.show-front {
+  transform: translateZ(calc(--h) * -0.25) rotateY(0deg);
+}
+.box.show-back {
+  transform: translateZ(calc(--h) * -0.25) rotateY(-180deg);
+}
+.box.show-right {
+  transform: translateZ(calc(var(--w) * -1)) rotateY(-90deg);
+}
+.box.show-left {
+  transform: translateZ(calc(var(--w) * -1)) rotateY(90deg);
+}
+.box.show-top {
+  transform: translateZ(calc(var(--h) * -1)) rotateX(-90deg);
+}
+.box.show-bottom {
+  transform: translateZ(calc(var(--h) * -1)) rotateX(90deg);
+}
+
+.box-face {
+  position: absolute;
+  border: 1.5px solid hsl(27deg 40% 36%);
+  font-size: 0;
+  font-weight: bold;
+  color: white;
+  text-align: center;
+}
+
+.box-front,
+.box-back {
+  width: var(--w);
+  height: calc(var(--h) * 2);
+}
+
+.box-right,
+.box-left {
+  width: calc(var(--h) * 4);
+  height: calc(var(--h) * 2);
+  left: calc(var(--h) * 0);
+}
+
+.box-top,
+.box-bottom {
+  width: var(--w);
+  height: calc(var(--h) * 4);
+  top: calc(var(--h) * 0);
+}
+
+.box-front {
+  filter: brightness(0.8);
+  transform: rotateY(0deg) translateZ(calc(var(--h) * 1));
+}
+.box-back {
+  transform: rotateY(180deg) translateZ(calc(var(--h) * 3));
+}
+
+.box-right {
+  transform: rotateY(90deg)
+    translate3d(calc(var(--h) * 1), 0, calc(var(--w) - calc(var(--h) * 2)));
+}
+.box-left {
+  transform: rotateY(-90deg)
+    translate3d(calc(var(--h) * -1), 0, calc(var(--h) * 2));
+}
+
+.box-top {
+  transform: rotateX(90deg)
+    translate3d(0px, calc(var(--h) * -1), calc(var(--h) * 2));
+}
+.box-bottom {
+  transform: rotateX(-90deg) translate3d(0px, var(--h), 0);
+}

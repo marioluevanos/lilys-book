@@ -9,17 +9,39 @@ type IconProps = SVGProps<SVGSVGElement> & {
 export function TrashIcon({ title = "Trash Icon", ...props }: IconProps) {
   return (
     <svg
-      width="16"
       height="16"
+      width="16"
       viewBox="0 0 16 16"
       xmlns="http://www.w3.org/2000/svg"
       {...props}
     >
-      {/* <path d="M10 11v6"></path>
-      <path d="M14 11v6"></path>
-      <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"></path>
-      <path d="M3 6h18"></path>
-      <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path> */}
+      <title>{title}</title>
+      <g fill="currentColor">
+        <path
+          d="M2.5,5.5l.865,8.649A1.5,1.5,0,0,0,4.857,15.5h6.286a1.5,1.5,0,0,0,1.492-1.351L13.5,5.5"
+          fill="none"
+          stroke="currentColor"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+        <line
+          fill="none"
+          stroke="currentColor"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          x1="0.5"
+          x2="15.5"
+          y1="3.5"
+          y2="3.5"
+        />
+        <polyline
+          fill="none"
+          points="5.5 3.5 5.5 0.5 10.5 0.5 10.5 3.5"
+          stroke="currentColor"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      </g>
     </svg>
   );
 }

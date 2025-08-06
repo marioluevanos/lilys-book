@@ -1,20 +1,20 @@
-import "./Book.css";
+import "./BookHorizontal.css";
 import { BookDB, ImageProps } from "../../types";
 import { BaseSyntheticEvent, FC, useCallback, useEffect, useRef } from "react";
 import { Button } from "../Button/Button";
-import { useBookObserver } from "./useBookObserver";
+import { useBookObserver } from "./useBookHorizontalObserver";
 import { cn } from "../../utils/cn";
 import { events } from "../../events";
-import { BookProgress } from "./BookProgress";
+import { BookHorizontalProgress } from "./BookHorizontalProgress";
 import { HomeIcon, ImageAddIcon } from "../Icon";
 
-type BookProps = {
+type BookHorizontalProps = {
   book: BookDB;
   onGenerateImageClick: (event: BaseSyntheticEvent) => void;
   isGeneratingImage: boolean;
 };
 
-export const Book: FC<BookProps> = (props) => {
+export const BookHorizontal: FC<BookHorizontalProps> = (props) => {
   const { book, isGeneratingImage, onGenerateImageClick } = props;
   const bookRef = useRef<HTMLOListElement>(null);
   const { pagesRef, pageIndex, bookProgress, onPageChange } = useBookObserver();
@@ -41,7 +41,7 @@ export const Book: FC<BookProps> = (props) => {
       data-book-id={String(book.id)}
       data-page-index={String(pageIndex)}
     >
-      <BookProgress progress={bookProgress} />
+      <BookHorizontalProgress progress={bookProgress} />
 
       <ol className="h-scroll book" ref={bookRef}>
         <li className="h-scroll-section page home">

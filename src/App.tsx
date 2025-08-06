@@ -3,7 +3,7 @@ import { aiGenerateBook, aiGenerateImage } from "./ai";
 import { useModes } from "./hooks/useModes";
 import { BookDB, StorageOptions } from "./types";
 import { bookResponseOptions, imageResponseOptions } from "./system";
-import { preloadStorage, updateUserOptions } from "./storage";
+import { getStorageOptions, setStorageOptions } from "./storage";
 import { Drawer } from "./components/Drawer/Drawer";
 import { events } from "./events";
 import { LoadingProgress } from "./components/LoadingProgress/LoadingProgress";
@@ -87,15 +87,15 @@ function App() {
   const getUserInput = useCallback(
     (event: BaseSyntheticEvent): StorageOptions => {
       const form = event.target as HTMLFormElement;
-      const prompt = form.elements.namedItem("prompt") as HTMLTextAreaElement;
-      const apikey = form.elements.namedItem("apikey") as HTMLInputElement;
+      const input = form.elements.namedItem("input") as HTMLTextAreaElement;
+      const api_key = form.elements.namedItem("api_key") as HTMLInputElement;
       const art_style = form.elements.namedItem(
         "art_style"
       ) as HTMLSelectElement;
 
       return {
-        apikey: apikey.value,
-        input: prompt.value,
+        api_key: api_key.value,
+        input: input.value,
         art_style: art_style.value,
       };
     },
@@ -113,11 +113,33 @@ function App() {
         const _options = {
           ...options,
           input: options?.input || "",
-          apikey: options?.apikey || "",
+          api_key: options?.api_key || "",
           art_style,
         };
         setOptions(_options);
-        updateUserOptions(_options);
+        setStorageOptions(_options);
+      }
+    },
+    [options]
+  );
+
+  /**
+   * Handle form submit
+   */
+  const onFormBlur = useCallback(
+    async (event: BaseSyntheticEvent) => {
+      const value = event.target.value;
+      const key: keyof StorageOptions = event.target.name;
+
+      if (typeof value === "string") {
+        const o: StorageOptions = {
+          input: options?.input || "",
+          art_style: options?.art_style || "",
+          api_key: options?.api_key || "",
+          [key]: value,
+        };
+        setOptions(o);
+        setStorageOptions(o);
       }
     },
     [options]
@@ -167,7 +189,7 @@ function App() {
         });
 
         setBook(uploadedBook);
-        updateUserOptions(inputOptions);
+        setStorageOptions(inputOptions);
       }
 
       onFinalize(event);
@@ -201,15 +223,15 @@ function App() {
    */
   useEffect(() => {
     events.on("home-view", onHomeView);
-  }, [onHomeView]);
+    events.on("formblur", onFormBlur);
+  }, [onHomeView, onFormBlur]);
 
   /**
    * Set state from browser storage
    */
   useEffect(() => {
-    preloadStorage({
-      getSettings: (p) => setOptions(p),
-    });
+    const options = getStorageOptions();
+    if (options) setOptions(options);
   }, []);
 
   return (

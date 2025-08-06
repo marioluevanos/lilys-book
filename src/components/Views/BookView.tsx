@@ -2,7 +2,7 @@ import "./views.css";
 
 import { BaseSyntheticEvent, FC, useState } from "react";
 import { BookDB } from "../../types";
-import { Book } from "../Book/Book";
+import { BookHorizontal } from "../BookHorizontal/BookHorizontal";
 import { BookFlip } from "../BookFlip/BookFlip";
 import { Button } from "../Button/Button";
 import { TestIcon } from "../Icon";
@@ -33,7 +33,7 @@ export const BookView: FC<{
         {useFlip ? (
           <BookFlip book={book} />
         ) : (
-          <Book
+          <BookHorizontal
             book={book}
             isGeneratingImage={isGeneratingImage}
             onGenerateImageClick={onGenerateImageClick}

@@ -1,6 +1,6 @@
 import { FC } from "react";
 
-export const BookProgress: FC<{ progress: number }> = (props) => {
+export const BookHorizontalProgress: FC<{ progress: number }> = (props) => {
   const { progress } = props;
   return (
     <div

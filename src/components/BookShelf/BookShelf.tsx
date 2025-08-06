@@ -13,6 +13,8 @@ import { useBookShelf } from "./useBookShelf";
 import { Button } from "../Button/Button";
 import { TrashIcon } from "../Icon";
 import { deleteBookDB, getBooksDB, getImageDB } from "../../db";
+import { Box } from "../Box/Box";
+import { events } from "../../events";
 
 type BooksPreviewProps = {
   className?: string;
@@ -54,7 +56,8 @@ export const BookShelf: FC<BooksPreviewProps> = (props) => {
     if (bookId) {
       const apiResponse = await deleteBookDB(bookId);
       if (apiResponse.message) {
-        console.log("deleted");
+        events.emit("deletedbook", bookId);
+        setBookPreviews((prev) => (prev || []).filter((b) => b.id !== bookId));
       }
     }
   }, []);
@@ -123,15 +126,7 @@ export const BookShelf: FC<BooksPreviewProps> = (props) => {
             <h3 className="book-shelf-title">{b.title}</h3>
           </article>
         ))}
-
-        <div className="box">
-          <div className="box__face box__face--front">front</div>
-          <div className="box__face box__face--back">back</div>
-          <div className="box__face box__face--right">right</div>
-          <div className="box__face box__face--left">left</div>
-          <div className="box__face box__face--top">top</div>
-          <div className="box__face box__face--bottom">bottom</div>
-        </div>
+        <Box className="wooden-shelf" />
       </div>
     </section>
   );

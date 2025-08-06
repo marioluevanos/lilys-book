@@ -32,11 +32,32 @@ export type GenerateResponseOptions = {
   art_style?: (typeof ART_STYLES)[number] | (string & {});
 };
 
-export const ART_STYLES = ["Dr. Seuss", "Disney"] as const;
+export const ART_STYLES = [
+  // People or entities
+  "Dr. Seuss",
+  "Disney",
+  "Eric Carle",
+  "Shel Silverstein",
+  "Chris Van Allsburg",
+  "Lisbeth Zwerger",
+  "Beatrix Potter",
+  "Dan Santat",
+  // Styles
+  "Cartoonish",
+  "Realistic",
+  "Whimsical",
+  "Line Drawing",
+  "Sketch",
+  "Abstract",
+  "Stylized and Exaggerated",
+  "Vintage",
+  "Bold and Bright",
+  "Muted or Subdued",
+] as const;
 
 export type StorageOptions = {
   input: string;
-  apikey: string;
+  api_key: string;
   art_style: GenerateResponseOptions["art_style"] | (string & {});
 };
 

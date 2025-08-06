@@ -1,4 +1,4 @@
-import { ReactNode } from "react";
+import { BaseSyntheticEvent, ReactNode } from "react";
 import { ImageProps } from "./types";
 
 type EventPayloads =
@@ -9,6 +9,14 @@ type EventPayloads =
   | {
       event: "drawer";
       payload: { children: ReactNode };
+    }
+  | {
+      event: "deletedbook";
+      payload: string;
+    }
+  | {
+      event: "formblur";
+      payload: BaseSyntheticEvent;
     }
   | {
       event: "drawerclose";

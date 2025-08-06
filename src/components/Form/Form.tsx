@@ -1,9 +1,17 @@
 import "./Form.css";
 import { Button } from "../Button/Button";
-import { BaseSyntheticEvent, FC, useEffect, useState } from "react";
+import {
+  BaseSyntheticEvent,
+  FC,
+  useCallback,
+  useEffect,
+  useState,
+} from "react";
 import { ART_STYLES, StorageOptions } from "../../types";
 import { cn } from "../../utils/cn";
-import { getOptions } from "../../storage";
+import { getStorageOptions, setStorageOptions } from "../../storage";
+import { TrashIcon } from "../Icon";
+import { events } from "../../events";
 
 export const Form: FC<{
   onSubmit: (event: BaseSyntheticEvent) => void;
@@ -12,33 +20,50 @@ export const Form: FC<{
 }> = (props) => {
   const { onSubmit, onChange, disabled } = props;
   const [options, setOptions] = useState<StorageOptions>();
+  const hasAPIKey =
+    typeof options?.api_key === "string" && options.api_key.length > 0;
+
+  const onClearAPIKey = useCallback(() => {
+    setStorageOptions(undefined);
+  }, []);
+
+  const onBlur = useCallback((event: BaseSyntheticEvent) => {
+    events.emit("formblur", event);
+  }, []);
 
   useEffect(() => {
-    const options = getOptions();
+    const options = getStorageOptions();
     if (options) setOptions(options);
   }, []);
 
   return (
     <form onSubmit={onSubmit} aria-disabled={disabled}>
       <textarea
-        id="prompt"
-        name="prompt"
+        id="input"
+        name="input"
         disabled={disabled}
         rows={6}
+        onBlur={onBlur}
         defaultValue={options?.input}
         placeholder="What kind of book would you like?"
       />
       <div className="form-col">
-        <label className="apikey">
+        <label className="api_key">
           OpenAI API Key
           <input
             className="input"
             type="text"
-            name="apikey"
-            placeholder="sk-proj..."
-            defaultValue={options?.apikey}
-            disabled={typeof options?.apikey === "string"}
+            name="api_key"
+            placeholder="Enter OpenAI API key"
+            defaultValue={options?.api_key}
+            disabled={hasAPIKey || disabled}
+            onBlur={onBlur}
           />
+          {hasAPIKey && (
+            <button className="clear-btn" type="button" onClick={onClearAPIKey}>
+              <TrashIcon className="delete-icon" />
+            </button>
+          )}
         </label>
         <label className="art-style">
           Art Style
